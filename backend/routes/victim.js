@@ -3,15 +3,15 @@ const router = express.Router();
 const db = require('../config/database');
 const { generateBlockHTML } = require('../utils/blocks');
 
-// GET /v/:shortId/:step - Step successivi (PRIMA per priorità)
-router.get('/v/:shortId/:step', async (req, res) => {
+// GET /v/:shortId/:step - Step successivi (con regex per numeri)
+router.get('/v/:shortId/:step(\\d+)', async (req, res) => {
   const currentStep = parseInt(req.params.step) || 0;
   console.log(`DEBUG: /v/:shortId/:step route called with shortId: ${req.params.shortId}, step: ${req.params.step}`);
   await handleVictimStep(req, res, currentStep);
 });
 
-// GET /v/:shortId - Primo step (step 0) (DOPO)
-router.get('/v/:shortId', async (req, res) => {
+// GET /v/:shortId - Primo step (step 0) - solo se non è un numero
+router.get('/v/:shortId([a-zA-Z0-9]{6})', async (req, res) => {
   console.log(`DEBUG: /v/:shortId route called with shortId: ${req.params.shortId}`);
   await handleVictimStep(req, res, 0);
 });
