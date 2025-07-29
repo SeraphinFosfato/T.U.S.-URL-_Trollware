@@ -347,14 +347,17 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
           }
         }
         
-        function reloadPage() {
-          showNotification();
-          setTimeout(() => window.location.reload(), 500);
-        }
-        
         function resetTimer() {
           if (!timerCompleted) {
-            reloadPage();
+            showNotification();
+            // Reset timer invece di reload
+            seconds = originalDuration;
+            timerEl.textContent = seconds;
+            progressEl.style.width = '0%';
+            statusEl.textContent = 'Timer reset due to inactivity';
+            setTimeout(() => {
+              statusEl.textContent = 'Please wait for completion';
+            }, 2000);
           }
         }
         
