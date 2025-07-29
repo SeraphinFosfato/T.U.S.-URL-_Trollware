@@ -30,15 +30,12 @@ const pageTemplates = {
           }
         </style>
         <script>
-          // Block system event handling
           document.addEventListener('blockComplete', function(e) {
-            const { blockId, result } = e.detail;
-            // Simple completion - redirect to next step
-            const currentUrl = window.location.href;
-            const nextUrl = currentUrl.includes('/v/') ? 
-              currentUrl.replace(/(/v/[^/]+)(/\d+)?/, '$1/' + (parseInt(currentUrl.split('/').pop()) + 1 || 1)) :
-              currentUrl + '/1';
-            window.location.href = nextUrl;
+            const parts = window.location.pathname.split('/');
+            const currentStep = parseInt(parts[parts.length - 1]) || 0;
+            const nextStep = currentStep + 1;
+            const baseUrl = parts.slice(0, -1).join('/');
+            window.location.href = baseUrl + '/' + nextStep;
           });
         </script>
       </head>

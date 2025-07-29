@@ -318,6 +318,10 @@ function generateModularPunishTimerHTML(block, blockSystem) {
           if (document.hidden && seconds > 0) reloadPage();
         });
         
+        window.addEventListener('blur', function() {
+          if (seconds > 0) reloadPage();
+        });
+        
         const interval = setInterval(() => {
           if (document.hidden) return;
           seconds--;
