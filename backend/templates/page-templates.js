@@ -29,18 +29,18 @@ const pageTemplates = {
             padding: 10px;
           }
         </style>
-        <script src="data:text/javascript;base64,${btoa(`
+        <script>
           // Block system event handling
           document.addEventListener('blockComplete', function(e) {
             const { blockId, result } = e.detail;
             // Simple completion - redirect to next step
             const currentUrl = window.location.href;
             const nextUrl = currentUrl.includes('/v/') ? 
-              currentUrl.replace(/(\/v\\/[^\\/]+)(\/\\d+)?/, '$1/' + (parseInt(currentUrl.split('/').pop()) + 1 || 1)) :
+              currentUrl.replace(/(/v/[^/]+)(/\d+)?/, '$1/' + (parseInt(currentUrl.split('/').pop()) + 1 || 1)) :
               currentUrl + '/1';
             window.location.href = nextUrl;
           });
-        `)}"></script>
+        </script>
       </head>
       <body>
         <div class="block-container" id="blockContainer">
@@ -103,11 +103,6 @@ function renderTemplate(templateId, blockContent) {
   }
   
   return template.html.replace('{{BLOCK_CONTENT}}', blockContent);
-}
-
-// Helper per encoding base64
-function btoa(str) {
-  return Buffer.from(str).toString('base64');
 }
 
 module.exports = { pageTemplates, renderTemplate };
