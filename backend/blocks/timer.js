@@ -350,10 +350,14 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
         function resetTimer() {
           if (!timerCompleted) {
             showNotification();
-            // Reload page after notification
+            // TEMP: Reset timer instead of reload to test routing
+            seconds = originalDuration;
+            timerEl.textContent = seconds;
+            progressEl.style.width = '0%';
+            statusEl.textContent = 'Timer reset - keep focus!';
             setTimeout(() => {
-              window.location.reload();
-            }, 1000);
+              statusEl.textContent = 'Please wait for completion';
+            }, 2000);
           }
         }
         
