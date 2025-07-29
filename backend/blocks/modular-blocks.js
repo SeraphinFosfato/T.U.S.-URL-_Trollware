@@ -137,7 +137,7 @@ function generateModularTimerHTML(block, blockSystem) {
       </div>
       <div class="timer-status-${blockId}" id="status-${blockId}">Timer in progress...</div>
       <button class="continue-btn-${blockId}" id="continue-${blockId}" 
-              data-block-action="complete" data-result="timer_completed">
+              onclick="document.dispatchEvent(new CustomEvent('blockComplete', {detail: {blockId: '${blockId}', result: 'timer_completed'}}))">
         Continue
       </button>
     </div>
@@ -233,7 +233,6 @@ function generateModularClickGameHTML(block, blockSystem) {
           if (clicks >= target) {
             btnEl.textContent = 'Continue';
             btnEl.onclick = function() {
-              // Trigger completion via block system
               const event = new CustomEvent('blockComplete', {
                 detail: { blockId: '${blockId}', result: 'click_completed' }
               });
@@ -247,14 +246,99 @@ function generateModularClickGameHTML(block, blockSystem) {
   `;
 }
 
-// Estendi BlockSystem con i generatori
-if (typeof BlockSystem !== 'undefined') {
-  BlockSystem.prototype.generateTimerHTML = generateModularTimerHTML;
-  BlockSystem.prototype.generateClickGameHTML = generateModularClickGameHTML;
+// Timer punitivo modulare
+function generateModularPunishTimerHTML(block, blockSystem) {
+  const duration = block.duration;
+  const blockId = block.id;
+  
+  return `
+    <style>
+      .punish-timer-widget-${blockId} {
+        background: #c0c0c0;
+        border: 2px outset #c0c0c0;
+        padding: 15px;
+        width: 300px;
+        margin: 0 auto;
+        font-family: 'MS Sans Serif', sans-serif;
+        font-size: 11px;
+      }
+      .punish-timer-display-${blockId} {
+        font-family: 'Courier New', monospace;
+        font-size: 24px;
+        color: #000080;
+        margin: 10px 0;
+        text-align: center;
+        background: #ffffff;
+        border: 1px inset #c0c0c0;
+        padding: 5px;
+      }
+      .punish-continue-${blockId} {
+        background: #c0c0c0;
+        border: 1px outset #c0c0c0;
+        padding: 2px 8px;
+        font-size: 11px;
+        color: #808080;
+        cursor: default;
+        margin-top: 10px;
+        display: none;
+      }
+      .punish-continue-${blockId}.enabled {
+        color: #000000;
+        cursor: pointer;
+      }
+    </style>
+    
+    <div class="punish-timer-widget-${blockId}">
+      <div>Loading in progress...</div>
+      <div class="punish-timer-display-${blockId}" id="timer-${blockId}">${duration}</div>
+      <div id="status-${blockId}">Please wait for completion</div>
+      <button class="punish-continue-${blockId}" id="continue-${blockId}"
+              onclick="document.dispatchEvent(new CustomEvent('blockComplete', {detail: {blockId: '${blockId}', result: 'punish_completed'}}))">
+        Continue
+      </button>
+    </div>
+    
+    <script>
+      (function() {
+        let seconds = ${duration};
+        const timerEl = document.getElementById('timer-${blockId}');
+        const statusEl = document.getElementById('status-${blockId}');
+        const continueBtn = document.getElementById('continue-${blockId}');
+        
+        function reloadPage() {
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('⚠️ Active Waiting Required', {
+              body: 'You must remain actively waiting. Page reloaded.'
+            });
+          }
+          setTimeout(() => window.location.reload(), 500);
+        }
+        
+        document.addEventListener('visibilitychange', function() {
+          if (document.hidden && seconds > 0) reloadPage();
+        });
+        
+        const interval = setInterval(() => {
+          if (document.hidden) return;
+          seconds--;
+          timerEl.textContent = seconds;
+          
+          if (seconds <= 0) {
+            clearInterval(interval);
+            statusEl.textContent = 'Completed';
+            continueBtn.style.display = 'inline-block';
+            continueBtn.className = 'punish-continue-${blockId} enabled';
+            timerEl.textContent = 'OK';
+          }
+        }, 1000);
+      })();
+    </script>
+  `;
 }
 
 module.exports = { 
   modularBlocks, 
   generateModularTimerHTML, 
-  generateModularClickGameHTML 
+  generateModularClickGameHTML,
+  generateModularPunishTimerHTML 
 };

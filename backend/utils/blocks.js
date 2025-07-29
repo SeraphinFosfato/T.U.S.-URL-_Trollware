@@ -1,7 +1,7 @@
 // Gestione blocchi e sequenze
 const { timerBlocks, generateTimerHTML, generatePunishTimerHTML } = require('../blocks/timer');
 const { minigameBlocks, generateClickDecoyHTML, generateClickDrainHTML, generateClickProtectedHTML } = require('../blocks/minigame');
-const { modularBlocks, generateModularTimerHTML, generateModularClickGameHTML } = require('../blocks/modular-blocks');
+const { modularBlocks, generateModularTimerHTML, generateModularClickGameHTML, generateModularPunishTimerHTML } = require('../blocks/modular-blocks');
 const { renderTemplate } = require('../templates/page-templates');
 
 // Pool di tutti i blocchi disponibili
@@ -50,6 +50,9 @@ function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
     switch (block.template) {
       case 'timer':
         blockContent = generateModularTimerHTML(modularBlock, null);
+        break;
+      case 'timer_punish':
+        blockContent = generateModularPunishTimerHTML(modularBlock, null);
         break;
       case 'click_game':
         blockContent = generateModularClickGameHTML(modularBlock, null);
