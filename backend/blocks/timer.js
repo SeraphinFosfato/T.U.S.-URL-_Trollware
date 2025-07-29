@@ -38,6 +38,7 @@ const timerBlocks = {
 };
 
 function generateTimerHTML(blockId, duration, nextUrl) {
+  console.log(`DEBUG: generateTimerHTML called with nextUrl: ${nextUrl}`);
   return `
     <!DOCTYPE html>
     <html lang="it">
@@ -206,6 +207,7 @@ function generateTimerHTML(blockId, duration, nextUrl) {
         
         function proceedNext() {
           if (timerCompleted) {
+            console.log('DEBUG: Timer proceedNext called, going to:', '${nextUrl}');
             window.location.href = '${nextUrl}';
           }
         }
