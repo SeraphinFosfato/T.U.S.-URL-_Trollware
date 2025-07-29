@@ -277,34 +277,36 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
           margin: 15px 0;
           text-transform: uppercase;
         }
-        .reset-warning {
-          background: #ff0000;
-          color: white;
-          padding: 10px;
-          margin: 20px 0;
-          border: 2px solid #ffffff;
-          font-weight: bold;
-        }
         .continue-btn {
           padding: 20px 40px;
           font-size: 20px;
+          background: #666;
+          color: #999;
+          border: 3px solid #444;
+          cursor: not-allowed;
+          margin-top: 20px;
+          text-transform: uppercase;
+          font-weight: bold;
+        }
+        .continue-btn.enabled {
           background: #ff0000;
           color: white;
           border: 3px solid #ffffff;
           cursor: pointer;
-          margin-top: 20px;
-          display: none;
-          text-transform: uppercase;
-          font-weight: bold;
         }
-        .continue-btn:disabled {
-          background: #666;
-          cursor: not-allowed;
+        .progress-bar {
+          width: 100%;
+          height: 30px;
+          background: #333;
+          border: 2px solid #ff0000;
+          margin: 20px 0;
+          position: relative;
         }
-        .reset-count {
-          color: #ff6600;
-          font-size: 16px;
-          margin: 10px 0;
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #ff0000 0%, #ff6600 100%);
+          width: 0%;
+          transition: none;
         }
       </style>
     </head>
@@ -313,11 +315,10 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
         <h1>⚠️ TIMER PUNITIVO ⚠️</h1>
         <div class="warning-text">ATTENZIONE COSTANTE RICHIESTA</div>
         <div class="timer" id="timer">${duration}</div>
-        <div class="reset-warning">
-          🚨 NON CAMBIARE SCHEDA O IL TIMER SI RESETTERÀ 🚨
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress"></div>
         </div>
-        <p id="status">Mantieni il focus su questa pagina</p>
-        <div class="reset-count" id="resetCount">Reset subiti: <span id="resets">0</span></div>
+        <p id="status">Attendere...</p>
         <button class="continue-btn" id="continueBtn" onclick="proceedNext()" disabled>
           PROCEDI →
         </button>
@@ -328,11 +329,11 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
         let originalDuration = ${duration};
         let isVisible = true;
         let timerCompleted = false;
-        let resetCount = 0;
+        let hasBeenIdle = false;
         const timerEl = document.getElementById('timer');
         const statusEl = document.getElementById('status');
         const continueBtn = document.getElementById('continueBtn');
-        const resetCountEl = document.getElementById('resets');
+        const progressEl = document.getElementById('progress');
         
         // Notification permission
         if ('Notification' in window && Notification.permission === 'default') {
@@ -340,35 +341,42 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
         }
         
         function showNotification() {
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('⚠️ ATTENZIONE RICHIESTA', {
-              body: 'Torna alla scheda o il timer si resetterà!',
-              icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚠️</text></svg>',
-              requireInteraction: true
-            });
+          if ('Notification' in window) {
+            if (Notification.permission === 'granted') {
+              new Notification('⚠️ TIMER RESETTATO', {
+                body: 'Il timer è stato resettato per mancanza di attenzione!',
+                icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚠️</text></svg>',
+                requireInteraction: false
+              });
+            } else if (Notification.permission === 'default') {
+              Notification.requestPermission().then(function(permission) {
+                if (permission === 'granted') {
+                  showNotification();
+                }
+              });
+            }
           }
         }
         
         function resetTimer() {
           if (!timerCompleted) {
-            resetCount++;
-            resetCountEl.textContent = resetCount;
             seconds = originalDuration;
-            statusEl.textContent = '🚨 TIMER RESETTATO! Mantieni il focus!';
+            statusEl.textContent = '🚨 TIMER RESETTATO!';
             statusEl.style.color = '#ff0000';
+            progressEl.style.width = '0%';
             showNotification();
             
             // Flash effect
             document.body.style.animation = 'flash 0.5s 3';
             setTimeout(() => {
-              statusEl.textContent = 'Mantieni il focus su questa pagina';
+              statusEl.textContent = 'Attendere...';
               statusEl.style.color = 'white';
             }, 2000);
           }
         }
         
         function pauseTimer() {
-          if (!timerCompleted) {
+          if (!timerCompleted && isVisible) {
             isVisible = false;
             resetTimer();
           }
@@ -394,17 +402,19 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
         window.addEventListener('pagehide', pauseTimer);
         window.addEventListener('pageshow', resumeTimer);
         
-        // Heartbeat più aggressivo
+        // Heartbeat per idle detection
         let lastActivity = Date.now();
         document.addEventListener('mousemove', function() {
           lastActivity = Date.now();
+          hasBeenIdle = false;
           if (!isVisible && !timerCompleted) {
             resumeTimer();
           }
         });
         
         setInterval(function() {
-          if (Date.now() - lastActivity > 2000 && !timerCompleted) {
+          if (Date.now() - lastActivity > 2000 && !timerCompleted && !hasBeenIdle) {
+            hasBeenIdle = true;
             pauseTimer();
           }
         }, 500);
@@ -417,15 +427,20 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
           seconds--;
           timerEl.textContent = seconds;
           
+          // Barra a blocchi (aggiorna ogni secondo)
+          const progress = ((originalDuration - seconds) / originalDuration) * 100;
+          progressEl.style.width = Math.floor(progress / 10) * 10 + '%';
+          
           if (seconds <= 0) {
             clearInterval(interval);
             timerCompleted = true;
-            statusEl.textContent = '✅ COMPLETATO! Puoi procedere.';
+            statusEl.textContent = '✅ COMPLETATO!';
             statusEl.style.color = '#00ff00';
-            continueBtn.style.display = 'inline-block';
             continueBtn.disabled = false;
+            continueBtn.className = 'continue-btn enabled';
             timerEl.textContent = '✓';
             timerEl.style.color = '#00ff00';
+            progressEl.style.width = '100%';
             document.body.style.animation = 'none';
             document.body.style.background = '#004400';
           }
@@ -450,8 +465,10 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
           }
         });
         
-        // Show initial notification
-        setTimeout(showNotification, 1000);
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+          Notification.requestPermission();
+        }
       </script>
     </body>
     </html>
