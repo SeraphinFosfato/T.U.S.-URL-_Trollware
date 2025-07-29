@@ -50,11 +50,18 @@ function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
       blockContent = `<h1>Template not implemented: ${block.template}</h1>`;
   }
   
-  // Estrai widget + script dal blocco completo
+  // Estrai CSS dal head
+  const styleMatch = blockContent.match(/<style[^>]*>(.*?)<\/style>/s);
+  const styles = styleMatch ? styleMatch[0] : '';
+  
+  // Estrai contenuto body
   const bodyMatch = blockContent.match(/<body[^>]*>(.*?)<\/body>/s);
   const bodyContent = bodyMatch ? bodyMatch[1] : blockContent;
   
-  return renderTemplate(templateId, bodyContent);
+  // Combina stili + contenuto
+  const widgetWithStyles = styles + bodyContent;
+  
+  return renderTemplate(templateId, widgetWithStyles);
 }
 
 module.exports = { 
