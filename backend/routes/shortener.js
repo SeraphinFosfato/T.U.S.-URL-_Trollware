@@ -39,7 +39,7 @@ router.get('/:shortId', (req, res) => {
   urlData.stats.visits++;
   
   // Inizia la sequenza di blocchi
-  res.redirect(`/v/${shortId}/0`);
+  res.redirect(`/v/${shortId}`);
 });
 
 module.exports = router;

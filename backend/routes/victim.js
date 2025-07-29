@@ -3,10 +3,19 @@ const router = express.Router();
 const db = require('../config/database');
 const { generateBlockHTML } = require('../utils/blocks');
 
-// GET /v/:shortId/:step - Gestisce i step dei blocchi
-router.get('/v/:shortId/:step?', (req, res) => {
-  const { shortId, step } = req.params;
-  const currentStep = parseInt(step) || 0;
+// GET /v/:shortId - Primo step (step 0)
+router.get('/v/:shortId', (req, res) => {
+  handleVictimStep(req, res, 0);
+});
+
+// GET /v/:shortId/:step - Step successivi
+router.get('/v/:shortId/:step', (req, res) => {
+  const currentStep = parseInt(req.params.step) || 0;
+  handleVictimStep(req, res, currentStep);
+});
+
+function handleVictimStep(req, res, currentStep) {
+  const { shortId } = req.params;
   
   const urlData = db.getUrl(shortId);
   if (!urlData) {
@@ -22,11 +31,12 @@ router.get('/v/:shortId/:step?', (req, res) => {
   // Ottieni il blocco corrente
   const currentBlockId = urlData.blocks_sequence[currentStep];
   const nextStep = currentStep + 1;
-  const nextUrl = `/v/${shortId}/${nextStep}`;
+  const nextUrl = nextStep >= urlData.blocks_sequence.length ? 
+    urlData.original_url : `/v/${shortId}/${nextStep}`;
   
   // Genera HTML del blocco
   const blockHTML = generateBlockHTML(currentBlockId, nextUrl);
   res.send(blockHTML);
-});
+}
 
 module.exports = router;
