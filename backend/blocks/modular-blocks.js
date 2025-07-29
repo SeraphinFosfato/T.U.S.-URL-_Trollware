@@ -361,94 +361,100 @@ function generateModularClickGameHTML(block, config = {}) {
   `;
 }
 
-// Timer punitivo modulare
-function generateModularPunishTimerHTML(block, nextUrl) {
+// Timer punitivo atomico con event system
+function generateModularPunishTimerHTML(block, config = {}) {
   const duration = block.duration;
   const blockId = block.id;
+  const enabled = config.enabled !== false;
   
   return `
-    <style>
-      .punish-timer-widget-${blockId} {
-        background: #c0c0c0;
-        border: 2px outset #c0c0c0;
-        padding: 15px;
-        width: 300px;
-        margin: 0 auto;
-        font-family: 'MS Sans Serif', sans-serif;
-        font-size: 11px;
-      }
-      .punish-timer-display-${blockId} {
-        font-family: 'Courier New', monospace;
-        font-size: 24px;
-        color: #000080;
-        margin: 10px 0;
-        text-align: center;
-        background: #ffffff;
-        border: 1px inset #c0c0c0;
-        padding: 5px;
-      }
-      .punish-progress-${blockId} {
-        width: 100%;
-        height: 20px;
-        background: #ffffff;
-        border: 1px inset #c0c0c0;
-        margin: 10px 0;
-      }
-      .punish-fill-${blockId} {
-        height: 100%;
-        background: #000080;
-        width: 0%;
-      }
-      .punish-continue-${blockId} {
-        background: #c0c0c0;
-        border: 1px outset #c0c0c0;
-        padding: 2px 8px;
-        font-size: 11px;
-        color: #808080;
-        cursor: default;
-        margin-top: 10px;
-        display: none;
-      }
-      .punish-continue-${blockId}.enabled {
-        color: #000000;
-        cursor: pointer;
-      }
-      .punish-continue-${blockId}.enabled:hover {
-        background: #d4d4d4;
-      }
-      .punish-continue-${blockId}.enabled:active {
-        border: 1px inset #c0c0c0;
-        background: #b0b0b0;
-      }
-    </style>
-    
-    <div class="punish-timer-widget-${blockId}">
-      <div>Loading in progress...</div>
-      <div class="punish-timer-display-${blockId}" id="timer-${blockId}">${duration}</div>
-      <div class="punish-progress-${blockId}">
-        <div class="punish-fill-${blockId}" id="progress-${blockId}"></div>
+    <div id="${blockId}-container" class="block-container">
+      <style>
+        .punish-timer-widget-${blockId} {
+          background: #c0c0c0;
+          border: 2px outset #c0c0c0;
+          padding: 15px;
+          width: 300px;
+          margin: 0 auto;
+          font-family: 'MS Sans Serif', sans-serif;
+          font-size: 11px;
+        }
+        .punish-timer-display-${blockId} {
+          font-family: 'Courier New', monospace;
+          font-size: 24px;
+          color: #000080;
+          margin: 10px 0;
+          text-align: center;
+          background: #ffffff;
+          border: 1px inset #c0c0c0;
+          padding: 5px;
+        }
+        .punish-progress-${blockId} {
+          width: 100%;
+          height: 20px;
+          background: #ffffff;
+          border: 1px inset #c0c0c0;
+          margin: 10px 0;
+        }
+        .punish-fill-${blockId} {
+          height: 100%;
+          background: #000080;
+          width: 0%;
+        }
+        .punish-continue-${blockId} {
+          background: #c0c0c0;
+          border: 1px outset #c0c0c0;
+          padding: 2px 8px;
+          font-size: 11px;
+          color: #808080;
+          cursor: default;
+          margin-top: 10px;
+          display: none;
+        }
+        .punish-continue-${blockId}.enabled {
+          color: #000000;
+          cursor: pointer;
+        }
+      </style>
+      
+      <div class="punish-timer-widget-${blockId}">
+        <div>Loading in progress...</div>
+        <div class="punish-timer-display-${blockId}" id="timer-${blockId}">${duration}</div>
+        <div class="punish-progress-${blockId}">
+          <div class="punish-fill-${blockId}" id="progress-${blockId}"></div>
+        </div>
+        <div id="status-${blockId}">Please wait for completion</div>
+        <button class="punish-continue-${blockId}" id="continue-${blockId}" onclick="completePunishTimer_${blockId}()">
+          Continue
+        </button>
       </div>
-      <div id="status-${blockId}">Please wait for completion</div>
-      <button class="punish-continue-${blockId}" id="continue-${blockId}" onclick="proceedNext_${blockId}()">
-        Continue
-      </button>
     </div>
     
     <script>
       (function() {
         let seconds = ${duration};
         let originalDuration = ${duration};
-        let isVisible = true;
+        let isActive = ${enabled};
+        let isPaused = false;
         let timerCompleted = false;
+        let timerInterval = null;
+        
         const timerEl = document.getElementById('timer-${blockId}');
         const statusEl = document.getElementById('status-${blockId}');
         const continueBtn = document.getElementById('continue-${blockId}');
         const progressEl = document.getElementById('progress-${blockId}');
         
+        // Registra blocco nel sistema eventi
+        window.BlockEventSystem.registerBlock('${blockId}', {
+          enabled: ${enabled},
+          nextBlockId: '${config.nextBlockId || ''}',
+          nextUrl: '${config.nextUrl || ''}'
+        });
+        
         function showNotification() {
           if ('Notification' in window && Notification.permission === 'granted') {
             new Notification('⚠️ Active Waiting Required', {
-              body: 'You must remain actively waiting. Timer reset.'
+              body: 'Timer reset due to inactivity.'
             });
           }
         }
@@ -466,69 +472,85 @@ function generateModularPunishTimerHTML(block, nextUrl) {
           }
         }
         
-        function pauseTimer() {
-          if (!timerCompleted && isVisible) {
-            isVisible = false;
-            resetTimer();
-          }
+        function startTimer() {
+          if (timerInterval) return;
+          
+          timerInterval = setInterval(() => {
+            if (!isActive || isPaused || timerCompleted) return;
+            
+            seconds--;
+            timerEl.textContent = seconds;
+            
+            const progress = ((originalDuration - seconds) / originalDuration) * 100;
+            progressEl.style.width = progress + '%';
+            
+            if (seconds <= 0) {
+              clearInterval(timerInterval);
+              timerCompleted = true;
+              statusEl.textContent = 'Completed';
+              continueBtn.style.display = 'inline-block';
+              continueBtn.className = 'punish-continue-${blockId} enabled';
+              timerEl.textContent = 'OK';
+              progressEl.style.width = '100%';
+            }
+          }, 1000);
         }
         
-        function resumeTimer() {
-          if (!timerCompleted) {
-            isVisible = true;
-          }
-        }
-        
-        document.addEventListener('visibilitychange', function() {
-          if (document.hidden) {
-            pauseTimer();
-          } else {
-            resumeTimer();
+        // Event listeners
+        document.addEventListener('blockEnabled', function(e) {
+          if (e.detail.blockId === '${blockId}') {
+            isActive = true;
+            startTimer();
           }
         });
         
-        window.addEventListener('blur', pauseTimer);
-        window.addEventListener('focus', resumeTimer);
+        document.addEventListener('blockDisabled', function(e) {
+          if (e.detail.blockId === '${blockId}') {
+            isActive = false;
+            if (timerInterval) {
+              clearInterval(timerInterval);
+              timerInterval = null;
+            }
+          }
+        });
         
-        // Idle detection
+        document.addEventListener('blockPause', function(e) {
+          if (e.detail.blockId === '${blockId}') {
+            isPaused = true;
+            resetTimer();
+          }
+        });
+        
+        document.addEventListener('blockResume', function(e) {
+          if (e.detail.blockId === '${blockId}') {
+            isPaused = false;
+          }
+        });
+        
+        // Mouse idle detection - più aggressivo per timer punitivo
         let lastActivity = Date.now();
         document.addEventListener('mousemove', function() {
           lastActivity = Date.now();
         });
         
         setInterval(function() {
-          if (Date.now() - lastActivity > 2000 && !timerCompleted && isVisible) {
-            pauseTimer();
+          if (Date.now() - lastActivity > 2000 && isActive && !isPaused && !timerCompleted) {
+            isPaused = true;
+            resetTimer();
           }
         }, 500);
         
-        const interval = setInterval(() => {
-          if (!isVisible || document.hidden) {
-            return;
-          }
-          
-          seconds--;
-          timerEl.textContent = seconds;
-          
-          const progress = ((originalDuration - seconds) / originalDuration) * 100;
-          progressEl.style.width = progress + '%';
-          
-          if (seconds <= 0) {
-            clearInterval(interval);
-            timerCompleted = true;
-            statusEl.textContent = 'Completed';
-            continueBtn.style.display = 'inline-block';
-            continueBtn.className = 'punish-continue-${blockId} enabled';
-            timerEl.textContent = 'OK';
-            progressEl.style.width = '100%';
-          }
-        }, 1000);
-        
-        window.proceedNext_${blockId} = function() {
+        // Complete function
+        window.completePunishTimer_${blockId} = function() {
           if (timerCompleted) {
-            window.location.href = '${nextUrl}';
+            window.BlockEventSystem.completeBlock('${blockId}', 'punish_timer_completed');
           }
         };
+        
+        // Start if enabled
+        if (${enabled}) {
+          startTimer();
+        }
       })();
     </script>
   `;

@@ -11,11 +11,15 @@ function generateRandomSequence(count = 2, testOverride = null) {
     return testOverride;
   }
   
-  // Restituisce un singolo step con sequenza atomica
-  return [[
-    { id: 'timer_simple', type: 'atomic' },
-    { id: 'click_simple', type: 'atomic' }
-  ]];
+  return [
+    // Step 1: Timer Punitivo + Click Challenge
+    [
+      { id: 'timer_punish', type: 'atomic' },
+      { id: 'click_simple', type: 'atomic' }
+    ],
+    // Step 2: Timer normale singolo
+    'timer_simple'
+  ];
 }
 
 // Genera HTML per sequenza di blocchi
