@@ -17,8 +17,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api', shortenerRoutes);
-app.use('/', victimRoutes); // Route per vittime /v/:shortId/:step PRIMA
-app.use('/', shortenerRoutes); // Per i redirect /:shortId DOPO
+app.use('/v', victimRoutes); // Route per vittime con prefisso /v
+app.use('/', shortenerRoutes); // Per i redirect /:shortId
 
 app.listen(PORT, () => {
   console.log(`TrollShortener attivo su http://localhost:${PORT}`);
