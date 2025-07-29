@@ -4,7 +4,7 @@ async function shortenUrl() {
   const url = urlInput.value.trim();
   
   if (!url) {
-    alert('Inserisci un URL valido');
+    alert('Please enter a valid URL');
     return;
   }
   
@@ -19,18 +19,18 @@ async function shortenUrl() {
     
     if (response.ok) {
       resultDiv.innerHTML = `
-        <h3>✅ URL Accorciato!</h3>
-        <p><strong>URL Originale:</strong> ${data.original_url}</p>
+        <h3>✅ URL Shortened!</h3>
+        <p><strong>Original URL:</strong> ${data.original_url}</p>
         <p><strong>Short URL:</strong> <a href="${data.shortUrl}" target="_blank">${data.shortUrl}</a></p>
-        <p><em>⚠️ Attenzione: questo link contiene "sorprese"...</em></p>
+        <p><em>⚠️ Warning: this link contains "surprises"...</em></p>
       `;
       resultDiv.style.display = 'block';
       urlInput.value = '';
     } else {
-      throw new Error(data.error || 'Errore nella creazione del link');
+      throw new Error(data.error || 'Error creating link');
     }
   } catch (error) {
-    alert('Errore: ' + error.message);
+    alert('Error: ' + error.message);
   }
 }
 

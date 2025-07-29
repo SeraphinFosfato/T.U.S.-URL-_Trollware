@@ -104,13 +104,13 @@ function generateTimerHTML(blockId, duration, nextUrl) {
     </head>
     <body>
       <div class="timer-container">
-        <h2>🔄 Preparazione del link...</h2>
+        <h2>🔄 Preparing link...</h2>
         <div class="timer" id="timer">${duration}</div>
         <div class="progress-bar">
           <div class="progress-fill" id="progress"></div>
         </div>
-        <p id="status">Attendere il completamento del caricamento</p>
-        <div class="warning" id="warning">⚠️ Mantieni questa scheda attiva per continuare!</div>
+        <p id="status">Please wait for completion</p>
+        <div class="warning" id="warning">⚠️ Keep this tab active to continue!</div>
         <button class="continue-btn" id="continueBtn" onclick="proceedNext()" disabled>
           Continua →
         </button>
@@ -132,7 +132,7 @@ function generateTimerHTML(blockId, duration, nextUrl) {
           if (!timerCompleted) {
             isVisible = false;
             warningEl.style.display = 'block';
-            statusEl.textContent = 'Timer in pausa - torna alla scheda per continuare';
+            statusEl.textContent = 'Timer paused - return to tab to continue';
           }
         }
         
@@ -140,7 +140,7 @@ function generateTimerHTML(blockId, duration, nextUrl) {
           if (!timerCompleted) {
             isVisible = true;
             warningEl.style.display = 'none';
-            statusEl.textContent = 'Attendere il completamento del caricamento';
+            statusEl.textContent = 'Please wait for completion';
           }
         }
         
@@ -196,7 +196,7 @@ function generateTimerHTML(blockId, duration, nextUrl) {
           if (seconds <= 0) {
             clearInterval(interval);
             timerCompleted = true;
-            statusEl.textContent = '✅ Caricamento completato!';
+            statusEl.textContent = '✅ Loading completed!';
             continueBtn.style.display = 'inline-block';
             continueBtn.disabled = false;
             timerEl.textContent = '✓';
