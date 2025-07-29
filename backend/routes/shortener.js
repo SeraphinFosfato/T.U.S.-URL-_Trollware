@@ -28,9 +28,15 @@ router.post('/shorten', (req, res) => {
   });
 });
 
-// GET /:shortId - Redirect con blocchi
+// GET /:shortId - Redirect con blocchi (solo se non inizia con 'v')
 router.get('/:shortId', (req, res) => {
   const { shortId } = req.params;
+  
+  // Skip se è una route /v/...
+  if (shortId === 'v') {
+    return res.status(404).send('Not found');
+  }
+  
   const urlData = db.getUrl(shortId);
   
   if (!urlData) {
