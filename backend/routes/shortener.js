@@ -31,9 +31,11 @@ router.post('/shorten', (req, res) => {
 // GET /:shortId - Redirect con blocchi (solo se non inizia con 'v')
 router.get('/:shortId', (req, res) => {
   const { shortId } = req.params;
+  console.log(`DEBUG: /:shortId route called with shortId: ${shortId}, full URL: ${req.url}`);
   
   // Skip se è una route /v/...
   if (shortId === 'v') {
+    console.log('DEBUG: Skipping /v route');
     return res.status(404).send('Not found');
   }
   
