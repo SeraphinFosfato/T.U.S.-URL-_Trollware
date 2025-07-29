@@ -13,16 +13,39 @@ const pageTemplates = {
             font-family: Arial, sans-serif; 
             background: #ffffff;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
           }
+          .block-container {
+            max-width: 600px;
+            width: 100%;
+            min-height: 500px;
+          }
+          .block-wrapper {
+            margin: 15px 0;
+            padding: 10px;
+          }
         </style>
+        <script src="data:text/javascript;base64,${btoa(`
+          // Block system event handling
+          document.addEventListener('blockComplete', function(e) {
+            const { blockId, result } = e.detail;
+            // Simple completion - redirect to next step
+            const currentUrl = window.location.href;
+            const nextUrl = currentUrl.includes('/v/') ? 
+              currentUrl.replace(/(\/v\\/[^\\/]+)(\/\\d+)?/, '$1/' + (parseInt(currentUrl.split('/').pop()) + 1 || 1)) :
+              currentUrl + '/1';
+            window.location.href = nextUrl;
+          });
+        `)}"></script>
       </head>
       <body>
-        {{BLOCK_CONTENT}}
+        <div class="block-container" id="blockContainer">
+          {{BLOCK_CONTENT}}
+        </div>
       </body>
       </html>
     `
@@ -80,6 +103,11 @@ function renderTemplate(templateId, blockContent) {
   }
   
   return template.html.replace('{{BLOCK_CONTENT}}', blockContent);
+}
+
+// Helper per encoding base64
+function btoa(str) {
+  return Buffer.from(str).toString('base64');
 }
 
 module.exports = { pageTemplates, renderTemplate };

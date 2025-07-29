@@ -1,12 +1,14 @@
 // Gestione blocchi e sequenze
 const { timerBlocks, generateTimerHTML, generatePunishTimerHTML } = require('../blocks/timer');
 const { minigameBlocks, generateClickDecoyHTML, generateClickDrainHTML, generateClickProtectedHTML } = require('../blocks/minigame');
+const { modularBlocks, generateModularTimerHTML, generateModularClickGameHTML } = require('../blocks/modular-blocks');
 const { renderTemplate } = require('../templates/page-templates');
 
 // Pool di tutti i blocchi disponibili
 const allBlocks = {
   ...timerBlocks,
-  ...minigameBlocks
+  ...minigameBlocks,
+  ...modularBlocks
 };
 
 // Genera sequenza casuale di blocchi
@@ -16,8 +18,8 @@ function generateRandomSequence(count = 2, testOverride = null) {
     return testOverride;
   }
   
-  // TEMP: Test timer + minigame nesting
-  return ['timer_5s', 'click_protected'];
+  // TEMP: Test modular blocks
+  return ['timer_5s', 'click_simple'];
   
   /* Codice originale per dopo:
   const blockIds = Object.keys(allBlocks);
