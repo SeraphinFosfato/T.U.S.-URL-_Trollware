@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const db = require('./config/database');
-const { generateShortId, isValidUrl } = require('./utils/shortener');
+const db = require('../config/database');
+const { generateShortId, isValidUrl } = require('../utils/shortener');
 
 // POST /api/shorten - Crea nuovo short URL
 router.post('/shorten', (req, res) => {
