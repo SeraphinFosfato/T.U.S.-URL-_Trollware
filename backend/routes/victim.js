@@ -31,15 +31,15 @@ async function handleVictimStep(req, res, currentStep) {
     return res.redirect(urlData.original_url);
   }
   
-  // Ottieni il blocco corrente
-  const currentBlockId = urlData.blocks_sequence[currentStep];
+  // Ottieni il blocco/sequenza corrente
+  const currentBlock = urlData.blocks_sequence[currentStep];
   const nextStep = currentStep + 1;
   const nextUrl = nextStep >= urlData.blocks_sequence.length ? 
     urlData.original_url : `/v/${shortId}/${nextStep}`;
   
-  // Genera HTML del blocco
+  // Genera HTML del blocco/sequenza
   const templateId = req.query.template || 'simple_center';
-  const blockHTML = generateBlockHTML(currentBlockId, nextUrl, templateId);
+  const blockHTML = generateBlockHTML(currentBlock, nextUrl, templateId);
   res.send(blockHTML);
 }
 

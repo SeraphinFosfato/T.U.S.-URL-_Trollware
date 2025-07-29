@@ -11,10 +11,11 @@ function generateRandomSequence(count = 2, testOverride = null) {
     return testOverride;
   }
   
-  return [
+  // Restituisce un singolo step con sequenza atomica
+  return [[
     { id: 'timer_simple', type: 'atomic' },
     { id: 'click_simple', type: 'atomic' }
-  ];
+  ]];
 }
 
 // Genera HTML per sequenza di blocchi
@@ -25,7 +26,7 @@ function generateBlockHTML(blockSequence, nextUrl, templateId = 'simple_center')
   }
   
   // Fallback per blocchi singoli (legacy)
-  const blockId = Array.isArray(blockSequence) ? blockSequence[0] : blockSequence;
+  const blockId = Array.isArray(blockSequence) ? blockSequence[0]?.id || blockSequence[0] : blockSequence;
   const block = allBlocks[blockId];
   
   if (!block) {
