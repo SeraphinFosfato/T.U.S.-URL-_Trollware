@@ -1,5 +1,5 @@
 // Gestione blocchi modulari
-const { modularBlocks, generateModularTimerHTML, generateModularClickGameHTML, generateModularPunishTimerHTML } = require('../blocks/modular-blocks');
+const { modularBlocks, generateModularTimerHTML, generateModularClickGameHTML, generateModularPunishTimerHTML, generateModularCompositeHTML } = require('../blocks/modular-blocks');
 const { renderTemplate } = require('../templates/page-templates');
 
 // Pool di blocchi modulari
@@ -11,7 +11,7 @@ function generateRandomSequence(count = 2, testOverride = null) {
     return testOverride;
   }
   
-  return ['timer_simple', 'click_simple'];
+  return ['timer_click_combo'];
 }
 
 // Genera HTML per blocco modulare
@@ -22,7 +22,12 @@ function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
     return `<h1>Block not found: ${blockId}</h1>`;
   }
   
+  // Risolvi durate dinamiche
   const modularBlock = { ...block, id: blockId, nextUrl };
+  if (typeof block.duration === 'function') {
+    modularBlock.duration = block.duration();
+  }
+  
   let blockContent;
   
   switch (block.template) {
@@ -34,6 +39,9 @@ function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
       break;
     case 'click_game':
       blockContent = generateModularClickGameHTML(modularBlock, nextUrl);
+      break;
+    case 'composite':
+      blockContent = generateModularCompositeHTML(modularBlock, nextUrl);
       break;
     default:
       return `<h1>Template not implemented: ${block.template}</h1>`;

@@ -2,39 +2,19 @@
 const modularBlocks = {
   // Timer modulari
   timer_simple: {
-    name: "Simple Timer",
+    name: "Loading Timer",
     template: "timer",
-    duration: 5,
-    category: "Timer",
-    difficulty: "Easy",
-    maxWidth: "400px",
-    maxHeight: "300px"
-  },
-  
-  timer_5s: {
-    name: "Timer 5 seconds",
-    template: "timer",
-    duration: 5,
+    duration: () => 15 + Math.floor(Math.random() * 10) * 5, // 15-60s a blocchi di 5s
     category: "Timer",
     difficulty: "Easy",
     maxWidth: "400px",
     maxHeight: "300px"
   },
 
-  timer_15s: {
-    name: "Timer 15 seconds", 
-    template: "timer",
-    duration: 15,
-    category: "Timer",
-    difficulty: "Normal",
-    maxWidth: "400px",
-    maxHeight: "300px"
-  },
-
-  timer_punish_15s: {
-    name: "Punitive Timer 15s",
+  timer_punish: {
+    name: "Punitive Timer",
     template: "timer_punish",
-    duration: 15,
+    duration: () => 15 + Math.floor(Math.random() * 10) * 5, // 15-60s a blocchi di 5s
     category: "Timer",
     difficulty: "Hard",
     maxWidth: "400px",
@@ -63,27 +43,16 @@ const modularBlocks = {
     maxHeight: "300px"
   },
 
-  // Blocchi compositi (nesting)
-  protected_click: {
-    name: "Timer Protected Click",
+  // Blocco composito timer+click
+  timer_click_combo: {
+    name: "Loading Challenge",
     template: "composite",
     category: "Composite",
-    difficulty: "Protected",
+    difficulty: "Normal",
     maxWidth: "500px",
-    maxHeight: "400px",
-    composition: {
-      timer_protection: {
-        blockType: "timer_5s",
-        position: "top",
-        onComplete: ["enable_click_game"]
-      },
-      click_game: {
-        blockType: "click_simple", 
-        position: "bottom",
-        enabled: false,
-        onComplete: [{ type: "callback", callback: "completeComposite" }]
-      }
-    }
+    maxHeight: "500px",
+    timer_duration: () => 15 + Math.floor(Math.random() * 10) * 5,
+    click_target: 5
   }
 };
 
@@ -506,9 +475,236 @@ function generateModularPunishTimerHTML(block, nextUrl) {
   `;
 }
 
+// Blocco composito timer+click
+function generateModularCompositeHTML(block, nextUrl) {
+  const timerDuration = typeof block.timer_duration === 'function' ? block.timer_duration() : block.timer_duration;
+  const clickTarget = block.click_target || 5;
+  const blockId = block.id;
+  
+  return `
+    <style>
+      .composite-widget-${blockId} {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        max-width: 500px;
+        margin: 0 auto;
+        text-align: center;
+        font-family: Arial, sans-serif;
+      }
+      .timer-section-${blockId} {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e0e0e0;
+      }
+      .timer-display-${blockId} {
+        font-size: 48px;
+        color: #007bff;
+        font-weight: bold;
+        margin: 20px 0;
+      }
+      .timer-progress-${blockId} {
+        width: 100%;
+        height: 20px;
+        background: #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 20px 0;
+      }
+      .timer-fill-${blockId} {
+        height: 100%;
+        background: #007bff;
+        width: 0%;
+        transition: width 1s linear;
+      }
+      .click-section-${blockId} {
+        opacity: 0.3;
+        pointer-events: none;
+        transition: opacity 0.5s;
+      }
+      .click-section-${blockId}.enabled {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .click-button-${blockId} {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        font-size: 18px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 15px;
+        transition: all 0.2s;
+      }
+      .click-button-${blockId}:hover {
+        background: #218838;
+        transform: scale(1.05);
+      }
+      .click-button-${blockId}:active {
+        background: #1e7e34;
+        transform: scale(0.95);
+      }
+      .warning-${blockId} {
+        color: #dc3545;
+        font-weight: bold;
+        margin: 10px 0;
+        display: none;
+      }
+    </style>
+    
+    <div class="composite-widget-${blockId}">
+      <h2>🔄 Loading Challenge</h2>
+      
+      <!-- Timer Section -->
+      <div class="timer-section-${blockId}" id="timer-section-${blockId}">
+        <h3>Step 1: Wait for loading</h3>
+        <div class="timer-display-${blockId}" id="timer-${blockId}">${timerDuration}</div>
+        <div class="timer-progress-${blockId}">
+          <div class="timer-fill-${blockId}" id="progress-${blockId}"></div>
+        </div>
+        <p id="timer-status-${blockId}">Please wait for completion</p>
+        <div class="warning-${blockId}" id="warning-${blockId}">⚠️ Keep this tab active!</div>
+      </div>
+      
+      <!-- Click Section -->
+      <div class="click-section-${blockId}" id="click-section-${blockId}">
+        <h3>Step 2: Complete verification</h3>
+        <div id="click-progress-${blockId}">0/${clickTarget} clicks</div>
+        <button class="click-button-${blockId}" id="click-btn-${blockId}" onclick="handleClick_${blockId}()">
+          Click to Verify
+        </button>
+      </div>
+    </div>
+    
+    <script>
+      (function() {
+        let timerSeconds = ${timerDuration};
+        let clicks = 0;
+        let isVisible = true;
+        let timerCompleted = false;
+        const totalSeconds = ${timerDuration};
+        const clickTarget = ${clickTarget};
+        
+        const timerEl = document.getElementById('timer-${blockId}');
+        const progressEl = document.getElementById('progress-${blockId}');
+        const timerStatusEl = document.getElementById('timer-status-${blockId}');
+        const warningEl = document.getElementById('warning-${blockId}');
+        const clickSectionEl = document.getElementById('click-section-${blockId}');
+        const clickProgressEl = document.getElementById('click-progress-${blockId}');
+        const clickBtnEl = document.getElementById('click-btn-${blockId}');
+        
+        // Mouse tracking
+        let lastMouseMove = Date.now();
+        let mouseInWindow = true;
+        
+        document.addEventListener('mousemove', function() {
+          lastMouseMove = Date.now();
+          if (!isVisible && !timerCompleted) {
+            resumeTimer();
+          }
+        });
+        
+        document.addEventListener('mouseenter', function() {
+          mouseInWindow = true;
+          if (!isVisible && !timerCompleted) {
+            resumeTimer();
+          }
+        });
+        
+        document.addEventListener('mouseleave', function() {
+          mouseInWindow = false;
+          if (!timerCompleted) {
+            pauseTimer();
+          }
+        });
+        
+        function pauseTimer() {
+          if (!timerCompleted) {
+            isVisible = false;
+            warningEl.style.display = 'block';
+            timerStatusEl.textContent = 'Timer paused - return to continue';
+          }
+        }
+        
+        function resumeTimer() {
+          if (!timerCompleted) {
+            isVisible = true;
+            warningEl.style.display = 'none';
+            timerStatusEl.textContent = 'Please wait for completion';
+          }
+        }
+        
+        // Visibility detection
+        document.addEventListener('visibilitychange', function() {
+          if (document.hidden) {
+            pauseTimer();
+          } else {
+            resumeTimer();
+          }
+        });
+        
+        window.addEventListener('blur', pauseTimer);
+        window.addEventListener('focus', resumeTimer);
+        
+        // Idle detection - check every second
+        setInterval(function() {
+          if (Date.now() - lastMouseMove > 3000 && !timerCompleted && isVisible && mouseInWindow) {
+            pauseTimer();
+          }
+        }, 1000);
+        
+        // Timer countdown
+        const timerInterval = setInterval(() => {
+          if (!isVisible || document.hidden || !document.hasFocus()) {
+            return;
+          }
+          
+          timerSeconds--;
+          timerEl.textContent = timerSeconds;
+          
+          const progress = ((totalSeconds - timerSeconds) / totalSeconds) * 100;
+          progressEl.style.width = progress + '%';
+          
+          if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerCompleted = true;
+            timerStatusEl.textContent = '✅ Loading completed!';
+            timerEl.textContent = '✓';
+            timerEl.style.color = '#28a745';
+            warningEl.style.display = 'none';
+            
+            // Enable click section
+            clickSectionEl.classList.add('enabled');
+          }
+        }, 1000);
+        
+        // Click handler
+        window.handleClick_${blockId} = function() {
+          if (!timerCompleted) return;
+          
+          clicks++;
+          clickProgressEl.textContent = clicks + '/' + clickTarget + ' clicks';
+          
+          if (clicks >= clickTarget) {
+            clickBtnEl.textContent = 'Continue →';
+            clickBtnEl.style.background = '#007bff';
+            clickBtnEl.onclick = function() {
+              window.location.href = '${nextUrl}';
+            };
+            clickProgressEl.textContent = '✅ Verification complete! Click Continue.';
+          }
+        };
+      })();
+    </script>
+  `;
+}
+
 module.exports = { 
   modularBlocks, 
   generateModularTimerHTML, 
   generateModularClickGameHTML,
-  generateModularPunishTimerHTML 
+  generateModularPunishTimerHTML,
+  generateModularCompositeHTML
 };
