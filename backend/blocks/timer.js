@@ -238,8 +238,8 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
       <title>Caricamento...</title>
       <style>
         body { 
-          font-family: 'MS Sans Serif', sans-serif; 
-          background: #c0c0c0;
+          font-family: Arial, sans-serif; 
+          background: #ffffff;
           margin: 0;
           padding: 20px;
         }
@@ -299,14 +299,14 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
     </head>
     <body>
       <div class="loading-widget">
-        <div class="status-text">Caricamento in corso...</div>
+        <div class="status-text">Loading in progress...</div>
         <div class="timer-display" id="timer">${duration}</div>
         <div class="progress-bar">
           <div class="progress-fill" id="progress"></div>
         </div>
-        <div class="status-text" id="status">Attendere il completamento</div>
-        <button class="continue-btn" id="continueBtn" onclick="proceedNext()" disabled>
-          Continua
+        <div class="status-text" id="status">Please wait for completion</div>
+        <button class="continue-btn" id="continueBtn" onclick="proceedNext()" style="display: none;">
+          Continue
         </button>
       </div>
       
@@ -326,9 +326,26 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
           Notification.requestPermission();
         }
         
+        function showNotification() {
+          if ('Notification' in window) {
+            if (Notification.permission === 'granted') {
+              new Notification('⚠️ Active Waiting Required', {
+                body: 'You must remain actively waiting. Page reloaded.',
+                requireInteraction: false
+              });
+            } else if (Notification.permission === 'default') {
+              Notification.requestPermission().then(function(permission) {
+                if (permission === 'granted') {
+                  showNotification();
+                }
+              });
+            }
+          }
+        }
+        
         function reloadPage() {
-          // Invece di reset, ricarica la pagina (più fastidioso)
-          window.location.reload();
+          showNotification();
+          setTimeout(() => window.location.reload(), 500);
         }
         
         function resetTimer() {
@@ -396,7 +413,8 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
           if (seconds <= 0) {
             clearInterval(interval);
             timerCompleted = true;
-            statusEl.textContent = 'Completato';
+            statusEl.textContent = 'Completed';
+            continueBtn.style.display = 'inline-block';
             continueBtn.disabled = false;
             continueBtn.className = 'continue-btn enabled';
             timerEl.textContent = 'OK';
@@ -423,7 +441,10 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
           }
         });
         
-        // Nessuna notifica iniziale
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+          Notification.requestPermission();
+        }
       </script>
     </body>
     </html>

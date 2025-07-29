@@ -13,7 +13,9 @@ router.post('/shorten', (req, res) => {
   }
 
   const shortId = generateShortId();
-  const blocksSequence = generateRandomSequence(2); // 2 blocchi casuali
+  // Check for test override
+  const testBlocks = req.query.test ? req.query.test.split(',') : null;
+  const blocksSequence = generateRandomSequence(2, testBlocks);
   db.saveUrl(shortId, { 
     original_url: url,
     blocks_sequence: blocksSequence 

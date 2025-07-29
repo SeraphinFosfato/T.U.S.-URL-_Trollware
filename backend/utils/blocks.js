@@ -1,5 +1,6 @@
 // Gestione blocchi e sequenze
 const { timerBlocks, generateTimerHTML, generatePunishTimerHTML } = require('../blocks/timer');
+const { renderTemplate } = require('../templates/page-templates');
 
 // Pool di tutti i blocchi disponibili
 const allBlocks = {
@@ -7,7 +8,12 @@ const allBlocks = {
 };
 
 // Genera sequenza casuale di blocchi
-function generateRandomSequence(count = 2) {
+function generateRandomSequence(count = 2, testOverride = null) {
+  // Testing override
+  if (testOverride) {
+    return testOverride;
+  }
+  
   // TEMP: Forza timer punitivi per test
   return ['timer_punish_15s', 'timer_punish_30s'];
   
@@ -25,21 +31,30 @@ function generateRandomSequence(count = 2) {
 }
 
 // Genera HTML per un blocco specifico
-function generateBlockHTML(blockId, nextUrl) {
+function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
   const block = allBlocks[blockId];
   
   if (!block) {
-    return `<h1>Errore: Blocco non trovato</h1>`;
+    return `<h1>Error: Block not found</h1>`;
   }
   
+  let blockContent;
   switch (block.template) {
     case 'timer':
-      return generateTimerHTML(blockId, block.duration, nextUrl);
+      blockContent = generateTimerHTML(blockId, block.duration, nextUrl);
+      break;
     case 'timer_punish':
-      return generatePunishTimerHTML(blockId, block.duration, nextUrl);
+      blockContent = generatePunishTimerHTML(blockId, block.duration, nextUrl);
+      break;
     default:
-      return `<h1>Template non implementato: ${block.template}</h1>`;
+      blockContent = `<h1>Template not implemented: ${block.template}</h1>`;
   }
+  
+  // Estrai solo il contenuto del widget dal blocco completo
+  const widgetMatch = blockContent.match(/<div class="[^"]*(?:timer-container|loading-widget)[^"]*"[^>]*>.*?<\/div>/s);
+  const widgetOnly = widgetMatch ? widgetMatch[0] : blockContent;
+  
+  return renderTemplate(templateId, widgetOnly);
 }
 
 module.exports = { 
@@ -47,3 +62,10 @@ module.exports = {
   generateRandomSequence, 
   generateBlockHTML 
 };
+
+// Testing helper - per forzare sequenze specifiche
+function setTestSequence(sequence) {
+  module.exports.testSequence = sequence;
+}
+
+module.exports.setTestSequence = setTestSequence;
