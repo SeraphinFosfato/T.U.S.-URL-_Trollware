@@ -18,8 +18,8 @@ function generateRandomSequence(count = 2, testOverride = null) {
     return testOverride;
   }
   
-  // TEMP: Test legacy + modular mix
-  return ['timer_punish_15s', 'click_simple'];
+  // TEMP: Back to working legacy blocks
+  return ['timer_punish_15s', 'click_decoy_popup'];
   
   /* Codice originale per dopo:
   const blockIds = Object.keys(allBlocks);
