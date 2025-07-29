@@ -7,10 +7,8 @@ const { generateRandomSequence } = require('../utils/blocks');
 // POST /api/shorten - Crea nuovo short URL
 router.post('/shorten', async (req, res) => {
   const { url } = req.body;
-  console.log(`DEBUG: Received URL: '${url}', type: ${typeof url}`);
   
   if (!url || !isValidUrl(url)) {
-    console.log(`DEBUG: URL validation failed for: '${url}'`);
     return res.status(400).json({ error: 'Invalid URL' });
   }
 
@@ -35,14 +33,11 @@ router.post('/shorten', async (req, res) => {
   });
 });
 
-// GET /:shortId - Redirect con blocchi (solo se non inizia con 'v')
+// GET /:shortId - Redirect con blocchi
 router.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
-  console.log(`DEBUG: /:shortId route called with shortId: ${shortId}, full URL: ${req.url}`);
   
-  // Skip se è una route /v/...
   if (shortId === 'v') {
-    console.log('DEBUG: Skipping /v route');
     return res.status(404).send('Not found');
   }
   

@@ -11,7 +11,6 @@ mongodb.connect().then(success => {
 class DatabaseWrapper {
   async saveUrl(shortId, data) {
     if (!dbReady) {
-      console.log('DEBUG: MongoDB not ready, attempting reconnect...');
       dbReady = await mongodb.connect();
     }
     return await mongodb.saveUrl(shortId, data);
@@ -19,7 +18,6 @@ class DatabaseWrapper {
 
   async getUrl(shortId) {
     if (!dbReady) {
-      console.log('DEBUG: MongoDB not ready, attempting reconnect...');
       dbReady = await mongodb.connect();
     }
     return await mongodb.getUrl(shortId);

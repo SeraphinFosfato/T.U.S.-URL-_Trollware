@@ -11,7 +11,6 @@ class MongoDB {
   async connect() {
     try {
       const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/trollshortener';
-      console.log(`DEBUG: MongoDB URI: '${uri}'`);
       this.client = new MongoClient(uri);
       await this.client.connect();
       this.db = this.client.db('trollshortener');
