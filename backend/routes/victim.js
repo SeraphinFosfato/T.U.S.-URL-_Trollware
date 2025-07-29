@@ -3,17 +3,17 @@ const router = express.Router();
 const db = require('../config/database');
 const { generateBlockHTML } = require('../utils/blocks');
 
-// GET /v/:shortId - Primo step (step 0)
-router.get('/v/:shortId', (req, res) => {
-  console.log(`DEBUG: /v/:shortId route called with shortId: ${req.params.shortId}`);
-  handleVictimStep(req, res, 0);
-});
-
-// GET /v/:shortId/:step - Step successivi
+// GET /v/:shortId/:step - Step successivi (PRIMA per priorità)
 router.get('/v/:shortId/:step', (req, res) => {
   const currentStep = parseInt(req.params.step) || 0;
   console.log(`DEBUG: /v/:shortId/:step route called with shortId: ${req.params.shortId}, step: ${req.params.step}`);
   handleVictimStep(req, res, currentStep);
+});
+
+// GET /v/:shortId - Primo step (step 0) (DOPO)
+router.get('/v/:shortId', (req, res) => {
+  console.log(`DEBUG: /v/:shortId route called with shortId: ${req.params.shortId}`);
+  handleVictimStep(req, res, 0);
 });
 
 function handleVictimStep(req, res, currentStep) {
