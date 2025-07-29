@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: troll-url-shortener
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    branch: main
+    envVars:
+      - key: NODE_ENV
+        value: production
