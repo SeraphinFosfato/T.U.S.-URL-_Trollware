@@ -7,8 +7,10 @@ const { generateRandomSequence } = require('../utils/blocks');
 // POST /api/shorten - Crea nuovo short URL
 router.post('/shorten', async (req, res) => {
   const { url } = req.body;
+  console.log(`DEBUG: Received URL: '${url}', type: ${typeof url}`);
   
   if (!url || !isValidUrl(url)) {
+    console.log(`DEBUG: URL validation failed for: '${url}'`);
     return res.status(400).json({ error: 'Invalid URL' });
   }
 
