@@ -409,7 +409,7 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
           
           // Barra a blocchi (aggiorna ogni secondo)
           const progress = ((originalDuration - seconds) / originalDuration) * 100;
-          progressEl.style.width = Math.floor(progress / 10) * 10 + '%';
+          progressEl.style.width = progress + '%';
           
           if (seconds <= 0) {
             clearInterval(interval);

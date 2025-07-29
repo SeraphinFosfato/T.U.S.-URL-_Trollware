@@ -11,6 +11,7 @@ router.get('/v/:shortId', (req, res) => {
 // GET /v/:shortId/:step - Step successivi
 router.get('/v/:shortId/:step', (req, res) => {
   const currentStep = parseInt(req.params.step) || 0;
+  console.log(`DEBUG: Route called with shortId: ${req.params.shortId}, step: ${req.params.step}`);
   handleVictimStep(req, res, currentStep);
 });
 
