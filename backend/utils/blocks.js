@@ -84,23 +84,14 @@ function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
   }
   
   // Handle different block content formats
-  let widgetWithStyles;
-  
   if (modularBlocks[blockId]) {
-    // Modular blocks are already complete widgets
-    widgetWithStyles = blockContent;
+    // Modular blocks use template system
+    const widgetWithStyles = blockContent;
+    return renderTemplate(templateId, widgetWithStyles);
   } else {
-    // Legacy blocks need CSS extraction
-    const styleMatch = blockContent.match(/<style[^>]*>(.*?)<\/style>/s);
-    const styles = styleMatch ? styleMatch[0] : '';
-    
-    const bodyMatch = blockContent.match(/<body[^>]*>(.*?)<\/body>/s);
-    const bodyContent = bodyMatch ? bodyMatch[1] : blockContent;
-    
-    widgetWithStyles = styles + bodyContent;
+    // Legacy blocks are complete HTML pages - return directly
+    return blockContent;
   }
-  
-  return renderTemplate(templateId, widgetWithStyles);
 }
 
 module.exports = { 
