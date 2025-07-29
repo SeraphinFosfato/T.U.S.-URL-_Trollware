@@ -1,10 +1,12 @@
 // Gestione blocchi e sequenze
 const { timerBlocks, generateTimerHTML, generatePunishTimerHTML } = require('../blocks/timer');
+const { minigameBlocks, generateClickDecoyHTML, generateClickDrainHTML, generateClickProtectedHTML } = require('../blocks/minigame');
 const { renderTemplate } = require('../templates/page-templates');
 
 // Pool di tutti i blocchi disponibili
 const allBlocks = {
-  ...timerBlocks
+  ...timerBlocks,
+  ...minigameBlocks
 };
 
 // Genera sequenza casuale di blocchi
@@ -14,8 +16,8 @@ function generateRandomSequence(count = 2, testOverride = null) {
     return testOverride;
   }
   
-  // TEMP: Forza timer normali per test
-  return ['timer_5s', 'timer_15s'];
+  // TEMP: Test timer + minigame nesting
+  return ['timer_5s', 'click_protected'];
   
   /* Codice originale per dopo:
   const blockIds = Object.keys(allBlocks);
@@ -45,6 +47,15 @@ function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
       break;
     case 'timer_punish':
       blockContent = generatePunishTimerHTML(blockId, block.duration, nextUrl);
+      break;
+    case 'click_decoy':
+      blockContent = generateClickDecoyHTML(blockId, block.target_clicks, nextUrl);
+      break;
+    case 'click_drain':
+      blockContent = generateClickDrainHTML(blockId, block.target_clicks, block.drain_speed, nextUrl);
+      break;
+    case 'click_protected':
+      blockContent = generateClickProtectedHTML(blockId, block.timer_duration, block.target_clicks, nextUrl);
       break;
     default:
       blockContent = `<h1>Template not implemented: ${block.template}</h1>`;
