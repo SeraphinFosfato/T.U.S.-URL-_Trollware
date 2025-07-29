@@ -1,6 +1,16 @@
 // Blocchi modulari con sistema puzzle
 const modularBlocks = {
   // Timer modulari
+  timer_simple: {
+    name: "Simple Timer",
+    template: "timer",
+    duration: 5,
+    category: "Timer",
+    difficulty: "Easy",
+    maxWidth: "400px",
+    maxHeight: "300px"
+  },
+  
   timer_5s: {
     name: "Timer 5 seconds",
     template: "timer",
@@ -78,35 +88,35 @@ const modularBlocks = {
 };
 
 // Generatori HTML modulari
-function generateModularTimerHTML(block, blockSystem) {
+function generateModularTimerHTML(block, nextUrl) {
   const duration = block.duration;
   const blockId = block.id;
   
   return `
     <style>
       .timer-widget-${blockId} {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 20px;
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        max-width: 400px;
+        margin: 0 auto;
         text-align: center;
         font-family: Arial, sans-serif;
-        max-width: ${block.maxWidth || '400px'};
-        margin: 0 auto;
       }
       .timer-display-${blockId} {
         font-size: 48px;
-        font-weight: bold;
         color: #007bff;
-        margin: 15px 0;
+        font-weight: bold;
+        margin: 20px 0;
       }
       .timer-progress-${blockId} {
         width: 100%;
         height: 20px;
-        background: #e9ecef;
+        background: #e0e0e0;
         border-radius: 10px;
         overflow: hidden;
-        margin: 15px 0;
+        margin: 20px 0;
       }
       .timer-fill-${blockId} {
         height: 100%;
@@ -115,43 +125,109 @@ function generateModularTimerHTML(block, blockSystem) {
         transition: width 1s linear;
       }
       .timer-status-${blockId} {
-        color: #6c757d;
         margin: 10px 0;
+        color: #666;
+      }
+      .timer-warning-${blockId} {
+        color: #dc3545;
+        font-weight: bold;
+        margin-top: 10px;
+        display: none;
       }
       .continue-btn-${blockId} {
+        padding: 15px 30px;
+        font-size: 18px;
         background: #28a745;
         color: white;
         border: none;
-        padding: 12px 24px;
         border-radius: 5px;
         cursor: pointer;
+        margin-top: 20px;
         display: none;
+        transition: background 0.2s;
+      }
+      .continue-btn-${blockId}:hover {
+        background: #218838;
+      }
+      .continue-btn-${blockId}:active {
+        background: #1e7e34;
+        transform: translateY(1px);
       }
     </style>
     
     <div class="timer-widget-${blockId}">
-      <h3>⏱️ Please Wait</h3>
+      <h2>🔄 Preparing link...</h2>
       <div class="timer-display-${blockId}" id="timer-${blockId}">${duration}</div>
       <div class="timer-progress-${blockId}">
         <div class="timer-fill-${blockId}" id="progress-${blockId}"></div>
       </div>
-      <div class="timer-status-${blockId}" id="status-${blockId}">Timer in progress...</div>
-      <button class="continue-btn-${blockId}" id="continue-${blockId}" 
-              onclick="document.dispatchEvent(new CustomEvent('blockComplete', {detail: {blockId: '${blockId}', result: 'timer_completed'}}))">
-        Continue
+      <p class="timer-status-${blockId}" id="status-${blockId}">Please wait for completion</p>
+      <div class="timer-warning-${blockId}" id="warning-${blockId}">⚠️ Keep this tab active to continue!</div>
+      <button class="continue-btn-${blockId}" id="continue-${blockId}" onclick="proceedNext_${blockId}()">
+        Continua →
       </button>
     </div>
     
     <script>
       (function() {
         let seconds = ${duration};
+        let isVisible = true;
+        let timerCompleted = false;
         const totalSeconds = ${duration};
         const timerEl = document.getElementById('timer-${blockId}');
         const progressEl = document.getElementById('progress-${blockId}');
         const statusEl = document.getElementById('status-${blockId}');
+        const warningEl = document.getElementById('warning-${blockId}');
         const continueBtn = document.getElementById('continue-${blockId}');
         
+        function pauseTimer() {
+          if (!timerCompleted) {
+            isVisible = false;
+            warningEl.style.display = 'block';
+            statusEl.textContent = 'Timer paused - return to tab to continue';
+          }
+        }
+        
+        function resumeTimer() {
+          if (!timerCompleted) {
+            isVisible = true;
+            warningEl.style.display = 'none';
+            statusEl.textContent = 'Please wait for completion';
+          }
+        }
+        
+        // Visibility detection
+        document.addEventListener('visibilitychange', function() {
+          if (document.hidden) {
+            pauseTimer();
+          } else {
+            resumeTimer();
+          }
+        });
+        
+        window.addEventListener('blur', pauseTimer);
+        window.addEventListener('focus', resumeTimer);
+        
+        // Idle detection
+        let lastActivity = Date.now();
+        document.addEventListener('mousemove', function() {
+          lastActivity = Date.now();
+          if (!isVisible && !timerCompleted) {
+            resumeTimer();
+          }
+        });
+        
+        setInterval(function() {
+          if (Date.now() - lastActivity > 3000 && !timerCompleted && isVisible) {
+            pauseTimer();
+          }
+        }, 1000);
+        
         const interval = setInterval(() => {
+          if (!isVisible || document.hidden || !document.hasFocus()) {
+            return;
+          }
+          
           seconds--;
           timerEl.textContent = seconds;
           
@@ -160,18 +236,26 @@ function generateModularTimerHTML(block, blockSystem) {
           
           if (seconds <= 0) {
             clearInterval(interval);
-            statusEl.textContent = '✅ Timer completed!';
+            timerCompleted = true;
+            statusEl.textContent = '✅ Loading completed!';
             continueBtn.style.display = 'inline-block';
             timerEl.textContent = '✓';
             timerEl.style.color = '#28a745';
+            warningEl.style.display = 'none';
           }
         }, 1000);
+        
+        window.proceedNext_${blockId} = function() {
+          if (timerCompleted) {
+            window.location.href = '${nextUrl}';
+          }
+        };
       })();
     </script>
   `;
 }
 
-function generateModularClickGameHTML(block, blockSystem) {
+function generateModularClickGameHTML(block, nextUrl) {
   const targetClicks = block.target_clicks || 5;
   const blockId = block.id;
   
@@ -184,7 +268,7 @@ function generateModularClickGameHTML(block, blockSystem) {
         padding: 20px;
         text-align: center;
         font-family: Arial, sans-serif;
-        max-width: ${block.maxWidth || '450px'};
+        max-width: 450px;
         margin: 0 auto;
       }
       .click-button-${blockId} {
@@ -196,9 +280,15 @@ function generateModularClickGameHTML(block, blockSystem) {
         border-radius: 5px;
         cursor: pointer;
         margin: 15px;
+        transition: all 0.2s;
       }
       .click-button-${blockId}:hover {
         background: #0056b3;
+        transform: scale(1.05);
+      }
+      .click-button-${blockId}:active {
+        background: #004085;
+        transform: scale(0.95);
       }
       .click-progress-${blockId} {
         font-size: 16px;
@@ -212,8 +302,7 @@ function generateModularClickGameHTML(block, blockSystem) {
       <div class="click-progress-${blockId}" id="progress-${blockId}">
         0/${targetClicks} clicks
       </div>
-      <button class="click-button-${blockId}" id="clickBtn-${blockId}"
-              onclick="handleClick_${blockId}()">
+      <button class="click-button-${blockId}" id="clickBtn-${blockId}" onclick="handleClick_${blockId}()">
         Click Here
       </button>
     </div>
@@ -231,12 +320,10 @@ function generateModularClickGameHTML(block, blockSystem) {
           progressEl.textContent = clicks + '/' + target + ' clicks';
           
           if (clicks >= target) {
-            btnEl.textContent = 'Continue';
+            btnEl.textContent = 'Continue →';
+            btnEl.style.background = '#28a745';
             btnEl.onclick = function() {
-              const event = new CustomEvent('blockComplete', {
-                detail: { blockId: '${blockId}', result: 'click_completed' }
-              });
-              document.dispatchEvent(event);
+              window.location.href = '${nextUrl}';
             };
             progressEl.textContent = '✅ Completed! Click Continue.';
           }
@@ -247,7 +334,7 @@ function generateModularClickGameHTML(block, blockSystem) {
 }
 
 // Timer punitivo modulare
-function generateModularPunishTimerHTML(block, blockSystem) {
+function generateModularPunishTimerHTML(block, nextUrl) {
   const duration = block.duration;
   const blockId = block.id;
   
@@ -272,6 +359,18 @@ function generateModularPunishTimerHTML(block, blockSystem) {
         border: 1px inset #c0c0c0;
         padding: 5px;
       }
+      .punish-progress-${blockId} {
+        width: 100%;
+        height: 20px;
+        background: #ffffff;
+        border: 1px inset #c0c0c0;
+        margin: 10px 0;
+      }
+      .punish-fill-${blockId} {
+        height: 100%;
+        background: #000080;
+        width: 0%;
+      }
       .punish-continue-${blockId} {
         background: #c0c0c0;
         border: 1px outset #c0c0c0;
@@ -286,14 +385,23 @@ function generateModularPunishTimerHTML(block, blockSystem) {
         color: #000000;
         cursor: pointer;
       }
+      .punish-continue-${blockId}.enabled:hover {
+        background: #d4d4d4;
+      }
+      .punish-continue-${blockId}.enabled:active {
+        border: 1px inset #c0c0c0;
+        background: #b0b0b0;
+      }
     </style>
     
     <div class="punish-timer-widget-${blockId}">
       <div>Loading in progress...</div>
       <div class="punish-timer-display-${blockId}" id="timer-${blockId}">${duration}</div>
+      <div class="punish-progress-${blockId}">
+        <div class="punish-fill-${blockId}" id="progress-${blockId}"></div>
+      </div>
       <div id="status-${blockId}">Please wait for completion</div>
-      <button class="punish-continue-${blockId}" id="continue-${blockId}"
-              onclick="document.dispatchEvent(new CustomEvent('blockComplete', {detail: {blockId: '${blockId}', result: 'punish_completed'}}))">
+      <button class="punish-continue-${blockId}" id="continue-${blockId}" onclick="proceedNext_${blockId}()">
         Continue
       </button>
     </div>
@@ -301,40 +409,98 @@ function generateModularPunishTimerHTML(block, blockSystem) {
     <script>
       (function() {
         let seconds = ${duration};
+        let originalDuration = ${duration};
+        let isVisible = true;
+        let timerCompleted = false;
         const timerEl = document.getElementById('timer-${blockId}');
         const statusEl = document.getElementById('status-${blockId}');
         const continueBtn = document.getElementById('continue-${blockId}');
+        const progressEl = document.getElementById('progress-${blockId}');
         
-        function reloadPage() {
+        function showNotification() {
           if ('Notification' in window && Notification.permission === 'granted') {
             new Notification('⚠️ Active Waiting Required', {
-              body: 'You must remain actively waiting. Page reloaded.'
+              body: 'You must remain actively waiting. Timer reset.'
             });
           }
-          setTimeout(() => window.location.reload(), 500);
+        }
+        
+        function resetTimer() {
+          if (!timerCompleted) {
+            showNotification();
+            seconds = originalDuration;
+            timerEl.textContent = seconds;
+            progressEl.style.width = '0%';
+            statusEl.textContent = 'Timer reset - keep focus!';
+            setTimeout(() => {
+              statusEl.textContent = 'Please wait for completion';
+            }, 2000);
+          }
+        }
+        
+        function pauseTimer() {
+          if (!timerCompleted && isVisible) {
+            isVisible = false;
+            resetTimer();
+          }
+        }
+        
+        function resumeTimer() {
+          if (!timerCompleted) {
+            isVisible = true;
+          }
         }
         
         document.addEventListener('visibilitychange', function() {
-          if (document.hidden && seconds > 0) reloadPage();
+          if (document.hidden) {
+            pauseTimer();
+          } else {
+            resumeTimer();
+          }
         });
         
-        window.addEventListener('blur', function() {
-          if (seconds > 0) reloadPage();
+        window.addEventListener('blur', pauseTimer);
+        window.addEventListener('focus', resumeTimer);
+        
+        // Idle detection
+        let lastActivity = Date.now();
+        document.addEventListener('mousemove', function() {
+          lastActivity = Date.now();
         });
+        
+        setInterval(function() {
+          if (Date.now() - lastActivity > 2000 && !timerCompleted && isVisible) {
+            pauseTimer();
+          }
+        }, 500);
         
         const interval = setInterval(() => {
-          if (document.hidden) return;
+          if (!isVisible || document.hidden) {
+            return;
+          }
+          
           seconds--;
           timerEl.textContent = seconds;
           
+          const progress = ((originalDuration - seconds) / originalDuration) * 100;
+          progressEl.style.width = progress + '%';
+          
           if (seconds <= 0) {
             clearInterval(interval);
+            timerCompleted = true;
             statusEl.textContent = 'Completed';
             continueBtn.style.display = 'inline-block';
             continueBtn.className = 'punish-continue-${blockId} enabled';
             timerEl.textContent = 'OK';
+            progressEl.style.width = '100%';
           }
         }, 1000);
+        
+        window.proceedNext_${blockId} = function() {
+          if (timerCompleted) {
+            window.location.href = '${nextUrl}';
+          }
+        };
       })();
     </script>
   `;
