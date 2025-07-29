@@ -11,6 +11,12 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 const shortenerRoutes = require('./routes/shortener');
 const victimRoutes = require('./routes/victim');
 
+// Debug middleware - log all requests
+app.use((req, res, next) => {
+  console.log(`DEBUG: Request ${req.method} ${req.url}`);
+  next();
+});
+
 // Landing page PRIMA di tutto
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
