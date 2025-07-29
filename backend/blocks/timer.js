@@ -65,6 +65,27 @@ function generateTimerHTML(blockId, duration, nextUrl) {
           width: 0%;
           transition: width 1s linear;
         }
+        .continue-btn {
+          padding: 15px 30px;
+          font-size: 18px;
+          background: #28a745;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          margin-top: 20px;
+          display: none;
+        }
+        .continue-btn:disabled {
+          background: #6c757d;
+          cursor: not-allowed;
+        }
+        .warning {
+          color: #dc3545;
+          font-weight: bold;
+          margin-top: 10px;
+          display: none;
+        }
       </style>
     </head>
     <body>
@@ -74,16 +95,42 @@ function generateTimerHTML(blockId, duration, nextUrl) {
         <div class="progress-bar">
           <div class="progress-fill" id="progress"></div>
         </div>
-        <p>Attendere il completamento del caricamento</p>
+        <p id="status">Attendere il completamento del caricamento</p>
+        <div class="warning" id="warning">⚠️ Mantieni questa scheda attiva per continuare!</div>
+        <button class="continue-btn" id="continueBtn" onclick="proceedNext()" disabled>
+          Continua →
+        </button>
       </div>
       
       <script>
         let seconds = ${duration};
+        let isVisible = true;
+        let timerCompleted = false;
         const timerEl = document.getElementById('timer');
         const progressEl = document.getElementById('progress');
+        const statusEl = document.getElementById('status');
+        const warningEl = document.getElementById('warning');
+        const continueBtn = document.getElementById('continueBtn');
         const totalSeconds = ${duration};
         
+        // Visibility detection
+        document.addEventListener('visibilitychange', function() {
+          if (document.hidden && !timerCompleted) {
+            isVisible = false;
+            warningEl.style.display = 'block';
+            statusEl.textContent = 'Timer in pausa - torna alla scheda per continuare';
+          } else if (!timerCompleted) {
+            isVisible = true;
+            warningEl.style.display = 'none';
+            statusEl.textContent = 'Attendere il completamento del caricamento';
+          }
+        });
+        
         const interval = setInterval(() => {
+          if (!isVisible || document.hidden) {
+            return; // Pausa il timer se non visibile
+          }
+          
           seconds--;
           timerEl.textContent = seconds;
           
@@ -92,19 +139,39 @@ function generateTimerHTML(blockId, duration, nextUrl) {
           
           if (seconds <= 0) {
             clearInterval(interval);
-            window.location.href = '${nextUrl}';
+            timerCompleted = true;
+            statusEl.textContent = '✅ Caricamento completato!';
+            continueBtn.style.display = 'inline-block';
+            continueBtn.disabled = false;
+            timerEl.textContent = '✓';
+            timerEl.style.color = '#28a745';
           }
         }, 1000);
+        
+        function proceedNext() {
+          if (timerCompleted) {
+            window.location.href = '${nextUrl}';
+          }
+        }
         
         // Anti-bypass: disabilita tasto indietro
         history.pushState(null, null, location.href);
         window.onpopstate = function () {
           history.go(1);
         };
+        
+        // Anti-bypass: blocca F5, Ctrl+R, etc
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+            e.preventDefault();
+            return false;
+          }
+        });
       </script>
     </body>
     </html>
   `;
+}
 }
 
 module.exports = { timerBlocks, generateTimerHTML };
