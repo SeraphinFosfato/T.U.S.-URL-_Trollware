@@ -19,12 +19,15 @@ function handleVictimStep(req, res, currentStep) {
   
   const urlData = db.getUrl(shortId);
   if (!urlData) {
+    console.log(`DEBUG: URL not found for shortId: ${shortId}`);
+    console.log('Available URLs:', Object.keys(db.urls || {}));
     return res.status(404).send('<h1>Link not found</h1>');
   }
   
   // Se abbiamo completato tutti i blocchi, redirect finale
   if (currentStep >= urlData.blocks_sequence.length) {
-    urlData.stats.completed++;
+    if (urlData.stats) urlData.stats.completed++;
+    console.log(`DEBUG: Redirecting to: ${urlData.original_url}`);
     return res.redirect(urlData.original_url);
   }
   

@@ -292,8 +292,12 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
           color: #000000;
           cursor: pointer;
         }
+        .continue-btn.enabled:hover {
+          background: #d4d4d4;
+        }
         .continue-btn.enabled:active {
           border: 1px inset #c0c0c0;
+          background: #b0b0b0;
         }
       </style>
     </head>
@@ -386,13 +390,10 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
         document.addEventListener('mousemove', function() {
           lastActivity = Date.now();
           hasBeenIdle = false;
-          if (!isVisible && !timerCompleted) {
-            resumeTimer();
-          }
         });
         
         setInterval(function() {
-          if (Date.now() - lastActivity > 2000 && !timerCompleted && !hasBeenIdle) {
+          if (Date.now() - lastActivity > 2000 && !timerCompleted && !hasBeenIdle && isVisible) {
             hasBeenIdle = true;
             pauseTimer();
           }
