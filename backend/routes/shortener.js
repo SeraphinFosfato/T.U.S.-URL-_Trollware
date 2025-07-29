@@ -5,7 +5,7 @@ const { generateShortId, isValidUrl } = require('../utils/shortener');
 const { generateRandomSequence } = require('../utils/blocks');
 
 // POST /api/shorten - Crea nuovo short URL
-router.post('/shorten', (req, res) => {
+router.post('/shorten', async (req, res) => {
   const { url } = req.body;
   
   if (!url || !isValidUrl(url)) {
@@ -16,10 +16,15 @@ router.post('/shorten', (req, res) => {
   // Check for test override
   const testBlocks = req.query.test ? req.query.test.split(',') : null;
   const blocksSequence = generateRandomSequence(2, testBlocks);
-  db.saveUrl(shortId, { 
+  
+  const saved = await db.saveUrl(shortId, { 
     original_url: url,
     blocks_sequence: blocksSequence 
   });
+  
+  if (!saved) {
+    return res.status(500).json({ error: 'Database error' });
+  }
   
   res.json({ 
     shortId, 
@@ -29,7 +34,7 @@ router.post('/shorten', (req, res) => {
 });
 
 // GET /:shortId - Redirect con blocchi (solo se non inizia con 'v')
-router.get('/:shortId', (req, res) => {
+router.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
   console.log(`DEBUG: /:shortId route called with shortId: ${shortId}, full URL: ${req.url}`);
   
@@ -39,14 +44,14 @@ router.get('/:shortId', (req, res) => {
     return res.status(404).send('Not found');
   }
   
-  const urlData = db.getUrl(shortId);
+  const urlData = await db.getUrl(shortId);
   
   if (!urlData) {
     return res.status(404).send('Link not found');
   }
 
   // Incrementa visite
-  urlData.stats.visits++;
+  await db.updateStats(shortId, 'visits');
   
   // Inizia la sequenza di blocchi
   res.redirect(`/v/${shortId}`);

@@ -4,25 +4,24 @@ const db = require('../config/database');
 const { generateBlockHTML } = require('../utils/blocks');
 
 // GET /v/:shortId/:step - Step successivi (PRIMA per priorità)
-router.get('/v/:shortId/:step', (req, res) => {
+router.get('/v/:shortId/:step', async (req, res) => {
   const currentStep = parseInt(req.params.step) || 0;
   console.log(`DEBUG: /v/:shortId/:step route called with shortId: ${req.params.shortId}, step: ${req.params.step}`);
-  handleVictimStep(req, res, currentStep);
+  await handleVictimStep(req, res, currentStep);
 });
 
 // GET /v/:shortId - Primo step (step 0) (DOPO)
-router.get('/v/:shortId', (req, res) => {
+router.get('/v/:shortId', async (req, res) => {
   console.log(`DEBUG: /v/:shortId route called with shortId: ${req.params.shortId}`);
-  handleVictimStep(req, res, 0);
+  await handleVictimStep(req, res, 0);
 });
 
-function handleVictimStep(req, res, currentStep) {
+async function handleVictimStep(req, res, currentStep) {
   const { shortId } = req.params;
   
-  let urlData = db.getUrl(shortId);
+  let urlData = await db.getUrl(shortId);
   if (!urlData) {
     console.log(`DEBUG: URL not found for shortId: ${shortId}`);
-    console.log('Available URLs:', Array.from(db.urls.keys()));
     
     // Fallback: se il shortId sembra essere un numero, potrebbe essere un parsing error
     if (/^\d+$/.test(shortId)) {
@@ -35,7 +34,7 @@ function handleVictimStep(req, res, currentStep) {
   
   // Se abbiamo completato tutti i blocchi, redirect finale
   if (currentStep >= urlData.blocks_sequence.length) {
-    if (urlData.stats) urlData.stats.completed++;
+    await db.updateStats(shortId, 'completed');
     console.log(`DEBUG: Redirecting to: ${urlData.original_url}`);
     return res.redirect(urlData.original_url);
   }
