@@ -466,9 +466,20 @@ function generateModularPunishTimerHTML(block, config = {}) {
             timerEl.textContent = seconds;
             progressEl.style.width = '0%';
             statusEl.textContent = 'Timer reset - keep focus!';
+            
+            // Riavvia il timer dopo il reset
+            if (timerInterval) {
+              clearInterval(timerInterval);
+              timerInterval = null;
+            }
+            
             setTimeout(() => {
               statusEl.textContent = 'Please wait for completion';
-            }, 2000);
+              isPaused = false;
+              if (isActive) {
+                startTimer();
+              }
+            }, 1000);
           }
         }
         
