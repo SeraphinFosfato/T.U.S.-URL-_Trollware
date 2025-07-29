@@ -172,6 +172,5 @@ function generateTimerHTML(blockId, duration, nextUrl) {
     </html>
   `;
 }
-}
 
 module.exports = { timerBlocks, generateTimerHTML };
