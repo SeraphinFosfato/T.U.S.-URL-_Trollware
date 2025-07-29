@@ -62,7 +62,31 @@ function generateBlockHTML(blockSequence, nextUrl, templateId = 'simple_center')
       return `<h1>Template not implemented: ${block.template}</h1>`;
   }
   
-  return renderTemplate(templateId, blockContent);
+  // Per blocchi singoli, aggiungi event system
+  const { BlockEventSystem } = require('../blocks/block-event-system');
+  const fullHTML = `
+    <!DOCTYPE html>
+    <html lang="it">
+    <head>
+      <meta charset="UTF-8">
+      <title>Loading...</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background: #f0f0f0;
+          margin: 0;
+          padding: 20px;
+        }
+      </style>
+    </head>
+    <body>
+      ${BlockEventSystem.generateEventSystemJS()}
+      ${blockContent}
+    </body>
+    </html>
+  `;
+  
+  return fullHTML;
 }
 
 module.exports = { 

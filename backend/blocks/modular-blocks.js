@@ -242,12 +242,17 @@ function generateModularTimerHTML(block, config = {}) {
         // Complete function
         window.completeTimer_${blockId} = function() {
           if (timerCompleted) {
-            window.BlockEventSystem.completeBlock('${blockId}', 'timer_completed');
+            if (window.BlockEventSystem) {
+              window.BlockEventSystem.completeBlock('${blockId}', 'timer_completed');
+            } else {
+              // Blocco singolo - vai direttamente al nextUrl
+              window.location.href = '${config.nextUrl || ''}';
+            }
           }
         };
         
-        // Start if enabled
-        if (${enabled}) {
+        // Start if enabled o se è un blocco singolo
+        if (${enabled} || !window.BlockEventSystem) {
           startTimer();
         }
       })();
