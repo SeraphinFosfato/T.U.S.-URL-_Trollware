@@ -14,8 +14,8 @@ function generateRandomSequence(count = 2, testOverride = null) {
     return testOverride;
   }
   
-  // TEMP: Forza timer punitivi per test
-  return ['timer_punish_15s', 'timer_punish_30s'];
+  // TEMP: Forza timer normali per test
+  return ['timer_5s', 'timer_15s'];
   
   /* Codice originale per dopo:
   const blockIds = Object.keys(allBlocks);
