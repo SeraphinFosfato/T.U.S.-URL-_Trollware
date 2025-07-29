@@ -9,9 +9,10 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Routes
 const shortenerRoutes = require('./routes/shortener');
+const victimRoutes = require('./routes/victim');
+
 app.use('/api', shortenerRoutes);
-app.use('/', shortenerRoutes);
-app.use('/api', shortenerRoutes);
+app.use('/', victimRoutes); // Route per vittime /v/:shortId/:step
 app.use('/', shortenerRoutes); // Per i redirect /:shortId
 
 // Landing page

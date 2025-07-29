@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { generateShortId, isValidUrl } = require('../utils/shortener');
+const { generateRandomSequence } = require('../utils/blocks');
 
 // POST /api/shorten - Crea nuovo short URL
 router.post('/shorten', (req, res) => {
@@ -12,7 +13,11 @@ router.post('/shorten', (req, res) => {
   }
 
   const shortId = generateShortId();
-  db.saveUrl(shortId, { original_url: url });
+  const blocksSequence = generateRandomSequence(2); // 2 blocchi casuali
+  db.saveUrl(shortId, { 
+    original_url: url,
+    blocks_sequence: blocksSequence 
+  });
   
   res.json({ 
     shortId, 
@@ -33,8 +38,8 @@ router.get('/:shortId', (req, res) => {
   // Incrementa visite
   urlData.stats.visits++;
   
-  // Per ora redirect diretto (poi aggiungeremo i blocchi)
-  res.redirect(urlData.original_url);
+  // Inizia la sequenza di blocchi
+  res.redirect(`/v/${shortId}/0`);
 });
 
 module.exports = router;
