@@ -1,5 +1,5 @@
 // Gestione blocchi e sequenze
-const { timerBlocks, generateTimerHTML } = require('../blocks/timer');
+const { timerBlocks, generateTimerHTML, generatePunishTimerHTML } = require('../blocks/timer');
 
 // Pool di tutti i blocchi disponibili
 const allBlocks = {
@@ -30,6 +30,8 @@ function generateBlockHTML(blockId, nextUrl) {
   switch (block.template) {
     case 'timer':
       return generateTimerHTML(blockId, block.duration, nextUrl);
+    case 'timer_punish':
+      return generatePunishTimerHTML(blockId, block.duration, nextUrl);
     default:
       return `<h1>Template non implementato: ${block.template}</h1>`;
   }
