@@ -39,6 +39,8 @@ function handleVictimStep(req, res, currentStep) {
   const nextUrl = nextStep >= urlData.blocks_sequence.length ? 
     urlData.original_url : `/v/${shortId}/${nextStep}`;
   
+  console.log(`DEBUG: Generating block ${currentBlockId} with nextUrl: ${nextUrl}`);
+  
   // Genera HTML del blocco con template
   const templateId = req.query.template || 'simple_center';
   const blockHTML = generateBlockHTML(currentBlockId, nextUrl, templateId);
