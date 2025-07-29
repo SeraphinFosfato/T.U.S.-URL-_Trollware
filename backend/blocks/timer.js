@@ -113,21 +113,63 @@ function generateTimerHTML(blockId, duration, nextUrl) {
         const continueBtn = document.getElementById('continueBtn');
         const totalSeconds = ${duration};
         
-        // Visibility detection
-        document.addEventListener('visibilitychange', function() {
-          if (document.hidden && !timerCompleted) {
+        // Multiple visibility detection methods
+        function pauseTimer() {
+          if (!timerCompleted) {
             isVisible = false;
             warningEl.style.display = 'block';
             statusEl.textContent = 'Timer in pausa - torna alla scheda per continuare';
-          } else if (!timerCompleted) {
+          }
+        }
+        
+        function resumeTimer() {
+          if (!timerCompleted) {
             isVisible = true;
             warningEl.style.display = 'none';
             statusEl.textContent = 'Attendere il completamento del caricamento';
           }
+        }
+        
+        // Visibility API
+        document.addEventListener('visibilitychange', function() {
+          if (document.hidden) {
+            pauseTimer();
+          } else {
+            resumeTimer();
+          }
         });
         
+        // Window focus/blur
+        window.addEventListener('blur', pauseTimer);
+        window.addEventListener('focus', resumeTimer);
+        
+        // Page hide/show
+        window.addEventListener('pagehide', pauseTimer);
+        window.addEventListener('pageshow', resumeTimer);
+        
+        // Mouse leave/enter (per tab switching)
+        document.addEventListener('mouseleave', function() {
+          setTimeout(pauseTimer, 100); // Piccolo delay per evitare falsi positivi
+        });
+        
+        // Heartbeat check - se l'utente non muove il mouse per 3 secondi, pausa
+        let lastActivity = Date.now();
+        document.addEventListener('mousemove', function() {
+          lastActivity = Date.now();
+          if (!isVisible && !timerCompleted) {
+            resumeTimer();
+          }
+        });
+        
+        setInterval(function() {
+          if (Date.now() - lastActivity > 3000 && !timerCompleted) {
+            pauseTimer();
+          }
+        }, 1000);
+        
         const interval = setInterval(() => {
-          if (!isVisible || document.hidden) {
+          // Controlli multipli per visibilità
+          if (!isVisible || document.hidden || !document.hasFocus()) {
             return; // Pausa il timer se non visibile
           }
           
