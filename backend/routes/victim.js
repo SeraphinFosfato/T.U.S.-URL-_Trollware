@@ -19,7 +19,7 @@ function handleVictimStep(req, res, currentStep) {
   
   const urlData = db.getUrl(shortId);
   if (!urlData) {
-    return res.status(404).send('<h1>Link non trovato</h1>');
+    return res.status(404).send('<h1>Link not found</h1>');
   }
   
   // Se abbiamo completato tutti i blocchi, redirect finale

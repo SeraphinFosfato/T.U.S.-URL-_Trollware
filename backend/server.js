@@ -11,14 +11,14 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 const shortenerRoutes = require('./routes/shortener');
 const victimRoutes = require('./routes/victim');
 
-app.use('/api', shortenerRoutes);
-app.use('/', victimRoutes); // Route per vittime /v/:shortId/:step
-app.use('/', shortenerRoutes); // Per i redirect /:shortId
-
-// Landing page
+// Landing page PRIMA di tutto
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
+
+app.use('/api', shortenerRoutes);
+app.use('/', victimRoutes); // Route per vittime /v/:shortId/:step
+app.use('/', shortenerRoutes); // Per i redirect /:shortId
 
 app.listen(PORT, () => {
   console.log(`TrollShortener attivo su http://localhost:${PORT}`);

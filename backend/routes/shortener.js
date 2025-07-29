@@ -9,7 +9,7 @@ router.post('/shorten', (req, res) => {
   const { url } = req.body;
   
   if (!url || !isValidUrl(url)) {
-    return res.status(400).json({ error: 'URL non valido' });
+    return res.status(400).json({ error: 'Invalid URL' });
   }
 
   const shortId = generateShortId();
@@ -34,7 +34,7 @@ router.get('/:shortId', (req, res) => {
   const urlData = db.getUrl(shortId);
   
   if (!urlData) {
-    return res.status(404).send('Link non trovato');
+    return res.status(404).send('Link not found');
   }
 
   // Incrementa visite
