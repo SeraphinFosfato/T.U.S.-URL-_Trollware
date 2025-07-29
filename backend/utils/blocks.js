@@ -50,11 +50,11 @@ function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
       blockContent = `<h1>Template not implemented: ${block.template}</h1>`;
   }
   
-  // Estrai solo il contenuto del widget dal blocco completo
-  const widgetMatch = blockContent.match(/<div class="[^"]*(?:timer-container|loading-widget)[^"]*"[^>]*>.*?<\/div>/s);
-  const widgetOnly = widgetMatch ? widgetMatch[0] : blockContent;
+  // Estrai widget + script dal blocco completo
+  const bodyMatch = blockContent.match(/<body[^>]*>(.*?)<\/body>/s);
+  const bodyContent = bodyMatch ? bodyMatch[1] : blockContent;
   
-  return renderTemplate(templateId, widgetOnly);
+  return renderTemplate(templateId, bodyContent);
 }
 
 module.exports = { 
