@@ -36,6 +36,7 @@ function generateRandomSequence(count = 2, testOverride = null) {
 
 // Genera HTML per un blocco specifico
 function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
+  console.log(`DEBUG: generateBlockHTML called with blockId: ${blockId}, nextUrl: ${nextUrl}`);
   const block = allBlocks[blockId];
   
   if (!block) {
@@ -62,6 +63,7 @@ function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
     }
   } else {
     // Use legacy system
+    console.log(`DEBUG: Using legacy system for ${blockId}, template: ${block.template}`);
     switch (block.template) {
       case 'timer':
         blockContent = generateTimerHTML(blockId, block.duration, nextUrl);
