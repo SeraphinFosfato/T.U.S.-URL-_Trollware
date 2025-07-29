@@ -1,21 +1,31 @@
 // Gestione blocchi modulari
-const { modularBlocks, generateModularTimerHTML, generateModularClickGameHTML, generateModularPunishTimerHTML, generateModularCompositeHTML } = require('../blocks/modular-blocks');
+const { modularBlocks, generateModularTimerHTML, generateModularClickGameHTML, generateModularPunishTimerHTML, generateModularCompositeHTML, generateAtomicSequenceHTML } = require('../blocks/modular-blocks');
 const { renderTemplate } = require('../templates/page-templates');
 
 // Pool di blocchi modulari
 const allBlocks = modularBlocks;
 
-// Genera sequenza di blocchi modulari
+// Genera sequenza di blocchi atomici
 function generateRandomSequence(count = 2, testOverride = null) {
   if (testOverride) {
     return testOverride;
   }
   
-  return ['timer_click_combo'];
+  return [
+    { id: 'timer_simple', type: 'atomic' },
+    { id: 'click_simple', type: 'atomic' }
+  ];
 }
 
-// Genera HTML per blocco modulare
-function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
+// Genera HTML per sequenza di blocchi
+function generateBlockHTML(blockSequence, nextUrl, templateId = 'simple_center') {
+  // Se è una sequenza atomica
+  if (Array.isArray(blockSequence) && blockSequence[0]?.type === 'atomic') {
+    return generateAtomicSequenceHTML(blockSequence, nextUrl);
+  }
+  
+  // Fallback per blocchi singoli (legacy)
+  const blockId = Array.isArray(blockSequence) ? blockSequence[0] : blockSequence;
   const block = allBlocks[blockId];
   
   if (!block) {
@@ -32,13 +42,13 @@ function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
   
   switch (block.template) {
     case 'timer':
-      blockContent = generateModularTimerHTML(modularBlock, nextUrl);
+      blockContent = generateModularTimerHTML(modularBlock, { nextUrl, enabled: true });
       break;
     case 'timer_punish':
-      blockContent = generateModularPunishTimerHTML(modularBlock, nextUrl);
+      blockContent = generateModularPunishTimerHTML(modularBlock, { nextUrl, enabled: true });
       break;
     case 'click_game':
-      blockContent = generateModularClickGameHTML(modularBlock, nextUrl);
+      blockContent = generateModularClickGameHTML(modularBlock, { nextUrl, enabled: true });
       break;
     case 'composite':
       blockContent = generateModularCompositeHTML(modularBlock, nextUrl);

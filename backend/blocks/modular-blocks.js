@@ -56,243 +56,302 @@ const modularBlocks = {
   }
 };
 
-// Generatori HTML modulari
-function generateModularTimerHTML(block, nextUrl) {
+// Timer atomico con event system
+function generateModularTimerHTML(block, config = {}) {
   const duration = block.duration;
   const blockId = block.id;
+  const enabled = config.enabled !== false;
   
   return `
-    <style>
-      .timer-widget-${blockId} {
-        background: white;
-        padding: 40px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        max-width: 400px;
-        margin: 0 auto;
-        text-align: center;
-        font-family: Arial, sans-serif;
-      }
-      .timer-display-${blockId} {
-        font-size: 48px;
-        color: #007bff;
-        font-weight: bold;
-        margin: 20px 0;
-      }
-      .timer-progress-${blockId} {
-        width: 100%;
-        height: 20px;
-        background: #e0e0e0;
-        border-radius: 10px;
-        overflow: hidden;
-        margin: 20px 0;
-      }
-      .timer-fill-${blockId} {
-        height: 100%;
-        background: #007bff;
-        width: 0%;
-        transition: width 1s linear;
-      }
-      .timer-status-${blockId} {
-        margin: 10px 0;
-        color: #666;
-      }
-      .timer-warning-${blockId} {
-        color: #dc3545;
-        font-weight: bold;
-        margin-top: 10px;
-        display: none;
-      }
-      .continue-btn-${blockId} {
-        padding: 15px 30px;
-        font-size: 18px;
-        background: #28a745;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-top: 20px;
-        display: none;
-        transition: background 0.2s;
-      }
-      .continue-btn-${blockId}:hover {
-        background: #218838;
-      }
-      .continue-btn-${blockId}:active {
-        background: #1e7e34;
-        transform: translateY(1px);
-      }
-    </style>
-    
-    <div class="timer-widget-${blockId}">
-      <h2>🔄 Preparing link...</h2>
-      <div class="timer-display-${blockId}" id="timer-${blockId}">${duration}</div>
-      <div class="timer-progress-${blockId}">
-        <div class="timer-fill-${blockId}" id="progress-${blockId}"></div>
+    <div id="${blockId}-container" class="block-container">
+      <style>
+        .timer-widget-${blockId} {
+          background: white;
+          padding: 40px;
+          border-radius: 10px;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          max-width: 400px;
+          margin: 0 auto;
+          text-align: center;
+          font-family: Arial, sans-serif;
+        }
+        .timer-display-${blockId} {
+          font-size: 48px;
+          color: #007bff;
+          font-weight: bold;
+          margin: 20px 0;
+        }
+        .timer-progress-${blockId} {
+          width: 100%;
+          height: 20px;
+          background: #e0e0e0;
+          border-radius: 10px;
+          overflow: hidden;
+          margin: 20px 0;
+        }
+        .timer-fill-${blockId} {
+          height: 100%;
+          background: #007bff;
+          width: 0%;
+          transition: width 1s linear;
+        }
+        .timer-status-${blockId} {
+          margin: 10px 0;
+          color: #666;
+        }
+        .timer-warning-${blockId} {
+          color: #dc3545;
+          font-weight: bold;
+          margin-top: 10px;
+          display: none;
+        }
+        .continue-btn-${blockId} {
+          padding: 15px 30px;
+          font-size: 18px;
+          background: #28a745;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          margin-top: 20px;
+          display: none;
+          transition: background 0.2s;
+        }
+        .continue-btn-${blockId}:hover {
+          background: #218838;
+        }
+      </style>
+      
+      <div class="timer-widget-${blockId}">
+        <h2>🔄 Preparing link...</h2>
+        <div class="timer-display-${blockId}" id="timer-${blockId}">${duration}</div>
+        <div class="timer-progress-${blockId}">
+          <div class="timer-fill-${blockId}" id="progress-${blockId}"></div>
+        </div>
+        <p class="timer-status-${blockId}" id="status-${blockId}">Please wait for completion</p>
+        <div class="timer-warning-${blockId}" id="warning-${blockId}">⚠️ Keep this tab active!</div>
+        <button class="continue-btn-${blockId}" id="continue-${blockId}" onclick="completeTimer_${blockId}()">
+          Continue →
+        </button>
       </div>
-      <p class="timer-status-${blockId}" id="status-${blockId}">Please wait for completion</p>
-      <div class="timer-warning-${blockId}" id="warning-${blockId}">⚠️ Keep this tab active to continue!</div>
-      <button class="continue-btn-${blockId}" id="continue-${blockId}" onclick="proceedNext_${blockId}()">
-        Continua →
-      </button>
     </div>
     
     <script>
       (function() {
         let seconds = ${duration};
-        let isVisible = true;
+        let isActive = ${enabled};
+        let isPaused = false;
         let timerCompleted = false;
+        let timerInterval = null;
         const totalSeconds = ${duration};
+        
         const timerEl = document.getElementById('timer-${blockId}');
         const progressEl = document.getElementById('progress-${blockId}');
         const statusEl = document.getElementById('status-${blockId}');
         const warningEl = document.getElementById('warning-${blockId}');
         const continueBtn = document.getElementById('continue-${blockId}');
         
+        // Registra blocco nel sistema eventi
+        window.BlockEventSystem.registerBlock('${blockId}', {
+          enabled: ${enabled},
+          nextBlockId: '${config.nextBlockId || ''}',
+          nextUrl: '${config.nextUrl || ''}'
+        });
+        
+        function startTimer() {
+          if (timerInterval) return;
+          
+          timerInterval = setInterval(() => {
+            if (!isActive || isPaused || timerCompleted) return;
+            
+            seconds--;
+            timerEl.textContent = seconds;
+            
+            const progress = ((totalSeconds - seconds) / totalSeconds) * 100;
+            progressEl.style.width = progress + '%';
+            
+            if (seconds <= 0) {
+              clearInterval(timerInterval);
+              timerCompleted = true;
+              statusEl.textContent = '✅ Loading completed!';
+              continueBtn.style.display = 'inline-block';
+              timerEl.textContent = '✓';
+              timerEl.style.color = '#28a745';
+              warningEl.style.display = 'none';
+            }
+          }, 1000);
+        }
+        
         function pauseTimer() {
-          if (!timerCompleted) {
-            isVisible = false;
-            warningEl.style.display = 'block';
-            statusEl.textContent = 'Timer paused - return to tab to continue';
-          }
+          isPaused = true;
+          warningEl.style.display = 'block';
+          statusEl.textContent = 'Timer paused - return to continue';
         }
         
         function resumeTimer() {
-          if (!timerCompleted) {
-            isVisible = true;
-            warningEl.style.display = 'none';
-            statusEl.textContent = 'Please wait for completion';
-          }
+          isPaused = false;
+          warningEl.style.display = 'none';
+          statusEl.textContent = 'Please wait for completion';
         }
         
-        // Visibility detection
-        document.addEventListener('visibilitychange', function() {
-          if (document.hidden) {
+        // Event listeners
+        document.addEventListener('blockEnabled', function(e) {
+          if (e.detail.blockId === '${blockId}') {
+            isActive = true;
+            startTimer();
+          }
+        });
+        
+        document.addEventListener('blockDisabled', function(e) {
+          if (e.detail.blockId === '${blockId}') {
+            isActive = false;
+            if (timerInterval) {
+              clearInterval(timerInterval);
+              timerInterval = null;
+            }
+          }
+        });
+        
+        document.addEventListener('blockPause', function(e) {
+          if (e.detail.blockId === '${blockId}') {
             pauseTimer();
-          } else {
+          }
+        });
+        
+        document.addEventListener('blockResume', function(e) {
+          if (e.detail.blockId === '${blockId}') {
             resumeTimer();
           }
         });
         
-        window.addEventListener('blur', pauseTimer);
-        window.addEventListener('focus', resumeTimer);
-        
-        // Idle detection
+        // Mouse idle detection
         let lastActivity = Date.now();
         document.addEventListener('mousemove', function() {
           lastActivity = Date.now();
-          if (!isVisible && !timerCompleted) {
+          if (isPaused && isActive && !timerCompleted) {
             resumeTimer();
           }
         });
         
         setInterval(function() {
-          if (Date.now() - lastActivity > 3000 && !timerCompleted && isVisible) {
+          if (Date.now() - lastActivity > 3000 && isActive && !isPaused && !timerCompleted) {
             pauseTimer();
           }
         }, 1000);
         
-        const interval = setInterval(() => {
-          if (!isVisible || document.hidden || !document.hasFocus()) {
-            return;
-          }
-          
-          seconds--;
-          timerEl.textContent = seconds;
-          
-          const progress = ((totalSeconds - seconds) / totalSeconds) * 100;
-          progressEl.style.width = progress + '%';
-          
-          if (seconds <= 0) {
-            clearInterval(interval);
-            timerCompleted = true;
-            statusEl.textContent = '✅ Loading completed!';
-            continueBtn.style.display = 'inline-block';
-            timerEl.textContent = '✓';
-            timerEl.style.color = '#28a745';
-            warningEl.style.display = 'none';
-          }
-        }, 1000);
-        
-        window.proceedNext_${blockId} = function() {
+        // Complete function
+        window.completeTimer_${blockId} = function() {
           if (timerCompleted) {
-            window.location.href = '${nextUrl}';
+            window.BlockEventSystem.completeBlock('${blockId}', 'timer_completed');
           }
         };
+        
+        // Start if enabled
+        if (${enabled}) {
+          startTimer();
+        }
       })();
     </script>
   `;
 }
 
-function generateModularClickGameHTML(block, nextUrl) {
+function generateModularClickGameHTML(block, config = {}) {
   const targetClicks = block.target_clicks || 5;
   const blockId = block.id;
+  const enabled = config.enabled !== false;
   
   return `
-    <style>
-      .click-widget-${blockId} {
-        background: #ffffff;
-        border: 2px solid #007bff;
-        border-radius: 8px;
-        padding: 20px;
-        text-align: center;
-        font-family: Arial, sans-serif;
-        max-width: 450px;
-        margin: 0 auto;
-      }
-      .click-button-${blockId} {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 15px 30px;
-        font-size: 18px;
-        border-radius: 5px;
-        cursor: pointer;
-        margin: 15px;
-        transition: all 0.2s;
-      }
-      .click-button-${blockId}:hover {
-        background: #0056b3;
-        transform: scale(1.05);
-      }
-      .click-button-${blockId}:active {
-        background: #004085;
-        transform: scale(0.95);
-      }
-      .click-progress-${blockId} {
-        font-size: 16px;
-        margin: 15px 0;
-        color: #495057;
-      }
-    </style>
-    
-    <div class="click-widget-${blockId}">
-      <h3>🎯 Click Challenge</h3>
-      <div class="click-progress-${blockId}" id="progress-${blockId}">
-        0/${targetClicks} clicks
+    <div id="${blockId}-container" class="block-container">
+      <style>
+        .click-widget-${blockId} {
+          background: #ffffff;
+          border: 2px solid #007bff;
+          border-radius: 8px;
+          padding: 20px;
+          text-align: center;
+          font-family: Arial, sans-serif;
+          max-width: 450px;
+          margin: 0 auto;
+        }
+        .click-button-${blockId} {
+          background: #007bff;
+          color: white;
+          border: none;
+          padding: 15px 30px;
+          font-size: 18px;
+          border-radius: 5px;
+          cursor: pointer;
+          margin: 15px;
+          transition: all 0.2s;
+        }
+        .click-button-${blockId}:hover {
+          background: #0056b3;
+          transform: scale(1.05);
+        }
+        .click-button-${blockId}:active {
+          background: #004085;
+          transform: scale(0.95);
+        }
+        .click-progress-${blockId} {
+          font-size: 16px;
+          margin: 15px 0;
+          color: #495057;
+        }
+      </style>
+      
+      <div class="click-widget-${blockId}">
+        <h3>🎯 Click Challenge</h3>
+        <div class="click-progress-${blockId}" id="progress-${blockId}">
+          0/${targetClicks} clicks
+        </div>
+        <button class="click-button-${blockId}" id="clickBtn-${blockId}" onclick="handleClick_${blockId}()">
+          Click Here
+        </button>
       </div>
-      <button class="click-button-${blockId}" id="clickBtn-${blockId}" onclick="handleClick_${blockId}()">
-        Click Here
-      </button>
     </div>
     
     <script>
       (function() {
         let clicks = 0;
+        let isActive = ${enabled};
+        let clickCompleted = false;
         const target = ${targetClicks};
         
+        const progressEl = document.getElementById('progress-${blockId}');
+        const btnEl = document.getElementById('clickBtn-${blockId}');
+        
+        // Registra blocco nel sistema eventi
+        window.BlockEventSystem.registerBlock('${blockId}', {
+          enabled: ${enabled},
+          nextBlockId: '${config.nextBlockId || ''}',
+          nextUrl: '${config.nextUrl || ''}'
+        });
+        
+        // Event listeners
+        document.addEventListener('blockEnabled', function(e) {
+          if (e.detail.blockId === '${blockId}') {
+            isActive = true;
+          }
+        });
+        
+        document.addEventListener('blockDisabled', function(e) {
+          if (e.detail.blockId === '${blockId}') {
+            isActive = false;
+          }
+        });
+        
         window.handleClick_${blockId} = function() {
-          clicks++;
-          const progressEl = document.getElementById('progress-${blockId}');
-          const btnEl = document.getElementById('clickBtn-${blockId}');
+          if (!isActive || clickCompleted) return;
           
+          clicks++;
           progressEl.textContent = clicks + '/' + target + ' clicks';
           
           if (clicks >= target) {
+            clickCompleted = true;
             btnEl.textContent = 'Continue →';
             btnEl.style.background = '#28a745';
             btnEl.onclick = function() {
-              window.location.href = '${nextUrl}';
+              window.BlockEventSystem.completeBlock('${blockId}', 'click_completed');
             };
             progressEl.textContent = '✅ Completed! Click Continue.';
           }
@@ -701,10 +760,79 @@ function generateModularCompositeHTML(block, nextUrl) {
   `;
 }
 
+// Genera pagina con blocchi atomici in sequenza
+function generateAtomicSequenceHTML(blocks, nextUrl) {
+  const { BlockEventSystem } = require('./block-event-system');
+  
+  let blocksHTML = '';
+  let sequenceConfig = [];
+  
+  // Genera HTML per ogni blocco
+  blocks.forEach((blockConfig, index) => {
+    const block = modularBlocks[blockConfig.id];
+    if (!block) return;
+    
+    // Risolvi durata dinamica
+    const resolvedBlock = { ...block, id: blockConfig.id };
+    if (typeof block.duration === 'function') {
+      resolvedBlock.duration = block.duration();
+    }
+    
+    // Configura sequenza
+    const config = {
+      enabled: index === 0, // Solo il primo è abilitato
+      nextBlockId: index < blocks.length - 1 ? blocks[index + 1].id : null,
+      nextUrl: index === blocks.length - 1 ? nextUrl : null
+    };
+    
+    sequenceConfig.push({ blockId: blockConfig.id, config });
+    
+    // Genera HTML del blocco
+    switch (block.template) {
+      case 'timer':
+        blocksHTML += generateModularTimerHTML(resolvedBlock, config);
+        break;
+      case 'click_game':
+        blocksHTML += generateModularClickGameHTML(resolvedBlock, config);
+        break;
+      case 'timer_punish':
+        blocksHTML += generateModularPunishTimerHTML(resolvedBlock, config);
+        break;
+    }
+  });
+  
+  return `
+    <!DOCTYPE html>
+    <html lang="it">
+    <head>
+      <meta charset="UTF-8">
+      <title>Loading...</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background: #f0f0f0;
+          margin: 0;
+          padding: 20px;
+        }
+        .block-container {
+          margin: 20px 0;
+          transition: opacity 0.3s;
+        }
+      </style>
+    </head>
+    <body>
+      ${BlockEventSystem.generateEventSystemJS()}
+      ${blocksHTML}
+    </body>
+    </html>
+  `;
+}
+
 module.exports = { 
   modularBlocks, 
   generateModularTimerHTML, 
   generateModularClickGameHTML,
   generateModularPunishTimerHTML,
-  generateModularCompositeHTML
+  generateModularCompositeHTML,
+  generateAtomicSequenceHTML
 };
