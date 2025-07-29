@@ -18,8 +18,8 @@ function generateRandomSequence(count = 2, testOverride = null) {
     return testOverride;
   }
   
-  // TEMP: Test modular blocks
-  return ['timer_5s', 'click_simple'];
+  // TEMP: Test legacy + modular mix
+  return ['timer_punish_15s', 'click_simple'];
   
   /* Codice originale per dopo:
   const blockIds = Object.keys(allBlocks);
@@ -43,36 +43,59 @@ function generateBlockHTML(blockId, nextUrl, templateId = 'simple_center') {
   }
   
   let blockContent;
-  switch (block.template) {
-    case 'timer':
-      blockContent = generateTimerHTML(blockId, block.duration, nextUrl);
-      break;
-    case 'timer_punish':
-      blockContent = generatePunishTimerHTML(blockId, block.duration, nextUrl);
-      break;
-    case 'click_decoy':
-      blockContent = generateClickDecoyHTML(blockId, block.target_clicks, nextUrl);
-      break;
-    case 'click_drain':
-      blockContent = generateClickDrainHTML(blockId, block.target_clicks, block.drain_speed, nextUrl);
-      break;
-    case 'click_protected':
-      blockContent = generateClickProtectedHTML(blockId, block.timer_duration, block.target_clicks, nextUrl);
-      break;
-    default:
-      blockContent = `<h1>Template not implemented: ${block.template}</h1>`;
+  // Check if it's a modular block (from modularBlocks)
+  if (modularBlocks[blockId]) {
+    // Use modular system
+    const modularBlock = { ...block, id: blockId };
+    switch (block.template) {
+      case 'timer':
+        blockContent = generateModularTimerHTML(modularBlock, null);
+        break;
+      case 'click_game':
+        blockContent = generateModularClickGameHTML(modularBlock, null);
+        break;
+      default:
+        blockContent = `<h1>Modular template not implemented: ${block.template}</h1>`;
+    }
+  } else {
+    // Use legacy system
+    switch (block.template) {
+      case 'timer':
+        blockContent = generateTimerHTML(blockId, block.duration, nextUrl);
+        break;
+      case 'timer_punish':
+        blockContent = generatePunishTimerHTML(blockId, block.duration, nextUrl);
+        break;
+      case 'click_decoy':
+        blockContent = generateClickDecoyHTML(blockId, block.target_clicks, nextUrl);
+        break;
+      case 'click_drain':
+        blockContent = generateClickDrainHTML(blockId, block.target_clicks, block.drain_speed, nextUrl);
+        break;
+      case 'click_protected':
+        blockContent = generateClickProtectedHTML(blockId, block.timer_duration, block.target_clicks, nextUrl);
+        break;
+      default:
+        blockContent = `<h1>Legacy template not implemented: ${block.template}</h1>`;
+    }
   }
   
-  // Estrai CSS dal head
-  const styleMatch = blockContent.match(/<style[^>]*>(.*?)<\/style>/s);
-  const styles = styleMatch ? styleMatch[0] : '';
+  // Handle different block content formats
+  let widgetWithStyles;
   
-  // Estrai contenuto body
-  const bodyMatch = blockContent.match(/<body[^>]*>(.*?)<\/body>/s);
-  const bodyContent = bodyMatch ? bodyMatch[1] : blockContent;
-  
-  // Combina stili + contenuto
-  const widgetWithStyles = styles + bodyContent;
+  if (modularBlocks[blockId]) {
+    // Modular blocks are already complete widgets
+    widgetWithStyles = blockContent;
+  } else {
+    // Legacy blocks need CSS extraction
+    const styleMatch = blockContent.match(/<style[^>]*>(.*?)<\/style>/s);
+    const styles = styleMatch ? styleMatch[0] : '';
+    
+    const bodyMatch = blockContent.match(/<body[^>]*>(.*?)<\/body>/s);
+    const bodyContent = bodyMatch ? bodyMatch[1] : blockContent;
+    
+    widgetWithStyles = styles + bodyContent;
+  }
   
   return renderTemplate(templateId, widgetWithStyles);
 }
