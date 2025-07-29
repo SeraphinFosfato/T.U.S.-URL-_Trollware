@@ -19,10 +19,17 @@ router.get('/v/:shortId', (req, res) => {
 function handleVictimStep(req, res, currentStep) {
   const { shortId } = req.params;
   
-  const urlData = db.getUrl(shortId);
+  let urlData = db.getUrl(shortId);
   if (!urlData) {
     console.log(`DEBUG: URL not found for shortId: ${shortId}`);
-    console.log('Available URLs:', Object.keys(db.urls || {}));
+    console.log('Available URLs:', Array.from(db.urls.keys()));
+    
+    // Fallback: se il shortId sembra essere un numero, potrebbe essere un parsing error
+    if (/^\d+$/.test(shortId)) {
+      console.log('DEBUG: Numeric shortId detected, possible parsing error');
+      return res.status(404).send('<h1>Session expired - please create a new link</h1>');
+    }
+    
     return res.status(404).send('<h1>Link not found</h1>');
   }
   

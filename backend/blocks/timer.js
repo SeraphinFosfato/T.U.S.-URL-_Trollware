@@ -350,14 +350,10 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
         function resetTimer() {
           if (!timerCompleted) {
             showNotification();
-            // Reset timer invece di reload
-            seconds = originalDuration;
-            timerEl.textContent = seconds;
-            progressEl.style.width = '0%';
-            statusEl.textContent = 'Timer reset due to inactivity';
+            // Reload page after notification
             setTimeout(() => {
-              statusEl.textContent = 'Please wait for completion';
-            }, 2000);
+              window.location.reload();
+            }, 1000);
           }
         }
         
