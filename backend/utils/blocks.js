@@ -8,6 +8,10 @@ const allBlocks = {
 
 // Genera sequenza casuale di blocchi
 function generateRandomSequence(count = 2) {
+  // TEMP: Forza timer punitivi per test
+  return ['timer_punish_15s', 'timer_punish_30s'];
+  
+  /* Codice originale per dopo:
   const blockIds = Object.keys(allBlocks);
   const sequence = [];
   
@@ -17,6 +21,7 @@ function generateRandomSequence(count = 2) {
   }
   
   return sequence;
+  */
 }
 
 // Genera HTML per un blocco specifico
