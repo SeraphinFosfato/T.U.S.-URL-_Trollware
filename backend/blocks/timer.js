@@ -235,92 +235,78 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
     <html lang="it">
     <head>
       <meta charset="UTF-8">
-      <title>⚠️ ATTENZIONE RICHIESTA</title>
+      <title>Caricamento...</title>
       <style>
         body { 
-          font-family: 'Courier New', monospace; 
-          text-align: center; 
+          font-family: 'MS Sans Serif', sans-serif; 
+          background: #c0c0c0;
+          margin: 0;
           padding: 20px;
-          background: linear-gradient(45deg, #ff0000, #ff6600);
-          color: white;
-          animation: flash 2s infinite;
         }
-        @keyframes flash {
-          0%, 50% { background: linear-gradient(45deg, #ff0000, #ff6600); }
-          25%, 75% { background: linear-gradient(45deg, #cc0000, #cc4400); }
+        .loading-widget {
+          background: #c0c0c0;
+          border: 2px outset #c0c0c0;
+          padding: 15px;
+          width: 300px;
+          margin: 50px auto;
+          font-size: 11px;
         }
-        .punish-container {
-          background: rgba(0,0,0,0.8);
-          padding: 30px;
-          border: 3px solid #ff0000;
-          border-radius: 0;
-          max-width: 500px;
-          margin: 0 auto;
-          box-shadow: 0 0 20px #ff0000;
-        }
-        .timer { 
-          font-size: 64px; 
-          color: #ff0000; 
-          font-weight: bold;
-          margin: 20px 0;
-          text-shadow: 2px 2px 4px #000;
-          animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
-        .warning-text {
-          font-size: 18px;
-          color: #ffff00;
-          font-weight: bold;
-          margin: 15px 0;
-          text-transform: uppercase;
-        }
-        .continue-btn {
-          padding: 20px 40px;
-          font-size: 20px;
-          background: #666;
-          color: #999;
-          border: 3px solid #444;
-          cursor: not-allowed;
-          margin-top: 20px;
-          text-transform: uppercase;
-          font-weight: bold;
-        }
-        .continue-btn.enabled {
-          background: #ff0000;
-          color: white;
-          border: 3px solid #ffffff;
-          cursor: pointer;
+        .timer-display { 
+          font-family: 'Courier New', monospace;
+          font-size: 24px; 
+          color: #000080;
+          font-weight: normal;
+          margin: 10px 0;
+          text-align: center;
+          background: #ffffff;
+          border: 1px inset #c0c0c0;
+          padding: 5px;
         }
         .progress-bar {
           width: 100%;
-          height: 30px;
-          background: #333;
-          border: 2px solid #ff0000;
-          margin: 20px 0;
-          position: relative;
+          height: 20px;
+          background: #ffffff;
+          border: 1px inset #c0c0c0;
+          margin: 10px 0;
         }
         .progress-fill {
           height: 100%;
-          background: linear-gradient(90deg, #ff0000 0%, #ff6600 100%);
+          background: #000080;
           width: 0%;
-          transition: none;
+        }
+        .status-text {
+          color: #000000;
+          font-size: 11px;
+          margin: 5px 0;
+        }
+        .continue-btn {
+          background: #c0c0c0;
+          border: 1px outset #c0c0c0;
+          padding: 2px 8px;
+          font-size: 11px;
+          color: #808080;
+          cursor: default;
+          margin-top: 10px;
+        }
+        .continue-btn.enabled {
+          color: #000000;
+          cursor: pointer;
+        }
+        .continue-btn.enabled:active {
+          border: 1px inset #c0c0c0;
         }
       </style>
     </head>
     <body>
-      <div class="punish-container">
-        <h1>⚠️ TIMER PUNITIVO ⚠️</h1>
-        <div class="warning-text">ATTENZIONE COSTANTE RICHIESTA</div>
-        <div class="timer" id="timer">${duration}</div>
+      <div class="loading-widget">
+        <div class="status-text">Caricamento in corso...</div>
+        <div class="timer-display" id="timer">${duration}</div>
         <div class="progress-bar">
           <div class="progress-fill" id="progress"></div>
         </div>
-        <p id="status">Attendere...</p>
+        <div class="status-text" id="status">Attendere il completamento</div>
         <button class="continue-btn" id="continueBtn" onclick="proceedNext()" disabled>
-          PROCEDI →
+          Continua
         </button>
       </div>
       
@@ -340,38 +326,14 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
           Notification.requestPermission();
         }
         
-        function showNotification() {
-          if ('Notification' in window) {
-            if (Notification.permission === 'granted') {
-              new Notification('⚠️ TIMER RESETTATO', {
-                body: 'Il timer è stato resettato per mancanza di attenzione!',
-                icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚠️</text></svg>',
-                requireInteraction: false
-              });
-            } else if (Notification.permission === 'default') {
-              Notification.requestPermission().then(function(permission) {
-                if (permission === 'granted') {
-                  showNotification();
-                }
-              });
-            }
-          }
+        function reloadPage() {
+          // Invece di reset, ricarica la pagina (più fastidioso)
+          window.location.reload();
         }
         
         function resetTimer() {
           if (!timerCompleted) {
-            seconds = originalDuration;
-            statusEl.textContent = '🚨 TIMER RESETTATO!';
-            statusEl.style.color = '#ff0000';
-            progressEl.style.width = '0%';
-            showNotification();
-            
-            // Flash effect
-            document.body.style.animation = 'flash 0.5s 3';
-            setTimeout(() => {
-              statusEl.textContent = 'Attendere...';
-              statusEl.style.color = 'white';
-            }, 2000);
+            reloadPage();
           }
         }
         
@@ -434,15 +396,11 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
           if (seconds <= 0) {
             clearInterval(interval);
             timerCompleted = true;
-            statusEl.textContent = '✅ COMPLETATO!';
-            statusEl.style.color = '#00ff00';
+            statusEl.textContent = 'Completato';
             continueBtn.disabled = false;
             continueBtn.className = 'continue-btn enabled';
-            timerEl.textContent = '✓';
-            timerEl.style.color = '#00ff00';
+            timerEl.textContent = 'OK';
             progressEl.style.width = '100%';
-            document.body.style.animation = 'none';
-            document.body.style.background = '#004400';
           }
         }, 1000);
         
@@ -465,10 +423,7 @@ function generatePunishTimerHTML(blockId, duration, nextUrl) {
           }
         });
         
-        // Request notification permission
-        if ('Notification' in window && Notification.permission === 'default') {
-          Notification.requestPermission();
-        }
+        // Nessuna notifica iniziale
       </script>
     </body>
     </html>
