@@ -83,15 +83,31 @@ async function handleVictimStep(req, res, currentStep) {
   let pathData = null;
   const pathCookie = req.cookies.troll_path;
   
+  logger.info('VICTIM', 'Looking for existing path', {
+    hasCookie: !!pathCookie,
+    currentStep,
+    fingerprint
+  });
+  
   if (pathCookie && clientFingerprint.validatePath(pathCookie)) {
     const cookieData = clientFingerprint.decryptPath(pathCookie);
     if (cookieData && cookieData.shortId === shortId) {
       pathData = await db.getClientPath(cookieData.pathHash);
+      logger.info('VICTIM', 'Path found via cookie', {
+        pathHash: cookieData.pathHash,
+        pathExists: !!pathData
+      });
     }
   }
   
   // Fallback: cerca per shortId + fingerprint
   if (!pathData) {
+    logger.warn('VICTIM', 'No valid path found, session expired', {
+      shortId,
+      currentStep,
+      fingerprint,
+      hasCookie: !!pathCookie
+    });
     return res.status(400).send('<h1>Session expired - please restart</h1>');
   }
   
@@ -102,6 +118,11 @@ async function handleVictimStep(req, res, currentStep) {
   
   // Se completato tutti i step
   if (currentStep >= pathData.templates.length) {
+    logger.info('VICTIM', 'All steps completed, redirecting to final URL', {
+      shortId,
+      pathHash: pathData.pathHash,
+      totalSteps: pathData.templates.length
+    });
     await db.completeClientPath(pathData.pathHash);
     await db.updateStats(shortId, 'completed');
     return res.redirect(urlData.original_url);
@@ -138,13 +159,12 @@ function generateAdvancedStepHTML(template, nextUrl, sessionJS = '') {
   
   let html;
   
+  // SEMPRE usa template minimal per consistenza grafica
   if (template.type === 'composite') {
     templateDebugger.debugCompositeTemplate(template);
     html = generateCompositeHTML(template, nextUrl, sessionJS);
-  } else if (useMinimal) {
-    html = generateMinimalHTML(template, nextUrl, sessionJS);
   } else {
-    html = generateNormalHTML(template, nextUrl, sessionJS);
+    html = generateMinimalHTML(template, nextUrl, sessionJS);
   }
   
   templateDebugger.debugHTMLGeneration(template, html.length, nextUrl);
@@ -204,7 +224,7 @@ function generateMinimalHTML(template, nextUrl, sessionJS = '') {
     case 'click':
       const isDrain = template.subtype === 'click_drain';
       const drainLogic = isDrain ? 'if(Date.now()-lastClick>2000&&n>0){n--;p.textContent=n+"/'+template.target+'"}' : '';
-      return `<html><body><h1>Click ${template.target} times</h1><div id="p">0/${template.target}</div><button onclick="c()">Click</button>${sessionJS}<script>let n=0,lastClick=Date.now(),p=document.getElementById('p');function c(){n++;lastClick=Date.now();p.textContent=n+'/${template.target}';if(n>=${template.target})location.href='${nextUrl}'}${isDrain ? ';setInterval(()=>{' + drainLogic + '},2000)' : ''}</script></body></html>`;
+      return `<html><body><h1>Click ${template.target} times</h1><div id="p">0/${template.target}</div><button onclick="c()">Click</button>${sessionJS}<script>let n=0,lastClick=Date.now(),p=document.getElementById('p');function c(){if(n>=${template.target})return;n++;lastClick=Date.now();p.textContent=n+'/${template.target}';if(n>=${template.target})setTimeout(()=>location.href='${nextUrl}',500)}${isDrain ? ';setInterval(()=>{' + drainLogic + '},2000)' : ''}</script></body></html>`;
     
     default:
       return `<html><body><script>location.href='${nextUrl}'</script></body></html>`;
@@ -373,6 +393,8 @@ function generateNormalHTML(template, nextUrl, sessionJS = '') {
             console.log('[CLICK_DEBUG] Click challenge started, target:', target);
             
             function clickHandler() {
+              if (clicks >= target) return; // Stop accepting clicks
+              
               clicks++;
               counterElement.textContent = clicks + ' / ' + target;
               
@@ -383,7 +405,7 @@ function generateNormalHTML(template, nextUrl, sessionJS = '') {
               
               if (clicks >= target) {
                 console.log('[CLICK_DEBUG] Challenge completed, redirecting');
-                location.href = '${nextUrl}';
+                setTimeout(() => location.href = '${nextUrl}', 500);
               }
             }
           </script>
