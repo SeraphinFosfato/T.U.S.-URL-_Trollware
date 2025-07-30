@@ -16,24 +16,12 @@ router.post('/:shortId/regenerate', async (req, res) => {
   
   const fingerprint = clientFingerprint.generateFingerprint(req);
   
-  // Genera nuovo percorso con penalità (step extra)
-  const penaltySteps = Math.min(urlData.total_steps + 1, 5); // Max 5 step
-  const pathData = clientFingerprint.generateClientPath(
-    shortId, 
-    fingerprint,
-    penaltySteps, // Step extra come punizione
-    urlData.expiry_days
-  );
-  
-  // Salva nuovo percorso
-  await db.saveClientPath(pathData);
-  
-  console.log(`[ANTI-TAMPER] Regenerated path for ${fingerprint} with ${penaltySteps} steps (penalty: +${penaltySteps - urlData.total_steps})`);
+  // DISABILITA ANTI-TAMPER per ora - causa loop infinito
+  console.log(`[ANTI-TAMPER] Disabled to prevent infinite loop for ${fingerprint}`);
   
   res.json({ 
-    status: 'regenerated',
-    penalty_steps: penaltySteps - urlData.total_steps,
-    message: 'Path regenerated due to tampering detection'
+    status: 'disabled',
+    message: 'Anti-tamper temporarily disabled'
   });
 });
 

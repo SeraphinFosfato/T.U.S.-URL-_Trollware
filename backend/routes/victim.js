@@ -135,10 +135,18 @@ function generateAdvancedStepHTML(template, nextUrl, sessionJS = '') {
 
 // Genera HTML per template compositi
 function generateCompositeHTML(template, nextUrl, sessionJS = '') {
-  // Per ora, usa il primo componente della sequenza
-  // TODO: Implementare rendering simultaneo per template misti
-  const firstComponent = template.sequence[0];
-  return generateAdvancedStepHTML(firstComponent, nextUrl, sessionJS);
+  // FALLBACK: Genera timer semplice per evitare loop
+  const logger = require('../utils/debug-logger');
+  logger.warn('TEMPLATE', 'Composite template fallback to simple timer', { subtype: template.subtype });
+  
+  const duration = 60; // Default 60s
+  return `<html><body><h1>Loading...</h1><div id="t">${duration}</div>${sessionJS}<script>
+    let s=${duration},t=document.getElementById('t'),paused=false;
+    const timer=setInterval(()=>{if(!paused){s--;t.textContent=s;if(s<=0){clearInterval(timer);location.href='${nextUrl}'}}},1000);
+    document.addEventListener('visibilitychange',()=>{paused=document.hidden});
+    window.addEventListener('blur',()=>{paused=true});
+    window.addEventListener('focus',()=>{paused=false});
+  </script></body></html>`;
 }
 
 // Genera HTML minimal per bandwidth ridotta

@@ -175,15 +175,9 @@ class ClientFingerprintManager {
             return null;
           },
           
-          // Rileva modifica cookie (anti-tamper basic)
+          // Rileva modifica cookie (anti-tamper basic) - DISABILITATO
           detectTamper: function() {
-            const stored = this.load();
-            if (stored && stored !== this.data) {
-              // Cookie modificato - trigger rigenerazione
-              fetch('/v/${pathData.shortId}/regenerate', { method: 'POST' })
-                .then(() => location.reload());
-              return true;
-            }
+            // Disabilitato per evitare loop infinito
             return false;
           },
           
