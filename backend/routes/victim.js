@@ -58,8 +58,8 @@ async function handleVictimStep(req, res, currentStep) {
     // Salva percorso in DB
     await db.saveClientPath(pathData);
     
-    const debugger = require('../utils/template-debugger');
-    debugger.debugSession(pathData, null);
+    const templateDebugger = require('../utils/template-debugger');
+    templateDebugger.debugSession(pathData, null);
     
     const pathJS = clientFingerprint.generatePathCookieJS(pathData);
     const currentTemplate = pathData.templates[0];
@@ -124,7 +124,7 @@ async function handleVictimStep(req, res, currentStep) {
 // Genera HTML avanzato per template
 function generateAdvancedStepHTML(template, nextUrl, sessionJS = '') {
   const logger = require('../utils/debug-logger');
-  const debugger = require('../utils/template-debugger');
+  const templateDebugger = require('../utils/template-debugger');
   const useMinimal = freeTier.shouldUseMinimalMode();
   
   logger.info('TEMPLATE', 'Generating HTML', { 
@@ -139,7 +139,7 @@ function generateAdvancedStepHTML(template, nextUrl, sessionJS = '') {
   let html;
   
   if (template.type === 'composite') {
-    debugger.debugCompositeTemplate(template);
+    templateDebugger.debugCompositeTemplate(template);
     html = generateCompositeHTML(template, nextUrl, sessionJS);
   } else if (useMinimal) {
     html = generateMinimalHTML(template, nextUrl, sessionJS);
@@ -147,14 +147,14 @@ function generateAdvancedStepHTML(template, nextUrl, sessionJS = '') {
     html = generateNormalHTML(template, nextUrl, sessionJS);
   }
   
-  debugger.debugHTMLGeneration(template, html.length, nextUrl);
+  templateDebugger.debugHTMLGeneration(template, html.length, nextUrl);
   return html;
 }
 
 // Genera HTML per template compositi
 function generateCompositeHTML(template, nextUrl, sessionJS = '') {
   const logger = require('../utils/debug-logger');
-  const debugger = require('../utils/template-debugger');
+  const templateDebugger = require('../utils/template-debugger');
   
   // Per ora, converti composite in timer singolo con durata appropriata
   logger.info('COMPOSITE', 'Converting composite to single timer', { 
@@ -170,7 +170,7 @@ function generateCompositeHTML(template, nextUrl, sessionJS = '') {
     duration: duration
   };
   
-  debugger.debugTimerControls(timerTemplate, 'composite_converted');
+  templateDebugger.debugTimerControls(timerTemplate, 'composite_converted');
   
   return generateNormalHTML(timerTemplate, nextUrl, sessionJS);
 }
@@ -213,14 +213,14 @@ function generateMinimalHTML(template, nextUrl, sessionJS = '') {
 
 // Genera HTML normale con styling completo
 function generateNormalHTML(template, nextUrl, sessionJS = '') {
-  const debugger = require('../utils/template-debugger');
+  const templateDebugger = require('../utils/template-debugger');
   
   switch(template.type) {
     case 'timer':
       const duration = template.duration;
       const isPunish = template.subtype === 'timer_punish';
       
-      debugger.debugTimerControls(template, 'normal_with_styling');
+      templateDebugger.debugTimerControls(template, 'normal_with_styling');
       
       if (isPunish) {
         return `
