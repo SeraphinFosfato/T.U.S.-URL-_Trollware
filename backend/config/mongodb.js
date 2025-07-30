@@ -13,9 +13,10 @@ class MongoDB {
     
     try {
       const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/trollshortener';
-      logger.info('MONGODB', 'Attempting connection', { uri: uri.replace(/\/\/.*@/, '//***@') });
+      const cleanUri = uri.trim(); // Remove whitespace/newlines
+      logger.info('MONGODB', 'Attempting connection', { uri: cleanUri.replace(/\/\/.*@/, '//***@') });
       
-      this.client = new MongoClient(uri);
+      this.client = new MongoClient(cleanUri);
       await this.client.connect();
       this.db = this.client.db('trollshortener');
       this.urls = this.db.collection('urls');
