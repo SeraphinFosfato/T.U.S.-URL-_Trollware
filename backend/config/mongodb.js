@@ -19,7 +19,12 @@ class MongoDB {
       
       // Create indexes
       await this.urls.createIndex({ shortId: 1 }, { unique: true });
-      await this.urls.createIndex({ created_at: 1 }, { expireAfterSeconds: 86400 }); // 24h TTL
+      await this.urls.createIndex({ expires_at: 1 }, { expireAfterSeconds: 0 }); // Custom TTL
+      
+      // Client paths indexes
+      await this.sessions.createIndex({ pathHash: 1 }, { unique: true });
+      await this.sessions.createIndex({ expires_at: 1 }, { expireAfterSeconds: 0 }); // TTL per paths
+      await this.sessions.createIndex({ shortId: 1, fingerprint: 1 }); // Query optimization
       
       console.log('DEBUG: Connected to MongoDB');
       return true;
@@ -34,13 +39,15 @@ class MongoDB {
       const urlData = {
         shortId,
         original_url: data.original_url,
-        blocks_sequence: data.blocks_sequence || ['timer_5s'],
+        total_steps: data.total_steps || 2,
+        expiry_days: data.expiry_days || 7,
         created_at: new Date(),
+        expires_at: new Date(Date.now() + (data.expiry_days || 7) * 24 * 60 * 60 * 1000),
         stats: { visits: 0, completed: 0 }
       };
       
       await this.urls.insertOne(urlData);
-      console.log(`DEBUG: Saved URL ${shortId} to MongoDB`);
+      console.log(`DEBUG: Saved URL ${shortId} to MongoDB (${data.total_steps} steps, ${data.expiry_days}d TTL)`);
       return urlData;
     } catch (error) {
       console.error(`DEBUG: Failed to save URL ${shortId}:`, error.message);
@@ -70,24 +77,54 @@ class MongoDB {
     }
   }
 
-  async saveSession(fingerprint, sessionData) {
+  async saveClientPath(pathData) {
     try {
       await this.sessions.replaceOne(
-        { fingerprint },
-        { fingerprint, ...sessionData, updated_at: new Date() },
+        { pathHash: pathData.pathHash },
+        { 
+          pathHash: pathData.pathHash,
+          shortId: pathData.shortId,
+          fingerprint: pathData.fingerprint,
+          currentStep: pathData.currentStep,
+          templates: pathData.templates,
+          completed: pathData.completed,
+          created_at: new Date(pathData.createdAt),
+          expires_at: new Date(pathData.expiresAt)
+        },
         { upsert: true }
       );
+      console.log(`DEBUG: Saved client path ${pathData.pathHash}`);
     } catch (error) {
-      console.error(`DEBUG: Failed to save session:`, error.message);
+      console.error(`DEBUG: Failed to save client path:`, error.message);
     }
   }
 
-  async getSession(fingerprint) {
+  async getClientPath(pathHash) {
     try {
-      return await this.sessions.findOne({ fingerprint });
+      return await this.sessions.findOne({ pathHash });
     } catch (error) {
-      console.error(`DEBUG: Failed to get session:`, error.message);
+      console.error(`DEBUG: Failed to get client path:`, error.message);
       return null;
+    }
+  }
+
+  async updateClientStep(pathHash, step) {
+    try {
+      await this.sessions.updateOne(
+        { pathHash },
+        { $set: { currentStep: step } }
+      );
+    } catch (error) {
+      console.error(`DEBUG: Failed to update client step:`, error.message);
+    }
+  }
+
+  async completeClientPath(pathHash) {
+    try {
+      await this.sessions.deleteOne({ pathHash });
+      console.log(`DEBUG: Completed and deleted path ${pathHash}`);
+    } catch (error) {
+      console.error(`DEBUG: Failed to complete client path:`, error.message);
     }
   }
 }

@@ -28,14 +28,24 @@ class DatabaseWrapper {
     return await mongodb.updateStats(shortId, field);
   }
 
-  async saveSession(fingerprint, sessionData) {
+  async saveClientPath(pathData) {
     if (!dbReady) return;
-    return await mongodb.saveSession(fingerprint, sessionData);
+    return await mongodb.saveClientPath(pathData);
   }
 
-  async getSession(fingerprint) {
+  async getClientPath(pathHash) {
     if (!dbReady) return null;
-    return await mongodb.getSession(fingerprint);
+    return await mongodb.getClientPath(pathHash);
+  }
+
+  async updateClientStep(pathHash, step) {
+    if (!dbReady) return;
+    return await mongodb.updateClientStep(pathHash, step);
+  }
+
+  async completeClientPath(pathHash) {
+    if (!dbReady) return;
+    return await mongodb.completeClientPath(pathHash);
   }
 }
 

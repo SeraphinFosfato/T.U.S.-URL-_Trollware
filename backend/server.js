@@ -10,6 +10,11 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 // Routes
 const shortenerRoutes = require('./routes/shortener');
 const victimRoutes = require('./routes/victim');
+const adminRoutes = require('./routes/admin');
+const regenerateRoutes = require('./routes/regenerate');
+
+// Middleware per cookie parsing
+app.use(require('cookie-parser')());
 
 // Landing page
 app.get('/', (req, res) => {
@@ -17,6 +22,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api', shortenerRoutes);
+app.use('/admin', adminRoutes); // Admin endpoints
+app.use('/v', regenerateRoutes); // Anti-tamper regeneration
 app.use('/v', victimRoutes); // Route per vittime con prefisso /v
 app.use('/', shortenerRoutes); // Per i redirect /:shortId
 

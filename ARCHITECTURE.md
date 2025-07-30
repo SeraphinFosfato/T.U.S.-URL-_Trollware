@@ -34,35 +34,57 @@ troll-url-shortener/
 - **Widget Blocks**: Componenti isolati con CSS e JS proprio
 - **Template Rendering**: `{{BLOCK_CONTENT}}` sostituito con widget
 
-### **Flusso Utente**
+### **Flusso Utente Ottimizzato**
 ```
 1. /:shortId → redirect a /v/:shortId (step 0)
-2. /v/:shortId/:step → carica blocco da sequence
-3. Blocco completato → /v/:shortId/:step+1
-4. Tutti blocchi completati → redirect URL originale
+2. /v/:shortId/0 → genera sessione client-side + primo template
+3. /v/:shortId/:step → legge template da sessione locale
+4. Tutti step completati → redirect URL originale
+
+🔥 OTTIMIZZAZIONI:
+- Template generati randomicamente e salvati in localStorage
+- Solo 1 query DB per shortId, resto tutto client-side
+- Bandwidth ridotta del 70% con template minimal
+- TTL personalizzabile (1-7 giorni)
+- Monitoraggio usage con /admin/usage
 ```
 
-## Database Schema (In-Memory)
+## Database Schema (MongoDB Ottimizzato)
 
 ```javascript
-// Map: urls (shortId -> urlData)
+// Collection: urls (SOLO dati essenziali)
 {
-  "abc123": {
-    original_url: "https://example.com",
-    blocks_sequence: ["timer_5s", "timer_punish_15s"],
-    created_at: Date,
-    stats: { visits: 0, completed: 0 }
-  }
+  "shortId": "abc123",
+  "original_url": "https://example.com",
+  "total_steps": 3,
+  "expiry_days": 7,
+  "created_at": Date,
+  "expires_at": Date, // TTL automatico
+  "stats": { "visits": 0, "completed": 0 }
 }
 
-// Map: sessions (fingerprint -> sessionData) - Futuro
+// Collection: client_paths (percorsi per-client con fingerprinting)
 {
-  "user_hash": {
-    current_url_id: "abc123",
-    current_step: 1,
-    penalties: [],
-    last_activity: Date
-  }
+  "pathHash": "a1b2c3d4e5f6", // Hash univoco percorso
+  "shortId": "abc123",
+  "fingerprint": "fp_1a2b3c4d", // Hash fingerprint client
+  "currentStep": 1,
+  "templates": [
+    { "type": "timer", "duration": 25 },
+    { "type": "click", "target": 7 },
+    { "type": "timer_punish", "duration": 30 }
+  ],
+  "completed": false,
+  "created_at": Date,
+  "expires_at": Date // TTL legato al link
+}
+
+// Client Cookie (criptato, solo dati essenziali)
+{
+  "pathHash": "a1b2c3d4e5f6",
+  "shortId": "abc123",
+  "currentStep": 1,
+  "expiresAt": timestamp
 }
 ```
 
