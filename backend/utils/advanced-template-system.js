@@ -31,11 +31,15 @@ class AdvancedTemplateSystem {
         stepSize: 5,
         estimatedTime: (duration) => duration,
         generateDuration: (targetTime, constraints) => {
-          const min = Math.max(this.templates.timer_simple.minDuration, constraints.minTime || 15);
-          const max = Math.min(this.templates.timer_simple.maxDuration, constraints.maxTime || 60);
-          const steps = Math.floor((max - min) / 5) + 1;
-          const randomStep = Math.floor(Math.random() * steps);
-          return min + (randomStep * 5);
+          // Usa targetTime come base, poi aggiusta ai vincoli
+          let duration = Math.round(targetTime / 5) * 5; // Round to 5s steps
+          duration = Math.max(duration, 15); // Min 15s
+          duration = Math.min(duration, 60); // Max 60s
+          
+          // Se targetTime è troppo grande per un singolo timer, usa max
+          if (targetTime > 60) duration = 60;
+          
+          return duration;
         }
       },
 
@@ -48,11 +52,14 @@ class AdvancedTemplateSystem {
         stepSize: 5,
         estimatedTime: (duration) => duration * 1.5, // Fattore punizione
         generateDuration: (targetTime, constraints) => {
-          const min = Math.max(20, constraints.minTime || 20);
-          const max = Math.min(45, constraints.maxTime || 45);
-          const steps = Math.floor((max - min) / 5) + 1;
-          const randomStep = Math.floor(Math.random() * steps);
-          return min + (randomStep * 5);
+          // Timer punitivo: usa targetTime ma con limiti più stretti
+          let duration = Math.round(targetTime / 5) * 5;
+          duration = Math.max(duration, 20); // Min 20s
+          duration = Math.min(duration, 45); // Max 45s
+          
+          if (targetTime > 45) duration = 45;
+          
+          return duration;
         }
       },
 
@@ -65,10 +72,10 @@ class AdvancedTemplateSystem {
         maxClicks: 15,
         estimatedTime: (clicks) => Math.ceil(clicks / 5), // 5 click/sec
         generateClicks: (targetTime, constraints) => {
-          const maxClicksForTime = Math.floor(targetTime * 5); // 5 click/sec
-          const min = Math.max(3, constraints.minClicks || 3);
-          const max = Math.min(15, Math.min(maxClicksForTime, constraints.maxClicks || 15));
-          return min + Math.floor(Math.random() * (max - min + 1));
+          // Calcola click basati su targetTime (5 click/sec stima cattiva)
+          let clicks = Math.max(Math.floor(targetTime * 5), 3); // Min 3 click
+          clicks = Math.min(clicks, 15); // Max 15 click
+          return clicks;
         }
       },
 
@@ -81,10 +88,10 @@ class AdvancedTemplateSystem {
         maxClicks: 30,
         estimatedTime: (clicks) => Math.ceil(clicks / 3),
         generateClicks: (targetTime, constraints) => {
-          const maxClicksForTime = Math.floor(targetTime * 3);
-          const min = Math.max(10, constraints.minClicks || 10);
-          const max = Math.min(30, Math.min(maxClicksForTime, constraints.maxClicks || 30));
-          return min + Math.floor(Math.random() * (max - min + 1));
+          // Click drain: più lento (3 click/sec)
+          let clicks = Math.max(Math.floor(targetTime * 3), 10); // Min 10 click
+          clicks = Math.min(clicks, 30); // Max 30 click
+          return clicks;
         }
       },
 
@@ -300,7 +307,7 @@ class AdvancedTemplateSystem {
         }
       } else if (template.type === 'composite') {
         // Compositi preferiti per step singoli con molto tempo
-        weight = remainingSteps === 1 && timePerStep > 60 ? 3 : 1;
+        weight = remainingSteps === 1 && timePerStep > 45 ? 3 : 1;
       }
       
       weights[templateId] = Math.max(weight, 0.1); // Min weight 0.1

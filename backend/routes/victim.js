@@ -146,8 +146,26 @@ function generateMinimalHTML(template, nextUrl, sessionJS = '') {
   switch(template.type) {
     case 'timer':
       const isPunish = template.subtype === 'timer_punish';
-      const resetOnBlur = isPunish ? 'if(document.hidden){s=' + template.duration + ';t.textContent=s;}' : '';
-      return `<html><body><h1>Loading...</h1><div id="t">${template.duration}</div>${sessionJS}<script>let s=${template.duration},t=document.getElementById('t');setInterval(()=>{${resetOnBlur}if(!document.hidden){s--;t.textContent=s;if(s<=0)location.href='${nextUrl}'}},1000)</script></body></html>`;
+      const duration = template.duration;
+      
+      if (isPunish) {
+        // Timer punitivo: reset completo su focus loss
+        return `<html><body><h1>Loading...</h1><div id="t">${duration}</div>${sessionJS}<script>
+          let s=${duration},t=document.getElementById('t'),paused=false;
+          const timer=setInterval(()=>{if(!paused&&!document.hidden){s--;t.textContent=s;if(s<=0){clearInterval(timer);location.href='${nextUrl}'}}},1000);
+          document.addEventListener('visibilitychange',()=>{if(document.hidden){s=${duration};t.textContent=s;paused=false}});
+          window.addEventListener('blur',()=>{s=${duration};t.textContent=s;paused=false});
+        </script></body></html>`;
+      } else {
+        // Timer normale: pausa su focus loss
+        return `<html><body><h1>Loading...</h1><div id="t">${duration}</div>${sessionJS}<script>
+          let s=${duration},t=document.getElementById('t'),paused=false;
+          const timer=setInterval(()=>{if(!paused){s--;t.textContent=s;if(s<=0){clearInterval(timer);location.href='${nextUrl}'}}},1000);
+          document.addEventListener('visibilitychange',()=>{paused=document.hidden});
+          window.addEventListener('blur',()=>{paused=true});
+          window.addEventListener('focus',()=>{paused=false});
+        </script></body></html>`;
+      }
     
     case 'click':
       const isDrain = template.subtype === 'click_drain';
