@@ -45,10 +45,10 @@ class MongoDB {
       const urlData = {
         shortId,
         original_url: data.original_url,
-        total_steps: data.total_steps || 2,
-        expiry_days: data.expiry_days || 7,
+        user_params: data.user_params || { timePreset: '1min', steps: null, expiryPreset: '1d' },
+        expiry_days: data.expiry_days || 1,
         created_at: new Date(),
-        expires_at: new Date(Date.now() + (data.expiry_days || 7) * 24 * 60 * 60 * 1000),
+        expires_at: new Date(Date.now() + (data.expiry_days || 1) * 24 * 60 * 60 * 1000),
         stats: { visits: 0, completed: 0 }
       };
       

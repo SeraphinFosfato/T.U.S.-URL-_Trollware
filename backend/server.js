@@ -13,6 +13,7 @@ const victimRoutes = require('./routes/victim');
 const adminRoutes = require('./routes/admin');
 const regenerateRoutes = require('./routes/regenerate');
 const debugRoutes = require('./routes/debug');
+const debugTemplatesRoutes = require('./routes/debug-templates');
 
 // Middleware per cookie parsing
 app.use(require('cookie-parser')());
@@ -25,6 +26,7 @@ app.get('/', (req, res) => {
 app.use('/api', shortenerRoutes);
 app.use('/admin', adminRoutes); // Admin endpoints
 app.use('/debug', debugRoutes); // Debug endpoints
+app.use('/debug', debugTemplatesRoutes); // Template debug endpoints
 app.use('/v', regenerateRoutes); // Anti-tamper regeneration
 app.use('/v', victimRoutes); // Route per vittime con prefisso /v
 app.use('/', shortenerRoutes); // Per i redirect /:shortId
