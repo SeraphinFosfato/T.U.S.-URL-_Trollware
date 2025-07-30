@@ -7,7 +7,7 @@ const freeTier = require('../config/free-tier-manager');
 
 // POST /api/shorten - Crea nuovo short URL
 router.post('/shorten', async (req, res) => {
-  const { url, steps = 2, days = 7 } = req.body;
+  const { url } = req.body;
   
   if (!url || !isValidUrl(url)) {
     return res.status(400).json({ error: 'Invalid URL' });
@@ -18,8 +18,9 @@ router.post('/shorten', async (req, res) => {
   }
 
   const shortId = generateShortId();
-  const totalSteps = Math.min(Math.max(parseInt(steps) || 2, 1), 5); // 1-5 steps
-  const expiryDays = Math.min(Math.max(parseInt(days) || 7, 1), 7); // 1-7 days
+  // RNG naturale per steps e giorni
+  const totalSteps = 2 + Math.floor(Math.random() * 3); // 2-4 steps random
+  const expiryDays = 3 + Math.floor(Math.random() * 5); // 3-7 giorni random
   
   freeTier.logDbOperation();
   const saved = await db.saveUrl(shortId, { 
@@ -35,9 +36,7 @@ router.post('/shorten', async (req, res) => {
   const response = { 
     shortId, 
     shortUrl: `${req.protocol}://${req.get('host')}/${shortId}`,
-    original_url: url,
-    steps: totalSteps,
-    expires_in_days: expiryDays
+    original_url: url
   };
   
   freeTier.logRequest(JSON.stringify(response).length);

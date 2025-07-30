@@ -63,10 +63,10 @@ class ClientFingerprintManager {
     const rng = this.seededRandom(seed);
     
     const availableTemplates = [
-      { type: 'timer', duration: () => 15 + Math.floor(rng() * 6) * 5 },
-      { type: 'timer_punish', duration: () => 20 + Math.floor(rng() * 4) * 5 },
-      { type: 'click', target: () => 3 + Math.floor(rng() * 5) },
-      { type: 'click_drain', target: () => 15 + Math.floor(rng() * 10) }
+      { type: 'timer', duration: () => 10 + Math.floor(rng() * 8) * 5 }, // 10-45s
+      { type: 'timer_punish', duration: () => 15 + Math.floor(rng() * 6) * 5 }, // 15-40s
+      { type: 'click', target: () => 3 + Math.floor(rng() * 7) }, // 3-9 clicks
+      { type: 'click_drain', target: () => 10 + Math.floor(rng() * 15) } // 10-24 clicks
     ];
 
     const sequence = [];

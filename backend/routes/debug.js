@@ -56,27 +56,6 @@ router.get('/status', async (req, res) => {
   }
 });
 
-// GET /debug/test-fingerprint - Test fingerprinting
-router.get('/test-fingerprint', (req, res) => {
-  const clientFingerprint = require('../utils/client-fingerprint');
-  const logger = require('../utils/debug-logger');
-  
-  const fingerprint = clientFingerprint.generateFingerprint(req);
-  const testPath = clientFingerprint.generateClientPath('test123', fingerprint, 3, 1);
-  
-  logger.info('DEBUG', 'Fingerprint test', { fingerprint, pathHash: testPath.pathHash });
-  
-  res.json({
-    fingerprint,
-    pathHash: testPath.pathHash,
-    templates: testPath.templates,
-    headers: {
-      'user-agent': req.headers['user-agent'],
-      'accept-language': req.headers['accept-language'],
-      'x-forwarded-for': req.headers['x-forwarded-for'],
-      ip: req.ip
-    }
-  });
-});
+
 
 module.exports = router;

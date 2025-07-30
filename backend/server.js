@@ -40,5 +40,6 @@ app.listen(PORT, () => {
   });
   
   console.log(`🚀 TrollShortener attivo su http://localhost:${PORT}`);
-  console.log(`📊 Debug endpoints: /debug/status, /admin/usage`);
+  console.log(`🧌 Ready to troll with natural RNG!`);
+  console.log(`📊 Monitoring: /debug/status, /admin/usage`);
 });
