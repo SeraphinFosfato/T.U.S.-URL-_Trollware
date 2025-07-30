@@ -106,17 +106,23 @@ class ClientFingerprintManager {
       expiresAt: pathData.expiresAt
     });
     
-    const cipher = crypto.createCipher('aes-256-cbc', this.secretKey);
+    const key = crypto.scryptSync(this.secretKey, 'salt', 32);
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    return encrypted;
+    return iv.toString('hex') + ':' + encrypted;
   }
 
   // Decripta percorso da cookie
   decryptPath(encryptedData) {
     try {
-      const decipher = crypto.createDecipher('aes-256-cbc', this.secretKey);
-      let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+      const parts = encryptedData.split(':');
+      const iv = Buffer.from(parts[0], 'hex');
+      const encrypted = parts[1];
+      const key = crypto.scryptSync(this.secretKey, 'salt', 32);
+      const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
       return JSON.parse(decrypted);
     } catch (error) {
