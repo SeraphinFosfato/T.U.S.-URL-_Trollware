@@ -37,11 +37,19 @@ class FreeTierManager {
     this.stats.dailyRequests++;
     this.stats.dailyBandwidth += responseSize;
     
-    console.log(`[USAGE] Requests: ${this.stats.dailyRequests}/${this.limits.maxDailyRequests}, Bandwidth: ${Math.round(this.stats.dailyBandwidth/1024)}KB/${Math.round(this.limits.maxDailyBandwidth/1024)}KB`);
+    const logger = require('../utils/debug-logger');
+    logger.usage('REQUESTS', this.stats.dailyRequests, this.limits.maxDailyRequests);
+    logger.usage('BANDWIDTH', Math.round(this.stats.dailyBandwidth/1024) + 'KB', Math.round(this.limits.maxDailyBandwidth/1024) + 'KB');
+    
+    if (this.shouldUseMinimalMode()) {
+      logger.warn('FREE-TIER', 'Switching to minimal mode due to high usage');
+    }
   }
 
   logDbOperation() {
     this.stats.dbOperations++;
+    const logger = require('../utils/debug-logger');
+    logger.usage('DB_OPS', this.stats.dbOperations, this.limits.maxDbOperations);
   }
 
   shouldUseMinimalMode() {

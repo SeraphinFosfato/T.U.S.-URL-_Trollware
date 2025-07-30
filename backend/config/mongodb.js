@@ -9,8 +9,12 @@ class MongoDB {
   }
 
   async connect() {
+    const logger = require('../utils/debug-logger');
+    
     try {
       const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/trollshortener';
+      logger.info('MONGODB', 'Attempting connection', { uri: uri.replace(/\/\/.*@/, '//***@') });
+      
       this.client = new MongoClient(uri);
       await this.client.connect();
       this.db = this.client.db('trollshortener');
@@ -19,22 +23,24 @@ class MongoDB {
       
       // Create indexes
       await this.urls.createIndex({ shortId: 1 }, { unique: true });
-      await this.urls.createIndex({ expires_at: 1 }, { expireAfterSeconds: 0 }); // Custom TTL
+      await this.urls.createIndex({ expires_at: 1 }, { expireAfterSeconds: 0 });
       
       // Client paths indexes
       await this.sessions.createIndex({ pathHash: 1 }, { unique: true });
-      await this.sessions.createIndex({ expires_at: 1 }, { expireAfterSeconds: 0 }); // TTL per paths
-      await this.sessions.createIndex({ shortId: 1, fingerprint: 1 }); // Query optimization
+      await this.sessions.createIndex({ expires_at: 1 }, { expireAfterSeconds: 0 });
+      await this.sessions.createIndex({ shortId: 1, fingerprint: 1 });
       
-      console.log('DEBUG: Connected to MongoDB');
+      logger.info('MONGODB', 'Connected successfully with indexes created');
       return true;
     } catch (error) {
-      console.error('DEBUG: MongoDB connection failed:', error.message);
+      logger.error('MONGODB', 'Connection failed', { error: error.message, stack: error.stack });
       return false;
     }
   }
 
   async saveUrl(shortId, data) {
+    const logger = require('../utils/debug-logger');
+    
     try {
       const urlData = {
         shortId,
@@ -47,10 +53,10 @@ class MongoDB {
       };
       
       await this.urls.insertOne(urlData);
-      console.log(`DEBUG: Saved URL ${shortId} to MongoDB (${data.total_steps} steps, ${data.expiry_days}d TTL)`);
+      logger.database('INSERT', 'urls', { shortId, steps: data.total_steps, expiry: data.expiry_days });
       return urlData;
     } catch (error) {
-      console.error(`DEBUG: Failed to save URL ${shortId}:`, error.message);
+      logger.error('MONGODB', `Failed to save URL ${shortId}`, { error: error.message });
       return null;
     }
   }
@@ -78,6 +84,8 @@ class MongoDB {
   }
 
   async saveClientPath(pathData) {
+    const logger = require('../utils/debug-logger');
+    
     try {
       await this.sessions.replaceOne(
         { pathHash: pathData.pathHash },
@@ -93,9 +101,17 @@ class MongoDB {
         },
         { upsert: true }
       );
-      console.log(`DEBUG: Saved client path ${pathData.pathHash}`);
+      logger.database('UPSERT', 'client_paths', { 
+        pathHash: pathData.pathHash, 
+        fingerprint: pathData.fingerprint,
+        shortId: pathData.shortId,
+        steps: pathData.templates.length
+      });
     } catch (error) {
-      console.error(`DEBUG: Failed to save client path:`, error.message);
+      logger.error('MONGODB', 'Failed to save client path', { 
+        pathHash: pathData.pathHash,
+        error: error.message 
+      });
     }
   }
 

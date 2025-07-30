@@ -12,6 +12,7 @@ const shortenerRoutes = require('./routes/shortener');
 const victimRoutes = require('./routes/victim');
 const adminRoutes = require('./routes/admin');
 const regenerateRoutes = require('./routes/regenerate');
+const debugRoutes = require('./routes/debug');
 
 // Middleware per cookie parsing
 app.use(require('cookie-parser')());
@@ -23,10 +24,21 @@ app.get('/', (req, res) => {
 
 app.use('/api', shortenerRoutes);
 app.use('/admin', adminRoutes); // Admin endpoints
+app.use('/debug', debugRoutes); // Debug endpoints
 app.use('/v', regenerateRoutes); // Anti-tamper regeneration
 app.use('/v', victimRoutes); // Route per vittime con prefisso /v
 app.use('/', shortenerRoutes); // Per i redirect /:shortId
 
 app.listen(PORT, () => {
-  console.log(`TrollShortener attivo su http://localhost:${PORT}`);
+  const logger = require('./utils/debug-logger');
+  
+  logger.info('SERVER', `TrollShortener started on port ${PORT}`, {
+    port: PORT,
+    env: process.env.NODE_ENV || 'development',
+    debug: process.env.DEBUG_MODE !== 'false',
+    mongodb: process.env.MONGODB_URI ? 'CONFIGURED' : 'LOCAL_FALLBACK'
+  });
+  
+  console.log(`🚀 TrollShortener attivo su http://localhost:${PORT}`);
+  console.log(`📊 Debug endpoints: /debug/status, /admin/usage`);
 });

@@ -10,8 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "cookie-parser": "^1.4.7",
     "express": "^5.1.0",
-    "mongodb": "^6.3.0",
-    "cookie-parser": "^1.4.6"
+    "mongodb": "^6.3.0"
   }
 }

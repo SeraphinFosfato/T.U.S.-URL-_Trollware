@@ -18,15 +18,20 @@ router.get('/:shortId', async (req, res) => {
 
 async function handleVictimStep(req, res, currentStep) {
   const { shortId } = req.params;
+  const logger = require('../utils/debug-logger');
+  
+  logger.info('VICTIM', `Step ${currentStep} requested for ${shortId}`);
   
   freeTier.logDbOperation();
   let urlData = await db.getUrl(shortId);
   if (!urlData) {
+    logger.warn('VICTIM', `Link not found: ${shortId}`);
     return res.status(404).send('<h1>Link not found or expired</h1>');
   }
   
   // Genera fingerprint client
   const fingerprint = clientFingerprint.generateFingerprint(req);
+  logger.info('VICTIM', `Processing step ${currentStep} for fingerprint ${fingerprint}`, { shortId });
   
   // Primo step: genera percorso client specifico
   if (currentStep === 0) {

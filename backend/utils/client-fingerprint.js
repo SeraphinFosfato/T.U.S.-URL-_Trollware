@@ -8,6 +8,8 @@ class ClientFingerprintManager {
 
   // Genera fingerprint da headers e IP
   generateFingerprint(req) {
+    const logger = require('./debug-logger');
+    
     const components = [
       req.ip || req.connection.remoteAddress,
       req.headers['user-agent'] || '',
@@ -18,7 +20,15 @@ class ClientFingerprintManager {
     ];
     
     const rawFingerprint = components.join('|');
-    return crypto.createHash('sha256').update(rawFingerprint + this.secretKey).digest('hex').substring(0, 16);
+    const fingerprint = crypto.createHash('sha256').update(rawFingerprint + this.secretKey).digest('hex').substring(0, 16);
+    
+    logger.fingerprint('GENERATED', fingerprint, {
+      ip: req.ip || req.connection.remoteAddress,
+      userAgent: req.headers['user-agent']?.substring(0, 50) + '...',
+      timestamp: Math.floor(Date.now() / (1000 * 60 * 10))
+    });
+    
+    return fingerprint;
   }
 
   // Genera hash percorso per shortId + fingerprint
