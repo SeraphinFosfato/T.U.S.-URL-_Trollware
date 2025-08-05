@@ -154,14 +154,12 @@ class AdvancedTemplateSystem {
     return 5;
   }
 
-  // Genera seed migliorato per RNG
+  // Genera seed deterministico per RNG (SOLO fingerprint + shortId)
   generateImprovedSeed(fingerprint, shortId) {
     const components = [
-      Date.now(),
       fingerprint,
       shortId,
-      Math.random(),
-      process.hrtime.bigint().toString()
+      'troll_rng_salt_2024' // Salt fisso per sicurezza
     ];
     
     const rawSeed = components.join('|');
