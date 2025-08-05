@@ -325,8 +325,18 @@ class AdvancedTemplateSystem {
     // Converte in formato compatibile con fallback robusto
     const sequence = distribution.map(item => {
       const template = this.templates[item.templateId];
+      
+      // Template compositi
+      if (item.templateId.includes('_then_') || item.templateId === 'double_timer') {
+        return {
+          type: 'composite',
+          subtype: item.templateId,
+          sequence: template.generateSequence(item.targetTime, {}),
+          estimatedTime: item.estimatedTime
+        };
+      }
+      
       if (!template) {
-        // Fallback per template mancante
         return {
           type: 'timer',
           subtype: 'timer_simple',
@@ -360,7 +370,6 @@ class AdvancedTemplateSystem {
         }
       }
       
-      // Fallback finale
       return {
         type: 'timer',
         subtype: 'timer_simple',
