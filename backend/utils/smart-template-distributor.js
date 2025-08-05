@@ -10,7 +10,12 @@ class SmartTemplateDistributor {
       click_drain: 1.0,
       click_teleport: 0.9,
       click_racing: 1.1,
-      click_racing_rigged: 0.6
+      click_racing_rigged: 0.6,
+      
+      // Template ricombinati
+      timer_then_click: 0.7,
+      click_then_timer: 0.7,
+      double_timer: 0.5
     };
   }
   
@@ -48,6 +53,11 @@ class SmartTemplateDistributor {
     const viable = [];
     
     Object.keys(this.baseWeights).forEach(templateId => {
+      // Skip compositi se targetTime troppo piccolo
+      if (templateId.includes('_then_') || templateId === 'double_timer') {
+        if (targetTime < 45) return;
+      }
+      
       const testParams = timeEstimator.generateOptimalParams(templateId, targetTime);
       const isViable = timeEstimator.isTemplateViable(templateId, targetTime, testParams);
       
@@ -55,8 +65,6 @@ class SmartTemplateDistributor {
       console.log(`DEBUG: Template ${templateId}, targetTime: ${targetTime}, params:`, testParams, 'timeRange:', timeRange, 'viable:', isViable);
       
       if (isViable) {
-        const timeRange = timeEstimator.getTimeRange(templateId, testParams);
-        
         viable.push({
           templateId,
           baseWeight: this.baseWeights[templateId],

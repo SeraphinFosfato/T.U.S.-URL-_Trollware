@@ -63,6 +63,28 @@ class TemplateTimeEstimator {
         },
         variance: 0.5, // Altissima varianza per frustrazione
         frustrationFactor: 1.8 // Molto frustrante
+      },
+      
+      // Template Compositi
+      timer_then_click: {
+        type: 'composite',
+        baseTime: (params) => params.totalTime || 60,
+        variance: 0.25,
+        frustrationFactor: 1.3 // Più frustrante per doppio step
+      },
+      
+      click_then_timer: {
+        type: 'composite', 
+        baseTime: (params) => params.totalTime || 60,
+        variance: 0.25,
+        frustrationFactor: 1.3
+      },
+      
+      double_timer: {
+        type: 'composite',
+        baseTime: (params) => params.totalTime || 60,
+        variance: 0.3, // Alta varianza per doppio timer
+        frustrationFactor: 1.5 // Molto frustrante
       }
     };
   }
@@ -157,6 +179,13 @@ class TemplateTimeEstimator {
           };
         }
         break;
+        
+      case 'composite':
+        return {
+          totalTime: targetTime,
+          timerRatio: templateId === 'double_timer' ? 0.5 : 
+                     templateId === 'timer_then_click' ? 0.6 : 0.4
+        };
     }
     
     return {};
