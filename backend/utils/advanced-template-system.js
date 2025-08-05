@@ -67,14 +67,14 @@ class AdvancedTemplateSystem {
         id: 'click_simple',
         type: 'atomic',
         category: 'click',
-        clicksPerSecond: 5, // Stima cattiva: 5 click/sec
+        clicksPerSecond: 2, // Con delay 0.5s = 2 click/sec reali
         minClicks: 3,
-        maxClicks: 15,
-        estimatedTime: (clicks) => Math.ceil(clicks / 5), // 5 click/sec
+        maxClicks: 60,
+        estimatedTime: (clicks) => Math.ceil(clicks * 0.5), // 0.5s per click
         generateClicks: (targetTime, constraints) => {
-          // Calcola click basati su targetTime (5 click/sec stima cattiva)
-          let clicks = Math.max(Math.floor(targetTime * 5), 3); // Min 3 click
-          clicks = Math.min(clicks, 15); // Max 15 click
+          // Calcola click basati su targetTime (0.5s per click)
+          let clicks = Math.max(Math.floor(targetTime * 2), 3); // Min 3 click
+          clicks = Math.min(clicks, 60); // Max 60 click
           return clicks;
         }
       },
@@ -83,14 +83,14 @@ class AdvancedTemplateSystem {
         id: 'click_drain',
         type: 'atomic',
         category: 'click',
-        clicksPerSecond: 3, // Più lento per drain
+        clicksPerSecond: 1.5, // Più lento per drain
         minClicks: 10,
-        maxClicks: 30,
-        estimatedTime: (clicks) => Math.ceil(clicks / 3),
+        maxClicks: 60,
+        estimatedTime: (clicks) => Math.ceil(clicks * 0.67), // ~0.67s per click
         generateClicks: (targetTime, constraints) => {
-          // Click drain: più lento (3 click/sec)
-          let clicks = Math.max(Math.floor(targetTime * 3), 10); // Min 10 click
-          clicks = Math.min(clicks, 30); // Max 30 click
+          // Click drain: più lento
+          let clicks = Math.max(Math.floor(targetTime * 1.5), 10); // Min 10 click
+          clicks = Math.min(clicks, 60); // Max 60 click
           return clicks;
         }
       },
