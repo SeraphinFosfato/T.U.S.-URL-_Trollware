@@ -102,12 +102,12 @@ class TemplateTimeEstimator {
   isTemplateViable(templateId, targetTime, params) {
     const range = this.getTimeRange(templateId, params);
     
-    // Template è viable se il tempo target è nel range ±30%
-    const tolerance = 0.3;
+    // Template è viable se può essere ragionevolmente vicino al target
+    const tolerance = 0.5; // Aumentato a 50% per più flessibilità
     const minAcceptable = targetTime * (1 - tolerance);
     const maxAcceptable = targetTime * (1 + tolerance);
     
-    return range.min <= maxAcceptable && range.max >= minAcceptable;
+    return range.expected >= minAcceptable && range.expected <= maxAcceptable;
   }
   
   // Genera parametri ottimali per tempo target
@@ -127,7 +127,7 @@ class TemplateTimeEstimator {
           const clickTime = templateId === 'click_teleport' ? 0.8 : 
                            templateId === 'click_drain' ? 0.67 : 0.5;
           const clicks = Math.max(Math.floor(targetTime / (clickTime * estimate.frustrationFactor)), 3);
-          return { clicks: Math.min(clicks, 60) };
+          return { clicks: Math.min(clicks, 40) }; // Ridotto max click
         }
         break;
         
