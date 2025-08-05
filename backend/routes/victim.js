@@ -58,22 +58,11 @@ async function handleVictimStep(req, res, currentStep) {
     // Salva percorso in DB
     await db.saveClientPath(pathData);
     
-    const templateDebugger = require('../utils/template-debugger');
-    templateDebugger.debugSession(pathData, null);
-    
     const pathJS = clientFingerprint.generatePathCookieJS(pathData);
     const currentTemplate = pathData.templates[0];
     
-    logger.info('VICTIM', 'First step template selected', {
-      templateType: currentTemplate.type,
-      templateSubtype: currentTemplate.subtype,
-      duration: currentTemplate.duration,
-      target: currentTemplate.target,
-      estimatedTime: currentTemplate.estimatedTime
-    });
-    
     const nextUrl = `/v/${shortId}/1`;
-    const blockHTML = generateAdvancedStepHTML(currentTemplate, nextUrl, pathJS);
+    const blockHTML = generateStepHTML(currentTemplate, nextUrl, pathJS);
     
     freeTier.logRequest(blockHTML.length);
     return res.send(blockHTML);
@@ -83,46 +72,30 @@ async function handleVictimStep(req, res, currentStep) {
   let pathData = null;
   const pathCookie = req.cookies.troll_path;
   
-  logger.info('VICTIM', 'Looking for existing path', {
-    hasCookie: !!pathCookie,
-    currentStep,
-    fingerprint
-  });
-  
   if (pathCookie && clientFingerprint.validatePath(pathCookie)) {
     const cookieData = clientFingerprint.decryptPath(pathCookie);
     if (cookieData && cookieData.shortId === shortId) {
       pathData = await db.getClientPath(cookieData.pathHash);
-      logger.info('VICTIM', 'Path found via cookie', {
-        pathHash: cookieData.pathHash,
-        pathExists: !!pathData
-      });
     }
   }
   
   // Fallback: cerca per shortId + fingerprint
   if (!pathData) {
-    logger.warn('VICTIM', 'No valid path found, session expired', {
-      shortId,
-      currentStep,
-      fingerprint,
-      hasCookie: !!pathCookie
-    });
     return res.status(400).send('<h1>Session expired - please restart</h1>');
   }
   
   // Verifica step progression
   if (currentStep !== pathData.currentStep + 1) {
+    logger.warn('VICTIM', 'Invalid step sequence', {
+      expected: pathData.currentStep + 1,
+      received: currentStep,
+      pathHash: pathData.pathHash
+    });
     return res.status(400).send('<h1>Invalid step sequence</h1>');
   }
   
   // Se completato tutti i step
   if (currentStep >= pathData.templates.length) {
-    logger.info('VICTIM', 'All steps completed, redirecting to final URL', {
-      shortId,
-      pathHash: pathData.pathHash,
-      totalSteps: pathData.templates.length
-    });
     await db.completeClientPath(pathData.pathHash);
     await db.updateStats(shortId, 'completed');
     return res.redirect(urlData.original_url);
@@ -136,286 +109,23 @@ async function handleVictimStep(req, res, currentStep) {
   const nextUrl = nextStep >= pathData.templates.length ? 
     urlData.original_url : `/v/${shortId}/${nextStep}`;
   
-  const blockHTML = generateAdvancedStepHTML(currentTemplate, nextUrl);
+  const blockHTML = generateStepHTML(currentTemplate, nextUrl);
   
   freeTier.logRequest(blockHTML.length);
   res.send(blockHTML);
 }
 
-// Genera HTML avanzato per template
-function generateAdvancedStepHTML(template, nextUrl, sessionJS = '') {
-  const logger = require('../utils/debug-logger');
-  const templateDebugger = require('../utils/template-debugger');
-  const useMinimal = freeTier.shouldUseMinimalMode();
-  
-  logger.info('TEMPLATE', 'Generating HTML', { 
-    type: template.type, 
-    subtype: template.subtype,
-    useMinimal,
-    estimatedTime: template.estimatedTime,
-    duration: template.duration,
-    target: template.target
-  });
-  
-  let html;
-  
-  // SEMPRE usa template minimal per consistenza grafica
-  if (template.type === 'composite') {
-    templateDebugger.debugCompositeTemplate(template);
-    html = generateCompositeHTML(template, nextUrl, sessionJS);
-  } else {
-    html = generateMinimalHTML(template, nextUrl, sessionJS);
+// Usa SEMPRE template originali
+function generateStepHTML(template, nextUrl, sessionJS = '') {
+  if (template.type === 'timer') {
+    return minimalTemplates.timer('step', template.duration, nextUrl) + sessionJS;
+  } else if (template.type === 'click') {
+    return minimalTemplates.click('step', template.target, nextUrl) + sessionJS;
+  } else if (template.type === 'composite') {
+    const duration = Math.min(Math.max(Math.round(template.estimatedTime || 60), 15), 60);
+    return minimalTemplates.timer('step', duration, nextUrl) + sessionJS;
   }
-  
-  templateDebugger.debugHTMLGeneration(template, html.length, nextUrl);
-  return html;
-}
-
-// Genera HTML per template compositi
-function generateCompositeHTML(template, nextUrl, sessionJS = '') {
-  const logger = require('../utils/debug-logger');
-  const templateDebugger = require('../utils/template-debugger');
-  
-  // Per ora, converti composite in timer singolo con durata appropriata
-  logger.info('COMPOSITE', 'Converting composite to single timer', { 
-    subtype: template.subtype,
-    estimatedTime: template.estimatedTime
-  });
-  
-  const duration = Math.min(Math.max(Math.round(template.estimatedTime || 60), 15), 60);
-  
-  const timerTemplate = {
-    type: 'timer',
-    subtype: 'timer_simple',
-    duration: duration
-  };
-  
-  templateDebugger.debugTimerControls(timerTemplate, 'composite_converted');
-  
-  return generateNormalHTML(timerTemplate, nextUrl, sessionJS);
-}
-
-// Genera HTML minimal per bandwidth ridotta
-function generateMinimalHTML(template, nextUrl, sessionJS = '') {
-  switch(template.type) {
-    case 'timer':
-      const isPunish = template.subtype === 'timer_punish';
-      const duration = template.duration;
-      
-      if (isPunish) {
-        // Timer punitivo: reset completo su focus loss
-        return `<html><body><h1>Loading...</h1><div id="t">${duration}</div>${sessionJS}<script>
-          let s=${duration},t=document.getElementById('t'),paused=false;
-          const timer=setInterval(()=>{if(!paused&&!document.hidden){s--;t.textContent=s;if(s<=0){clearInterval(timer);location.href='${nextUrl}'}}},1000);
-          document.addEventListener('visibilitychange',()=>{if(document.hidden){s=${duration};t.textContent=s;paused=false}});
-          window.addEventListener('blur',()=>{s=${duration};t.textContent=s;paused=false});
-        </script></body></html>`;
-      } else {
-        // Timer normale: pausa su focus loss
-        return `<html><body><h1>Loading...</h1><div id="t">${duration}</div>${sessionJS}<script>
-          let s=${duration},t=document.getElementById('t'),paused=false;
-          const timer=setInterval(()=>{if(!paused){s--;t.textContent=s;if(s<=0){clearInterval(timer);location.href='${nextUrl}'}}},1000);
-          document.addEventListener('visibilitychange',()=>{paused=document.hidden});
-          window.addEventListener('blur',()=>{paused=true});
-          window.addEventListener('focus',()=>{paused=false});
-        </script></body></html>`;
-      }
-    
-    case 'click':
-      const isDrain = template.subtype === 'click_drain';
-      const drainLogic = isDrain ? 'if(Date.now()-lastClick>2000&&n>0){n--;p.textContent=n+"/'+template.target+'"}' : '';
-      return `<html><body><h1>Click ${template.target} times</h1><div id="p">0/${template.target}</div><button onclick="c()">Click</button>${sessionJS}<script>let n=0,lastClick=Date.now(),p=document.getElementById('p');function c(){if(n>=${template.target})return;n++;lastClick=Date.now();p.textContent=n+'/${template.target}';if(n>=${template.target})setTimeout(()=>location.href='${nextUrl}',500)}${isDrain ? ';setInterval(()=>{' + drainLogic + '},2000)' : ''}</script></body></html>`;
-    
-    default:
-      return `<html><body><script>location.href='${nextUrl}'</script></body></html>`;
-  }
-}
-
-// Genera HTML normale con styling completo
-function generateNormalHTML(template, nextUrl, sessionJS = '') {
-  const templateDebugger = require('../utils/template-debugger');
-  
-  switch(template.type) {
-    case 'timer':
-      const duration = template.duration;
-      const isPunish = template.subtype === 'timer_punish';
-      
-      templateDebugger.debugTimerControls(template, 'normal_with_styling');
-      
-      if (isPunish) {
-        return `
-          <html>
-          <head>
-            <title>Loading...</title>
-            <style>
-              body { font-family: Arial; text-align: center; padding: 50px; background: #f0f0f0; }
-              .timer { font-size: 48px; color: #d32f2f; margin: 20px; }
-              .message { font-size: 18px; color: #666; }
-              .warning { color: #ff5722; font-weight: bold; }
-            </style>
-          </head>
-          <body>
-            <h1>Please Wait...</h1>
-            <div class="timer" id="timer">${duration}</div>
-            <div class="message">Loading content...</div>
-            <div class="warning">⚠️ Don't switch tabs or this will reset!</div>
-            ${sessionJS}
-            <script>
-              let seconds = ${duration};
-              let timerElement = document.getElementById('timer');
-              let paused = false;
-              
-              console.log('[TIMER_DEBUG] Punish timer started:', seconds);
-              
-              const interval = setInterval(() => {
-                if (!paused && !document.hidden) {
-                  seconds--;
-                  timerElement.textContent = seconds;
-                  console.log('[TIMER_DEBUG] Tick:', seconds);
-                  
-                  if (seconds <= 0) {
-                    console.log('[TIMER_DEBUG] Timer completed, redirecting');
-                    clearInterval(interval);
-                    location.href = '${nextUrl}';
-                  }
-                }
-              }, 1000);
-              
-              // Reset on focus loss (punish behavior)
-              document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                  console.log('[TIMER_DEBUG] Visibility lost, resetting timer');
-                  seconds = ${duration};
-                  timerElement.textContent = seconds;
-                }
-              });
-              
-              window.addEventListener('blur', () => {
-                console.log('[TIMER_DEBUG] Window blur, resetting timer');
-                seconds = ${duration};
-                timerElement.textContent = seconds;
-              });
-            </script>
-          </body>
-          </html>
-        `;
-      } else {
-        return `
-          <html>
-          <head>
-            <title>Loading...</title>
-            <style>
-              body { font-family: Arial; text-align: center; padding: 50px; background: #f8f9fa; }
-              .timer { font-size: 48px; color: #2196f3; margin: 20px; }
-              .message { font-size: 18px; color: #666; }
-              .status { color: #4caf50; }
-            </style>
-          </head>
-          <body>
-            <h1>Loading...</h1>
-            <div class="timer" id="timer">${duration}</div>
-            <div class="message">Please wait while we prepare your content</div>
-            <div class="status" id="status">Timer running</div>
-            ${sessionJS}
-            <script>
-              let seconds = ${duration};
-              let timerElement = document.getElementById('timer');
-              let statusElement = document.getElementById('status');
-              let paused = false;
-              
-              console.log('[TIMER_DEBUG] Normal timer started:', seconds);
-              
-              const interval = setInterval(() => {
-                if (!paused) {
-                  seconds--;
-                  timerElement.textContent = seconds;
-                  console.log('[TIMER_DEBUG] Tick:', seconds);
-                  
-                  if (seconds <= 0) {
-                    console.log('[TIMER_DEBUG] Timer completed, redirecting');
-                    clearInterval(interval);
-                    location.href = '${nextUrl}';
-                  }
-                }
-              }, 1000);
-              
-              // Pause on focus loss (normal behavior)
-              document.addEventListener('visibilitychange', () => {
-                paused = document.hidden;
-                statusElement.textContent = paused ? 'Timer paused' : 'Timer running';
-                console.log('[TIMER_DEBUG] Visibility change, paused:', paused);
-              });
-              
-              window.addEventListener('blur', () => {
-                paused = true;
-                statusElement.textContent = 'Timer paused';
-                console.log('[TIMER_DEBUG] Window blur, paused');
-              });
-              
-              window.addEventListener('focus', () => {
-                paused = false;
-                statusElement.textContent = 'Timer running';
-                console.log('[TIMER_DEBUG] Window focus, resumed');
-              });
-            </script>
-          </body>
-          </html>
-        `;
-      }
-    
-    case 'click':
-      const target = template.target;
-      return `
-        <html>
-        <head>
-          <title>Click Challenge</title>
-          <style>
-            body { font-family: Arial; text-align: center; padding: 50px; background: #fff3e0; }
-            .counter { font-size: 36px; color: #ff9800; margin: 20px; }
-            .button { font-size: 24px; padding: 15px 30px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer; }
-            .button:hover { background: #1976d2; }
-            .progress { width: 300px; height: 20px; background: #ddd; margin: 20px auto; border-radius: 10px; }
-            .progress-bar { height: 100%; background: #4caf50; border-radius: 10px; transition: width 0.3s; }
-          </style>
-        </head>
-        <body>
-          <h1>Click Challenge</h1>
-          <div class="counter" id="counter">0 / ${target}</div>
-          <div class="progress"><div class="progress-bar" id="progress" style="width: 0%"></div></div>
-          <button class="button" onclick="clickHandler()">Click Me!</button>
-          ${sessionJS}
-          <script>
-            let clicks = 0;
-            let target = ${target};
-            let counterElement = document.getElementById('counter');
-            let progressElement = document.getElementById('progress');
-            
-            console.log('[CLICK_DEBUG] Click challenge started, target:', target);
-            
-            function clickHandler() {
-              if (clicks >= target) return; // Stop accepting clicks
-              
-              clicks++;
-              counterElement.textContent = clicks + ' / ' + target;
-              
-              let progress = (clicks / target) * 100;
-              progressElement.style.width = progress + '%';
-              
-              console.log('[CLICK_DEBUG] Click:', clicks, '/', target);
-              
-              if (clicks >= target) {
-                console.log('[CLICK_DEBUG] Challenge completed, redirecting');
-                setTimeout(() => location.href = '${nextUrl}', 500);
-              }
-            }
-          </script>
-        </body>
-        </html>
-      `;
-    
-    default:
-      return `<html><body><script>location.href='${nextUrl}'</script></body></html>`;
-  }
+  return `<html><body><script>location.href='${nextUrl}'</script></body></html>`;
 }
 
 module.exports = router;
