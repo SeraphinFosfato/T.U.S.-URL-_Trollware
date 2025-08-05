@@ -44,12 +44,12 @@ class TemplateTimeEstimator {
       click_racing: {
         type: 'dynamic',
         baseTime: (params) => {
-          // Tempo base + fattore difficoltà
           const baseDuration = params.duration || 30;
-          const difficultyMultiplier = this.getDifficultyMultiplier(params.drain);
+          const drainRate = params.drain || 1.0;
+          const difficultyMultiplier = drainRate <= 0.6 ? 0.8 : drainRate <= 1.0 ? 1.0 : 1.3;
           return baseDuration * difficultyMultiplier;
         },
-        variance: 0.4, // Alta varianza per skill
+        variance: 0.4,
         frustrationFactor: 1.2
       },
       

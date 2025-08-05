@@ -49,8 +49,11 @@ class SmartTemplateDistributor {
     
     Object.keys(this.baseWeights).forEach(templateId => {
       const testParams = timeEstimator.generateOptimalParams(templateId, targetTime);
+      const isViable = timeEstimator.isTemplateViable(templateId, targetTime, testParams);
       
-      if (timeEstimator.isTemplateViable(templateId, targetTime, testParams)) {
+      console.log(`DEBUG: Template ${templateId}, targetTime: ${targetTime}, params:`, testParams, 'viable:', isViable);
+      
+      if (isViable) {
         const timeRange = timeEstimator.getTimeRange(templateId, testParams);
         
         viable.push({
@@ -62,6 +65,7 @@ class SmartTemplateDistributor {
       }
     });
     
+    console.log(`DEBUG: Found ${viable.length} viable templates for targetTime ${targetTime}`);
     return viable;
   }
   
