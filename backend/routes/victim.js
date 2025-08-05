@@ -52,7 +52,7 @@ async function handleVictimStep(req, res, currentStep) {
       metadata: sequenceData.metadata,
       completed: false,
       createdAt: Date.now(),
-      expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000) // Sempre 7 giorni per sessioni
+      expiresAt: Date.now() + (urlData.expiry_days * 24 * 60 * 60 * 1000)
     };
     
     // Salva percorso in DB

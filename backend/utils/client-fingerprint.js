@@ -14,9 +14,7 @@ class ClientFingerprintManager {
       req.ip || req.connection.remoteAddress,
       req.headers['user-agent'] || '',
       req.headers['accept-language'] || '',
-      req.headers['accept-encoding'] || '',
-      // Aggiungi timestamp per evitare collisioni bot
-      Math.floor(Date.now() / (1000 * 60 * 10)) // 10min window
+      req.headers['accept-encoding'] || ''
     ];
     
     const rawFingerprint = components.join('|');
