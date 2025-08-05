@@ -2,15 +2,14 @@
 
 > Un URL shortener che forza gli utenti attraverso step fastidiosi prima del redirect finale
 
-## 🚀 Stato Progetto (Iterazione 22 - Nuovi Games)
+## 🚀 Stato Progetto (Iterazione 23 - Sistema Intelligente Completo)
 
 ### ✅ Funzionalità Core Implementate
-- **MVP Funzionante** con RNG deterministico stabile
-- **Timer Standard** (pause/resume con penalty 1.5s + 2-5s random)
-- **Timer Punitivo** (Windows 95 style, reload su focus loss)
-- **Click Games Avanzati** con 6 varianti diverse
-- **Sistema Sessioni** robusto con fallback DB
-- **Template System** avanzato con 9 template totali
+- **Sistema Intelligente** con distribuzione template ottimizzata
+- **9 Template Totali**: 6 atomici + 3 compositi
+- **Racing Games Perfezionati** con meccanismi frustranti
+- **Sessioni Stabili** con fingerprint deterministico
+- **Template Time Estimator** standardizzato e scalabile
 
 ### 🏗️ Architettura
 - **Backend**: Node.js/Express + MongoDB Atlas
@@ -18,11 +17,29 @@
 - **Deploy**: Render.com con auto-deploy da GitHub
 - **Database**: MongoDB Atlas con TTL automatico
 
-### 🎯 Nuove Features (Iterazione 22)
-1. **Teleporting Click**: Button che si teletrasporta (35% hover, 10% barriera, 5s idle)
-2. **Racing Click**: Riempi barra vs drain automatico (3 difficoltà)
-3. **Rigged Racing**: Racing truccato con timer nascosto
-4. **Template Avanzati**: 6 atomici + 3 compositi = 9 template totali
+### 🧠 Sistema Intelligente (Nuovo)
+1. **Template Time Estimator**: Stime temporali standardizzate per ogni template
+2. **Smart Template Distributor**: Algoritmo intelligente per selezione ottimale
+3. **Template Limits Logic**: Preferenza automatica per compositi su tempi lunghi
+4. **Bilanciamento Dinamico**: Varietà garantita e precisione temporale
+
+## 🎮 Template Disponibili (9 Totali)
+
+### ⏱️ Timer (2)
+- `timer_simple`: 15-60s, pause/resume con penalty
+- `timer_punish`: 20-45s, Windows 95 style, reload su focus loss
+
+### 🖱️ Click Games (4)
+- `click_simple`: 3-40 click, delay random 0.4-0.6s
+- `click_drain`: 10-40 click, più lento (0.67s per click)
+- `click_teleport`: 5-40 click, button che si teletrasporta
+- `click_racing`: 15-120s, riempi barra vs drain passivo
+- `click_racing_rigged`: 10-150s, racing truccato con accelerazione dinamica
+
+### 🔄 Compositi (3)
+- `timer_then_click`: Timer seguito da click game
+- `click_then_timer`: Click game seguito da timer
+- `double_timer`: Due timer in sequenza (normale + punitivo)
 
 ## 🧪 Test e Verifica
 
@@ -33,78 +50,73 @@
 ### Script di Test Disponibili
 ```bash
 cd tests
-node test-teleport.js      # Teleporting click game
-node test-racing.js        # Racing click game  
+node test-racing.js        # Racing click game
 node test-rigged.js        # Rigged racing game
+node test-teleport.js      # Teleporting click game
 node test-all-games.js     # Sequenza multi-game
 node create-test-link.js   # Link generico
 ```
 
 ### Comportamenti Verificati
-- ✅ Stesso fingerprint = stessa sequenza sempre
-- ✅ Fingerprint diversi = sequenze uniche
-- ✅ Reload non cambia percorso
-- ✅ Continue button funziona correttamente
-- ✅ Redirect finale a URL originale
+- ✅ Sistema intelligente seleziona template ottimali
+- ✅ Template compositi per tempi lunghi (>90s)
+- ✅ Varietà automatica e bilanciamento categorie
+- ✅ Stime temporali accurate
+- ✅ Sessioni stabili senza scadenze premature
 
 ## 📁 Struttura File Critici
 
 ```
 backend/
-├── routes/victim.js           # 🔥 CORE - Gestione step utente
-├── utils/advanced-template-system.js  # 🔥 CORE - RNG deterministico
-├── utils/client-fingerprint.js        # 🔥 CORE - Sessioni utente
-├── templates/minimal-templates.js      # 🎨 UI - Template ottimizzati
-└── config/database.js         # 💾 DB - Wrapper MongoDB
+├── routes/victim.js                    # 🔥 CORE - Gestione step utente
+├── utils/advanced-template-system.js  # 🔥 CORE - Sistema template legacy + nuovo
+├── utils/template-time-estimator.js   # 🧠 NEW - Stime temporali standardizzate
+├── utils/smart-template-distributor.js # 🧠 NEW - Algoritmo selezione intelligente
+├── utils/client-fingerprint.js        # 🔥 CORE - Sessioni utente stabili
+├── templates/minimal-templates.js     # 🎨 UI - Template ottimizzati
+└── config/database.js                 # 💾 DB - Wrapper MongoDB
 ```
 
 ## ⚠️ Punti Critici - NON MODIFICARE
 
-### 🔒 RNG Deterministico (advanced-template-system.js)
+### 🔒 Sistema Intelligente (template-time-estimator.js)
 ```javascript
-// ❌ NON AGGIUNGERE Date.now() o Math.random() al seed!
-generateImprovedSeed(fingerprint, shortId) {
-  const components = [
-    fingerprint,
-    shortId,
-    'troll_rng_salt_2024' // Salt fisso per sicurezza
-  ];
-  // Seed DEVE essere deterministico per stesso fingerprint+shortId
-}
+// ❌ NON MODIFICARE le stime temporali senza testare!
+// Ogni template ha calcoli specifici per frustrationFactor e variance
+// Racing rigged: medium_racing_time + fake_time/10
+// Compositi: calcolo basato su componenti reali
 ```
 
-### 🔒 Logica Step (victim.js)
+### 🔒 Distribuzione Template (smart-template-distributor.js)
 ```javascript
-// ❌ NON MODIFICARE questa logica!
-if (currentStep >= pathData.templates.length) {
-  // Redirect finale - CRITICO per funzionamento
-  return res.redirect(urlData.original_url);
-}
+// ❌ NON FORZARE pesi artificiali!
+// Sistema usa limiti realistici e bonus/penalty automatici
+// Compositi preferiti automaticamente per targetTime > 90s
+// Penalty per singoli oltre 80% del loro limite massimo
 ```
 
-### 🔒 Sistema Sessioni (client-fingerprint.js)
+### 🔒 Sessioni Stabili (client-fingerprint.js)
 ```javascript
-// ❌ NON MODIFICARE il sistema di fallback DB!
-// Cookie + localStorage + DB fallback = robustezza
+// ❌ NON AGGIUNGERE timestamp volatili al fingerprint!
+// Fingerprint basato solo su IP + User-Agent + headers statici
+// TTL sessioni = TTL URL per ottimizzare risorse
 ```
 
-## 🎮 Template Disponibili (9 Totali)
+## 🎯 Meccanismi Frustranti Implementati
 
-### Timer (2)
-- `timer_simple`: 15-60s, pause/resume con penalty
-- `timer_punish`: 20-45s, Windows 95 style, reload su focus loss
+### 🏁 Racing Games
+- **Game Over**: A 0 per più di 1s
+- **Finto Loading**: 2s dopo "Try Again"
+- **Timer Rigged**: In pausa quando non clicchi
+- **Drain Dinamico**: Accelerazione esponenziale verso 80%
 
-### Click Games (6)
-- `click_simple`: 3-60 click, delay 0.5s
-- `click_drain`: 10-60 click, più lento (0.67s per click)
-- `click_teleport`: 5-40 click, button che si teletrasporta
-- `click_racing`: 15-45s, riempi barra vs drain
-- `click_racing_rigged`: 10-40s, racing truccato con timer nascosto
+### 🔮 Teleporting Click
+- **35% hover teleport**, **10% barriera**, **5s idle teleport**
+- **Orb decorativo** fluttuante per distrazione
 
-### Compositi (3)
-- `timer_then_click`: Timer seguito da click game
-- `click_then_timer`: Click game seguito da timer
-- `double_timer`: Due timer in sequenza
+### ⏰ Timer Punitivo
+- **Windows 95 style** con reload su focus loss
+- **Penalty 1.5s + 2-5s random** su resume
 
 ## 🚀 Deploy
 
@@ -116,25 +128,37 @@ git push origin main
 # Render.com fa deploy automatico
 ```
 
-## 📊 Prossimi Sviluppi
+## 📊 Metriche Sistema Intelligente
 
-### Completato (Iterazione 22)
-- **Teleporting Click Game**: ✅ Implementato con barriera predittiva
-- **Racing Click Game**: ✅ Implementato con 3 difficoltà
-- **Rigged Racing**: ✅ Implementato con timer nascosto
+### 🎯 Accuratezza Temporale
+- **Target 120s**: Sistema sceglie template con stima ~120s
+- **Compositi automatici**: Per tempi >90s per step
+- **Varietà garantita**: Penalty ripetizione template
 
-### In Sviluppo (Iterazione 23)
-- **Sistema Layered**: Minigiochi sovrapposti nella stessa posizione
-- **Template Ricombinati**: Nuove combinazioni con 9 template
+### 🧠 Algoritmo Selezione
+1. **Viabilità**: Template deve essere nel range ±50% del target
+2. **Precisione**: Bonus per vicinanza al tempo target
+3. **Varietà**: Penalty per ripetizioni recenti
+4. **Limiti**: Penalty per singoli vicini al limite massimo
+5. **Compositi**: Bonus crescente per tempi lunghi
+
+## 🔮 Prossimi Sviluppi
+
+### Completato (Iterazione 23)
+- **Sistema Intelligente**: ✅ Template selection ottimizzata
+- **Template Limits**: ✅ Logica automatica per compositi
+- **Time Estimator**: ✅ Stime standardizzate e scalabili
+- **Racing Games**: ✅ Meccanismi frustranti perfezionati
 
 ### Roadmap Futura
-- Analytics Dashboard
-- Custom Themes
-- API Rate Limiting
-- Banner Pubblicitari non invasivi
+- **Sistema Layered**: Minigiochi sovrapposti
+- **Analytics Dashboard**: Metriche dettagliate
+- **Custom Themes**: Personalizzazione UI
+- **API Rate Limiting**: Protezione abuse
 
 ---
 
-**🎯 Progetto Stabile e Pronto per Produzione**
+**🎯 Progetto Stabile e Intelligente - Pronto per Produzione**
 
 *Deploy Live*: https://tus-tasklink.onrender.com
+*Sistema*: Selezione template completamente automatizzata e ottimizzata
