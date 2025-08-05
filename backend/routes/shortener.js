@@ -7,7 +7,7 @@ const freeTier = require('../config/free-tier-manager');
 
 // POST /api/shorten - Crea nuovo short URL con parametri utente
 router.post('/shorten', async (req, res) => {
-  const { url, timePreset, steps, expiryPreset } = req.body;
+  const { url, timePreset, steps, expiryPreset, testTemplate } = req.body;
   const logger = require('../utils/debug-logger');
   
   if (!url || !isValidUrl(url)) {
@@ -24,7 +24,8 @@ router.post('/shorten', async (req, res) => {
   const userParams = {
     timePreset: timePreset || '1min',
     steps: steps || null, // null = auto
-    expiryPreset: expiryPreset || '1d'
+    expiryPreset: expiryPreset || '1d',
+    testTemplate: testTemplate || null // Per test deterministici
   };
   
   // Calcola expiry days
