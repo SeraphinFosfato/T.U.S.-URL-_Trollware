@@ -392,8 +392,8 @@ class AdvancedTemplateSystem {
     };
     
     } catch (error) {
-      logger.error('TEMPLATE', 'Intelligent system failed, falling back to legacy', { error: error.message });
-      return this.generateConstrainedSequence(userParams, fingerprint, shortId);
+      logger.error('TEMPLATE', 'Intelligent system failed', { error: error.message });
+      throw error; // Forza il fix invece di nascondere il problema
     }
   }
 
