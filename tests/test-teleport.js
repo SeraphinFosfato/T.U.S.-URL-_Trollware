@@ -5,8 +5,9 @@ function createTeleportTest() {
   const postData = JSON.stringify({
     url: 'https://www.google.com',
     timePreset: '30s',
-    steps: 1,  // Solo 1 step per testare teleporting
-    expiryPreset: '1d'
+    steps: 1,
+    expiryPreset: '1d',
+    testTemplate: 'click_teleport'  // Forza teleporting
   });
 
   const options = {

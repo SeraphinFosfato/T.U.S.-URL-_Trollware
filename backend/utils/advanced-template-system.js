@@ -296,6 +296,11 @@ class AdvancedTemplateSystem {
     const maxSteps = this.calculateMaxSteps(targetTime);
     const requestedSteps = Math.min(userParams.steps || maxSteps, maxSteps);
     
+    // Test override: forza template specifico
+    const constraints = {
+      forceTemplate: userParams.testTemplate || null
+    };
+    
     logger.info('TEMPLATE', 'Generating constrained sequence', {
       targetTime,
       requestedSteps,
@@ -321,16 +326,16 @@ class AdvancedTemplateSystem {
       const stepTime = i === requestedSteps - 1 ? remainingTime : Math.floor(remainingTime / remainingSteps);
       
       // Seleziona template pesato
-      const templateId = this.selectWeightedTemplate(availableTemplates, rng);
+      const templateId = this.selectWeightedTemplate(availableTemplates, rng, constraints.forceTemplate);
       const template = this.templates[templateId];
       
       let stepTemplate;
       
       if (template.type === 'atomic') {
-        stepTemplate = this.generateAtomicTemplate(templateId, stepTime);
+        stepTemplate = this.generateAtomicTemplate(templateId, stepTime, constraints);
       } else if (template.type === 'composite') {
         // Per compositi, genera sotto-sequenza
-        const subSequence = template.generateSequence(stepTime, {});
+        const subSequence = template.generateSequence(stepTime, constraints);
         stepTemplate = {
           type: 'composite',
           subtype: templateId,
@@ -392,10 +397,10 @@ class AdvancedTemplateSystem {
   }
 
   // Selezione template con peso
-  selectWeightedTemplate(weights, rng) {
-    // TEMP: Forza teleporting per test
-    if (weights['click_teleport'] && rng() < 0.5) {
-      return 'click_teleport';
+  selectWeightedTemplate(weights, rng, forceTemplate = null) {
+    // Test override: forza template specifico
+    if (forceTemplate && this.templates[forceTemplate]) {
+      return forceTemplate;
     }
     
     const totalWeight = Object.values(weights).reduce((sum, w) => sum + w, 0);
