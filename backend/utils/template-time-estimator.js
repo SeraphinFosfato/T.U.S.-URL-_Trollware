@@ -79,7 +79,19 @@ class TemplateTimeEstimator {
     const estimate = this.timeEstimates[templateId];
     if (!estimate) return 30; // Fallback
     
-    const baseTime = estimate.baseTime(params);
+    let baseTime;
+    if (estimate.type === 'direct') {
+      baseTime = params.duration || 30;
+    } else if (estimate.type === 'multiplied') {
+      baseTime = params.duration || 30;
+    } else if (estimate.type === 'calculated') {
+      baseTime = estimate.baseTime(params.clicks || 10);
+    } else if (estimate.type === 'dynamic') {
+      baseTime = estimate.baseTime(params);
+    } else {
+      baseTime = 30;
+    }
+    
     const withFrustration = baseTime * estimate.frustrationFactor;
     
     return Math.ceil(withFrustration);

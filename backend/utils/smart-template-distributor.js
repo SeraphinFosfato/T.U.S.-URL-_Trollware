@@ -51,7 +51,8 @@ class SmartTemplateDistributor {
       const testParams = timeEstimator.generateOptimalParams(templateId, targetTime);
       const isViable = timeEstimator.isTemplateViable(templateId, targetTime, testParams);
       
-      console.log(`DEBUG: Template ${templateId}, targetTime: ${targetTime}, params:`, testParams, 'viable:', isViable);
+      const timeRange = timeEstimator.getTimeRange(templateId, testParams);
+      console.log(`DEBUG: Template ${templateId}, targetTime: ${targetTime}, params:`, testParams, 'timeRange:', timeRange, 'viable:', isViable);
       
       if (isViable) {
         const timeRange = timeEstimator.getTimeRange(templateId, testParams);
