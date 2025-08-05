@@ -11,26 +11,12 @@ function generateRandomSequence(count = 2, testOverride = null) {
     return testOverride;
   }
   
-  // RNG REALE ATTIVATO - usa advanced-template-system
-  const advancedTemplates = require('./advanced-template-system');
-  
-  // Parametri default per RNG
-  const defaultParams = {
-    timePreset: '1min',
-    steps: null // auto
-  };
-  
-  // Genera fingerprint fittizio per RNG
-  const fakeFingerprint = 'rng_' + Date.now() + '_' + Math.random();
-  const fakeShortId = 'test_' + Math.random().toString(36).substr(2, 6);
-  
-  const result = advancedTemplates.generateConstrainedSequence(
-    defaultParams,
-    fakeFingerprint, 
-    fakeShortId
-  );
-  
-  return result.sequence;
+  // RNG FORZATO per debug
+  return [
+    { type: 'timer', subtype: 'timer_simple', duration: 15, estimatedTime: 15 },
+    { type: 'click', subtype: 'click_simple', target: 5, estimatedTime: 2.5 },
+    { type: 'timer', subtype: 'timer_punish', duration: 20, estimatedTime: 30 }
+  ];
 }
 
 // Genera HTML per sequenza di blocchi (USA SISTEMA AVANZATO)
