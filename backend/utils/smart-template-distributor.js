@@ -17,6 +17,17 @@ class SmartTemplateDistributor {
       click_then_timer: 0.7,
       double_timer: 0.5
     };
+    
+    // Limiti massimi realistici per template singoli
+    this.templateLimits = {
+      timer_simple: 60,
+      timer_punish: 45,
+      click_simple: 20, // 40 click * 0.5s
+      click_drain: 30,  // 40 click * 0.67s
+      click_teleport: 45, // 40 click * 0.8s * 1.4 frustration
+      click_racing: 120, // Può durare di più
+      click_racing_rigged: 150 // Può durare ancora di più
+    };
   }
   
   calculateOptimalDistribution(targetTime, steps, rng) {
@@ -93,6 +104,23 @@ class SmartTemplateDistributor {
       const recentUse = history.filter(h => h.templateId === template.templateId).length;
       const varietyPenalty = Math.pow(0.7, recentUse);
       weight *= varietyPenalty;
+      
+      // Bonus per compositi quando singoli sono al limite
+      const isComposite = template.templateId.includes('_then_') || template.templateId === 'double_timer';
+      if (isComposite && targetTime > 90) {
+        // Bonus crescente per tempi lunghi
+        const compositeBonus = Math.min((targetTime - 90) / 60, 2); // Max 2x bonus
+        weight *= (1 + compositeBonus);
+      }
+      
+      // Penalty per singoli vicini al limite
+      if (!isComposite && this.templateLimits[template.templateId]) {
+        const limit = this.templateLimits[template.templateId];
+        if (targetTime > limit * 0.8) { // Se oltre 80% del limite
+          const limitPenalty = (targetTime - limit * 0.8) / (limit * 0.2);
+          weight *= Math.max(0.3, 1 - limitPenalty * 0.7); // Max 70% penalty
+        }
+      }
       
       return {
         ...template,
