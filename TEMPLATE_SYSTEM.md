@@ -1,150 +1,317 @@
-# TrollShortener - Sistema Template Avanzato
+# TrollShortener - Sistema Template Intelligente
 
-## ARCHITETTURA TEMPLATE
+## ARCHITETTURA SISTEMA INTELLIGENTE (Iterazione 23)
 
-### **Template Atomici Base**
+### **🧠 Template Time Estimator**
+Sistema standardizzato per stime temporali accurate di ogni template.
+
 ```javascript
+// Struttura standardizzata
 {
-  id: 'timer_simple',
-  type: 'timer',
-  estimatedTime: (duration) => duration, // Tempo fisso
-  minDuration: 15,
-  maxDuration: 60,
-  stepSize: 5,
-  generateDuration: (targetTime, constraints) => {
-    // Genera durata basata su tempo target e vincoli
+  templateId: {
+    type: 'direct|multiplied|calculated|dynamic|composite',
+    baseTime: (params) => calculatedTime,
+    variance: 0.1-0.5,           // Varianza utente
+    frustrationFactor: 1.0-1.8   // Fattore frustrazione
   }
 }
 ```
 
-### **Template Compositi**
+### **🎯 Smart Template Distributor**
+Algoritmo intelligente per selezione ottimale basata su:
+1. **Viabilità**: Template nel range ±50% del tempo target
+2. **Precisione**: Bonus per vicinanza temporale
+3. **Varietà**: Penalty per ripetizioni recenti
+4. **Limiti**: Penalty per singoli oltre 80% del limite massimo
+5. **Compositi**: Bonus crescente per tempi lunghi
+
+## TEMPLATE DISPONIBILI (9 Totali)
+
+### **⏱️ Timer Templates (2)**
+
+#### timer_simple
 ```javascript
 {
-  id: 'timer_then_click',
+  type: 'direct',
+  baseTime: (duration) => duration,
+  variance: 0.1,
+  frustrationFactor: 1.0,
+  limits: { min: 15, max: 60, step: 5 }
+}
+```
+
+#### timer_punish  
+```javascript
+{
+  type: 'multiplied',
+  baseTime: (duration) => duration,
+  variance: 0.2,
+  frustrationFactor: 1.5,  // 50% più lento per punizioni
+  limits: { min: 20, max: 45, step: 5 }
+}
+```
+
+### **🖱️ Click Templates (4)**
+
+#### click_simple
+```javascript
+{
+  type: 'calculated',
+  baseTime: (clicks) => clicks * 0.5,  // 0.5s per click + delay random 0.4-0.6s
+  variance: 0.15,
+  frustrationFactor: 1.0,
+  limits: { min: 3, max: 40 }
+}
+```
+
+#### click_drain
+```javascript
+{
+  type: 'calculated',
+  baseTime: (clicks) => clicks * 0.67,  // Più lento per drain
+  variance: 0.2,
+  frustrationFactor: 1.1,
+  limits: { min: 10, max: 40 }
+}
+```
+
+#### click_teleport
+```javascript
+{
+  type: 'calculated', 
+  baseTime: (clicks) => clicks * 0.8,   // Più lento per teleport
+  variance: 0.3,                        // Alta varianza per frustrazione
+  frustrationFactor: 1.4,
+  limits: { min: 5, max: 40 }
+}
+```
+
+#### click_racing
+```javascript
+{
+  type: 'dynamic',
+  baseTime: (params) => {
+    const baseDuration = params.duration || 30;
+    const drainRate = params.drain || 1.0;
+    const difficultyMultiplier = drainRate <= 0.6 ? 0.8 : 
+                                 drainRate <= 1.0 ? 1.0 : 1.3;
+    return baseDuration * difficultyMultiplier;
+  },
+  variance: 0.4,
+  frustrationFactor: 1.2,
+  limits: { min: 15, max: 120 }
+}
+```
+
+#### click_racing_rigged
+```javascript
+{
+  type: 'dynamic',
+  baseTime: (params) => {
+    // Formula: medium_racing_time + fake_time/10
+    const baseDuration = params.realDuration || 20;
+    const mediumRacingTime = baseDuration * 1.0;
+    const fakeTimeBonus = baseDuration / 10;
+    return mediumRacingTime + fakeTimeBonus;
+  },
+  variance: 0.4,
+  frustrationFactor: 1.2,
+  limits: { min: 10, max: 150 }
+}
+```
+
+### **🔄 Template Compositi (3)**
+
+#### timer_then_click
+```javascript
+{
   type: 'composite',
-  components: ['timer_simple', 'click_simple'],
-  estimatedTime: (components) => sum(components.estimatedTime),
-  generateSequence: (targetTime, steps) => {
-    // Distribuisce tempo tra componenti
-  }
+  baseTime: (params) => {
+    const totalTime = params.totalTime || 60;
+    const timerTime = totalTime * 0.6;      // 60% timer
+    const clickTime = totalTime * 0.4;      // 40% click
+    return timerTime + (clickTime / 0.5) * 0.5;  // Timer diretto + click calc
+  },
+  variance: 0.25,
+  frustrationFactor: 1.0,
+  components: ['timer_simple', 'click_simple']
 }
 ```
 
-## SISTEMA VINCOLI TEMPORALI
-
-### **Parametri Utente**
-- **Tempo Medio**: 30s, 1min, 2min, 5min, 10min
-- **Steps**: 1-5 (con limite dinamico basato su tempo)
-- **Expiry**: 1h, 1d, 3d, 7d
-
-### **Algoritmo Distribuzione Tempo**
-```
-1. Calcola tempo disponibile per step
-2. Identifica template fissi (timer punish, ecc)
-3. Distribuisce tempo rimanente su template dinamici
-4. Valida vincoli (min 15s timer, max 60s timer)
-5. Aggiusta se necessario
-```
-
-### **Limiti Step Dinamici**
-```
-Tempo 30s: max 2 steps
-Tempo 1min: max 3 steps  
-Tempo 2min: max 4 steps
-Tempo 5min+: max 5 steps
-```
-
-## TEMPLATE DISPONIBILI
-
-### **Atomici**
-1. **timer_simple**: Timer normale (15-60s, step 5s)
-2. **timer_punish**: Timer punitivo (20-45s, reset su focus loss)
-3. **click_simple**: Click game (3-15 clicks, ~5 click/sec)
-4. **click_drain**: Click con drain (10-30 clicks, drain progressivo)
-
-### **Compositi** 
-1. **timer_then_click**: Timer → Click
-2. **click_then_timer**: Click → Timer nascosto
-3. **double_timer**: Timer semplice → Timer punitivo
-4. **mixed_challenge**: Timer + Click simultanei
-
-## SISTEMA RNG MIGLIORATO
-
-### **Seed Generation**
+#### click_then_timer
 ```javascript
-// Seed basato su: timestamp + fingerprint + shortId
-const seed = hash(Date.now() + fingerprint + shortId + Math.random());
+{
+  type: 'composite',
+  baseTime: (params) => {
+    const totalTime = params.totalTime || 60;
+    const clickTime = totalTime * 0.4;      // 40% click
+    const timerTime = totalTime * 0.6;      // 60% timer
+    return (clickTime / 0.5) * 0.5 + timerTime;
+  },
+  variance: 0.25,
+  frustrationFactor: 1.0,
+  components: ['click_simple', 'timer_simple']
+}
 ```
 
-### **Template Selection**
+#### double_timer
 ```javascript
-// Peso basato su tempo disponibile e step rimanenti
-const weights = templates.map(t => calculateWeight(t, remainingTime, remainingSteps));
-const selected = weightedRandom(templates, weights);
+{
+  type: 'composite',
+  baseTime: (params) => {
+    const totalTime = params.totalTime || 60;
+    const firstTimer = totalTime * 0.5;     // Timer normale
+    const secondTimer = totalTime * 0.5 * 1.5;  // Timer punitivo (1.5x)
+    return firstTimer + secondTimer;
+  },
+  variance: 0.3,
+  frustrationFactor: 1.0,
+  components: ['timer_simple', 'timer_punish']
+}
 ```
 
-## SISTEMA PUNIZIONI
+## ALGORITMO SELEZIONE INTELLIGENTE
 
-### **Trigger Punizioni**
-- Cookie tampering
-- Focus loss ripetuto  
-- Pattern bot detection
-- Step sequence violation
-
-### **Tipi Punizione**
-- **+1 Step**: Aggiunge step extra
-- **Time Reset**: Reset timer corrente
-- **Template Swap**: Cambia template a metà
-- **Infinite Loop**: Loop infinito per bot
-
-### **Implementazione**
+### **Fase 1: Viabilità**
 ```javascript
-// Punizioni sono ESENTI da vincoli temporali
-const penalty = {
-  type: 'extra_step',
-  template: 'timer_punish_60s', // Ignora vincoli utente
-  reason: 'cookie_tamper'
-};
+// Template è viable se può raggiungere il tempo target ±50%
+isTemplateViable(templateId, targetTime, params) {
+  const range = getTimeRange(templateId, params);
+  const tolerance = 0.5;
+  const minAcceptable = targetTime * (1 - tolerance);
+  const maxAcceptable = targetTime * (1 + tolerance);
+  return range.expected >= minAcceptable && range.expected <= maxAcceptable;
+}
 ```
 
-## DEBUG E TESTING
+### **Fase 2: Calcolo Peso Dinamico**
+```javascript
+// Peso finale basato su multiple metriche
+let weight = baseWeight;
 
-### **Debug Temporanei**
-- Log generazione template con timing
-- Validazione vincoli in real-time
-- Tracking seed e randomizzazione
-- Monitoring distribuzione tempo
+// 1. Bonus precisione temporale
+const timeDiff = Math.abs(timeRange.expected - targetTime);
+const precisionBonus = Math.max(0, 1 - (timeDiff / targetTime));
+weight *= (1 + precisionBonus);
 
-### **Test Cases**
-1. Tempo 30s, 2 steps → Verifica distribuzione
-2. Tempo 5min, 5 steps → Verifica limiti
-3. Template compositi → Verifica timing
-4. Punizioni → Verifica bypass vincoli
+// 2. Penalty varietà (ripetizioni)
+const recentUse = history.filter(h => h.templateId === templateId).length;
+const varietyPenalty = Math.pow(0.7, recentUse);
+weight *= varietyPenalty;
 
-## IMPLEMENTAZIONE FASI
+// 3. Bonus compositi per tempi lunghi
+if (isComposite && targetTime > 90) {
+  const compositeBonus = Math.min((targetTime - 90) / 60, 2); // Max 2x
+  weight *= (1 + compositeBonus);
+}
 
-### **FASE 1**: Sistema Vincoli Base
-- [ ] Parametri utente frontend
-- [ ] Algoritmo distribuzione tempo
-- [ ] Limiti step dinamici
-- [ ] Validazione vincoli
+// 4. Penalty singoli vicini al limite
+if (!isComposite && targetTime > limit * 0.8) {
+  const limitPenalty = (targetTime - limit * 0.8) / (limit * 0.2);
+  weight *= Math.max(0.3, 1 - limitPenalty * 0.7); // Max 70% penalty
+}
+```
 
-### **FASE 2**: Template Avanzati  
-- [ ] Template compositi
-- [ ] RNG migliorato con seed
-- [ ] Peso template basato su vincoli
-- [ ] Debug timing completo
+### **Fase 3: Selezione Pesata**
+```javascript
+// Selezione basata su peso finale
+const totalWeight = templates.reduce((sum, t) => sum + t.finalWeight, 0);
+let random = rng() * totalWeight;
 
-### **FASE 3**: Sistema Punizioni
-- [ ] Detection tampering avanzato
-- [ ] Punizioni esenti da vincoli
-- [ ] Progressive penalty system
-- [ ] Bot detection patterns
+for (const template of templates) {
+  random -= template.finalWeight;
+  if (random <= 0) return template.templateId;
+}
+```
 
-## NOTE CRITICHE
+## LIMITI TEMPLATE SINGOLI
 
-⚠️ **Seed RNG**: Deve essere diverso per ogni generazione
-⚠️ **Vincoli Timer**: 15-60s step 5s SEMPRE rispettati
-⚠️ **Click Timing**: 5 click/sec stima base
-⚠️ **Punizioni**: ESENTI da tutti i vincoli utente
-⚠️ **Debug**: Logging completo per troubleshooting
+```javascript
+// Limiti massimi realistici per evitare forzature
+templateLimits = {
+  timer_simple: 60,        // Max 60s
+  timer_punish: 45,        // Max 45s  
+  click_simple: 20,        // 40 click * 0.5s
+  click_drain: 30,         // 40 click * 0.67s
+  click_teleport: 45,      // 40 click * 0.8s * 1.4 frustration
+  click_racing: 120,       // Può durare di più
+  click_racing_rigged: 150 // Può durare ancora di più
+  // Compositi: nessun limite rigido
+}
+```
+
+## MECCANISMI FRUSTRANTI IMPLEMENTATI
+
+### **🏁 Racing Games**
+- **Game Over**: A 0 per più di 1s
+- **Finto Loading**: 2s dopo "Try Again"  
+- **Timer Rigged**: In pausa quando non clicchi
+- **Drain Dinamico**: Accelerazione esponenziale verso 80%
+
+### **🔮 Teleporting Click**
+- **35% hover teleport**, **10% barriera**, **5s idle teleport**
+- **Orb decorativo** fluttuante per distrazione
+
+### **⏰ Timer Punitivo**
+- **Windows 95 style** con reload su focus loss
+- **Penalty 1.5s + 2-5s random** su resume
+
+### **🎮 Click Games**
+- **Delay randomizzato**: 0.4-0.6s per click_simple
+- **Drain progressivo**: click_drain più lento
+- **Teleport frustrante**: Button che si sposta
+
+## TESTING E DEBUG
+
+### **Script di Test**
+```bash
+cd tests
+node test-racing.js        # Racing click game
+node test-rigged.js        # Rigged racing game  
+node test-teleport.js      # Teleporting click game
+node test-all-games.js     # Sequenza multi-game
+node create-test-link.js   # Link generico
+```
+
+### **Debug Template Selection**
+```javascript
+// Log automatico per ogni selezione
+DEBUG: Template timer_simple, targetTime: 120, 
+       params: { duration: 120 }, 
+       timeRange: { min: 108, max: 132, expected: 120 }, 
+       viable: true
+
+DEBUG: Found 7 viable templates for targetTime 120
+```
+
+### **Metriche di Successo**
+- **Accuratezza temporale**: ~90%+ (accuracy < 0.1)
+- **Varietà template**: Penalty ripetizioni automatica
+- **Preferenza compositi**: Automatica per tempi >90s
+- **Stabilità sessioni**: TTL ottimizzato
+
+## IMPLEMENTAZIONE FASI COMPLETATE
+
+### **✅ FASE 1**: Sistema Intelligente Base
+- Template Time Estimator standardizzato
+- Smart Template Distributor con algoritmo ottimale
+- Limiti template e logica viabilità
+- Selezione automatica compositi
+
+### **✅ FASE 2**: Template Avanzati
+- 9 template totali (6 atomici + 3 compositi)
+- Racing games con meccanismi diabolici
+- Stime temporali accurate per ogni tipo
+- Sistema RNG deterministico
+
+### **✅ FASE 3**: Ottimizzazioni
+- Sessioni stabili con fingerprint
+- Fallback robusti multi-livello
+- Deploy automatico e monitoring
+- Suite test completa
+
+---
+
+**🎯 Sistema Template Completamente Automatizzato e Intelligente**
+
+*Selezione ottimale basata su calcoli reali, non su pesi artificiali*
