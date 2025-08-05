@@ -95,6 +95,61 @@ class AdvancedTemplateSystem {
         }
       },
 
+      click_teleport: {
+        id: 'click_teleport',
+        type: 'atomic',
+        category: 'click',
+        clicksPerSecond: 2, // Stesso di click_simple
+        minClicks: 5,
+        maxClicks: 40, // Meno click per compensare difficoltà
+        estimatedTime: (clicks) => Math.ceil(clicks * 0.6), // Più veloce per frustrazione
+        generateClicks: (targetTime, constraints) => {
+          let clicks = Math.max(Math.floor(targetTime * 1.8), 5); // Min 5 click
+          clicks = Math.min(clicks, 40); // Max 40 click
+          return clicks;
+        }
+      },
+
+      click_racing: {
+        id: 'click_racing',
+        type: 'atomic',
+        category: 'click',
+        clicksPerSecond: 10, // Velocità massima
+        minTime: 15,
+        maxTime: 45,
+        estimatedTime: (targetTime) => targetTime,
+        generateDifficulty: (targetTime, constraints) => {
+          // 3 difficoltà: easy, medium, hard
+          const difficulties = [
+            { drain: 0.8, name: 'easy' },    // Perde 0.8% al secondo
+            { drain: 1.2, name: 'medium' },  // Perde 1.2% al secondo  
+            { drain: 1.8, name: 'hard' }     // Perde 1.8% al secondo
+          ];
+          const rng = Math.floor(Math.random() * 3);
+          return { ...difficulties[rng], duration: Math.max(targetTime, 15) };
+        }
+      },
+
+      click_racing_rigged: {
+        id: 'click_racing_rigged',
+        type: 'atomic', 
+        category: 'click',
+        clicksPerSecond: 10, // Identico al racing normale
+        minTime: 10,
+        maxTime: 40,
+        estimatedTime: (targetTime) => targetTime,
+        generateRiggedParams: (targetTime, constraints) => {
+          const realDuration = Math.max(Math.min(targetTime, 40), 10);
+          const fakeDifficulty = Math.floor(Math.random() * 3); // Finta difficoltà
+          return { 
+            realDuration,
+            fakeDifficulty,
+            maxProgress: 80, // Non può superare 80%
+            resetPoint: 25   // Riporta al 25%
+          };
+        }
+      },
+
       // Template compositi
       timer_then_click: {
         id: 'timer_then_click',
@@ -195,17 +250,39 @@ class AdvancedTemplateSystem {
     }
     
     if (template.category === 'click') {
-      const clicks = template.generateClicks(targetTime, constraints);
-      const estimatedTime = template.estimatedTime(clicks);
-      
-      logger.debug('TEMPLATE', `Generated ${templateId}`, { targetTime, clicks, estimatedTime, constraints });
-      
-      return {
-        type: template.category,
-        subtype: templateId,
-        target: clicks,
-        estimatedTime
-      };
+      if (templateId === 'click_racing') {
+        const params = template.generateDifficulty(targetTime, constraints);
+        logger.debug('TEMPLATE', `Generated ${templateId}`, { targetTime, params, constraints });
+        
+        return {
+          type: template.category,
+          subtype: templateId,
+          params,
+          estimatedTime: template.estimatedTime(params.duration)
+        };
+      } else if (templateId === 'click_racing_rigged') {
+        const params = template.generateRiggedParams(targetTime, constraints);
+        logger.debug('TEMPLATE', `Generated ${templateId}`, { targetTime, params, constraints });
+        
+        return {
+          type: template.category,
+          subtype: templateId,
+          params,
+          estimatedTime: template.estimatedTime(params.realDuration)
+        };
+      } else {
+        const clicks = template.generateClicks(targetTime, constraints);
+        const estimatedTime = template.estimatedTime(clicks);
+        
+        logger.debug('TEMPLATE', `Generated ${templateId}`, { targetTime, clicks, estimatedTime, constraints });
+        
+        return {
+          type: template.category,
+          subtype: templateId,
+          target: clicks,
+          estimatedTime
+        };
+      }
     }
 
     return null;

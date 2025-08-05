@@ -149,7 +149,15 @@ function generateStepHTML(template, nextUrl, sessionJS = '') {
       return minimalTemplates.timer('step', template.duration, nextUrl) + sessionJS;
     }
   } else if (template.type === 'click') {
-    return minimalTemplates.click('step', template.target, nextUrl) + sessionJS;
+    if (template.subtype === 'click_teleport') {
+      return minimalTemplates.click_teleport('step', template.target, nextUrl) + sessionJS;
+    } else if (template.subtype === 'click_racing') {
+      return minimalTemplates.click_racing('step', template.params || {drain: 1.2}, nextUrl) + sessionJS;
+    } else if (template.subtype === 'click_racing_rigged') {
+      return minimalTemplates.click_racing_rigged('step', template.params || {realDuration: 20, maxProgress: 80, resetPoint: 25}, nextUrl) + sessionJS;
+    } else {
+      return minimalTemplates.click('step', template.target, nextUrl) + sessionJS;
+    }
   } else if (template.type === 'composite') {
     const duration = Math.min(Math.max(Math.round(template.estimatedTime || 60), 15), 60);
     return minimalTemplates.timer('step', duration, nextUrl) + sessionJS;
