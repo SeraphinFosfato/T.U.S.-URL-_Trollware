@@ -56,35 +56,53 @@ class TemplateTimeEstimator {
       click_racing_rigged: {
         type: 'dynamic',
         baseTime: (params) => {
-          // Tempo reale + tempo trucco
-          const realDuration = params.realDuration || 20;
-          const riggedTime = realDuration * 0.6; // 60% tempo extra per trucco
-          return realDuration + riggedTime;
+          // Tempo base come racing medio + tempo falso/10
+          const baseDuration = params.realDuration || 20;
+          const mediumRacingTime = baseDuration * 1.0; // Difficoltà media
+          const fakeTimeBonus = baseDuration / 10; // Tempo falso diviso 10
+          return mediumRacingTime + fakeTimeBonus;
         },
-        variance: 0.5, // Altissima varianza per frustrazione
-        frustrationFactor: 1.8 // Molto frustrante
+        variance: 0.4,
+        frustrationFactor: 1.2
       },
       
       // Template Compositi
       timer_then_click: {
         type: 'composite',
-        baseTime: (params) => params.totalTime || 60,
+        baseTime: (params) => {
+          const totalTime = params.totalTime || 60;
+          const timerTime = totalTime * (params.timerRatio || 0.6);
+          const clickTime = totalTime * (1 - (params.timerRatio || 0.6));
+          // Timer: tempo diretto, Click: tempo/2 (0.5s per click)
+          return timerTime + (clickTime / 0.5) * 0.5;
+        },
         variance: 0.25,
-        frustrationFactor: 1.3 // Più frustrante per doppio step
+        frustrationFactor: 1.0 // Nessuna forzatura
       },
       
       click_then_timer: {
         type: 'composite', 
-        baseTime: (params) => params.totalTime || 60,
+        baseTime: (params) => {
+          const totalTime = params.totalTime || 60;
+          const clickTime = totalTime * (params.timerRatio || 0.4); // timerRatio = click ratio qui
+          const timerTime = totalTime * (1 - (params.timerRatio || 0.4));
+          return (clickTime / 0.5) * 0.5 + timerTime;
+        },
         variance: 0.25,
-        frustrationFactor: 1.3
+        frustrationFactor: 1.0
       },
       
       double_timer: {
         type: 'composite',
-        baseTime: (params) => params.totalTime || 60,
-        variance: 0.3, // Alta varianza per doppio timer
-        frustrationFactor: 1.5 // Molto frustrante
+        baseTime: (params) => {
+          // Due timer: primo normale, secondo punitivo (1.5x)
+          const totalTime = params.totalTime || 60;
+          const firstTimer = totalTime * 0.5;
+          const secondTimer = totalTime * 0.5 * 1.5; // Fattore punitivo
+          return firstTimer + secondTimer;
+        },
+        variance: 0.3,
+        frustrationFactor: 1.0
       }
     };
   }
@@ -110,6 +128,8 @@ class TemplateTimeEstimator {
       baseTime = estimate.baseTime(params.clicks || 10);
     } else if (estimate.type === 'dynamic') {
       baseTime = estimate.baseTime(params);
+    } else if (estimate.type === 'composite') {
+      baseTime = params.totalTime || 60;
     } else {
       baseTime = 30;
     }
