@@ -1,5 +1,7 @@
 // Sistema template avanzato con vincoli temporali
 const crypto = require('crypto');
+const timeEstimator = require('./template-time-estimator');
+const smartDistributor = require('./smart-template-distributor');
 
 class AdvancedTemplateSystem {
   constructor() {
@@ -288,7 +290,91 @@ class AdvancedTemplateSystem {
     return null;
   }
 
-  // Genera sequenza completa con vincoli
+  // Genera sequenza completa con nuovo sistema intelligente
+  generateIntelligentSequence(userParams, fingerprint, shortId) {
+    const logger = require('./debug-logger');
+    
+    const targetTime = this.timePresets[userParams.timePreset] || 60;
+    const maxSteps = this.calculateMaxSteps(targetTime);
+    const requestedSteps = Math.min(userParams.steps || maxSteps, maxSteps);
+    
+    // Test override
+    if (userParams.testTemplate) {
+      return this.generateConstrainedSequence(userParams, fingerprint, shortId);
+    }
+    
+    logger.info('TEMPLATE', 'Generating intelligent sequence', {
+      targetTime,
+      requestedSteps,
+      maxSteps,
+      userParams
+    });
+
+    // Genera seed deterministico
+    const seed = this.generateImprovedSeed(fingerprint, shortId);
+    const rng = this.createSeededRNG(seed);
+    
+    // Usa nuovo algoritmo intelligente
+    const distribution = smartDistributor.calculateOptimalDistribution(
+      targetTime, 
+      requestedSteps, 
+      rng
+    );
+    
+    // Converte in formato compatibile
+    const sequence = distribution.map(item => {
+      const template = this.templates[item.templateId];
+      
+      if (template.category === 'timer') {
+        return {
+          type: template.category,
+          subtype: item.templateId,
+          duration: item.params.duration,
+          estimatedTime: item.estimatedTime
+        };
+      } else if (template.category === 'click') {
+        if (item.templateId.includes('racing')) {
+          return {
+            type: template.category,
+            subtype: item.templateId,
+            params: item.params,
+            estimatedTime: item.estimatedTime
+          };
+        } else {
+          return {
+            type: template.category,
+            subtype: item.templateId,
+            target: item.params.clicks,
+            estimatedTime: item.estimatedTime
+          };
+        }
+      }
+    });
+    
+    const totalEstimatedTime = sequence.reduce((sum, s) => sum + s.estimatedTime, 0);
+    
+    logger.info('TEMPLATE', 'Generated intelligent sequence', {
+      sequence: sequence.map(s => ({ type: s.type, subtype: s.subtype, estimatedTime: s.estimatedTime })),
+      totalEstimatedTime,
+      targetTime,
+      accuracy: Math.abs(totalEstimatedTime - targetTime) / targetTime,
+      seed: seed.substring(0, 8)
+    });
+    
+    return {
+      sequence,
+      metadata: {
+        targetTime,
+        actualTime: totalEstimatedTime,
+        steps: requestedSteps,
+        accuracy: Math.abs(totalEstimatedTime - targetTime) / targetTime,
+        algorithm: 'intelligent',
+        seed: seed.substring(0, 8)
+      }
+    };
+  }
+
+  // Genera sequenza completa con vincoli (legacy)
   generateConstrainedSequence(userParams, fingerprint, shortId) {
     const logger = require('./debug-logger');
     

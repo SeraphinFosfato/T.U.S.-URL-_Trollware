@@ -36,8 +36,8 @@ async function handleVictimStep(req, res, currentStep) {
   
   // Primo step: genera percorso con sistema avanzato
   if (currentStep === 0) {
-    // Genera sequenza con vincoli utente
-    const sequenceData = advancedTemplates.generateConstrainedSequence(
+    // Genera sequenza con nuovo sistema intelligente
+    const sequenceData = advancedTemplates.generateIntelligentSequence(
       urlData.user_params,
       fingerprint,
       shortId
