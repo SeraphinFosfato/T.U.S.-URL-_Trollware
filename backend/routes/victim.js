@@ -121,7 +121,11 @@ async function handleVictimStep(req, res, currentStep) {
 // Usa SEMPRE template originali
 function generateStepHTML(template, nextUrl, sessionJS = '') {
   if (template.type === 'timer') {
-    return minimalTemplates.timer('step', template.duration, nextUrl) + sessionJS;
+    if (template.subtype === 'timer_punish') {
+      return minimalTemplates.timer_punish('step', template.duration, nextUrl) + sessionJS;
+    } else {
+      return minimalTemplates.timer('step', template.duration, nextUrl) + sessionJS;
+    }
   } else if (template.type === 'click') {
     return minimalTemplates.click('step', template.target, nextUrl) + sessionJS;
   } else if (template.type === 'composite') {
