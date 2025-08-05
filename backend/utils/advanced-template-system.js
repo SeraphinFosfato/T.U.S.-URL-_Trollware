@@ -393,6 +393,11 @@ class AdvancedTemplateSystem {
 
   // Selezione template con peso
   selectWeightedTemplate(weights, rng) {
+    // TEMP: Forza teleporting per test
+    if (weights['click_teleport'] && rng() < 0.5) {
+      return 'click_teleport';
+    }
+    
     const totalWeight = Object.values(weights).reduce((sum, w) => sum + w, 0);
     let random = rng() * totalWeight;
     
