@@ -249,8 +249,8 @@ timer_then_click: 3    click_then_timer: 3
 double_timer: 4
 
 // Template compositi avanzati - revenue alta (5-8)
-racing_then_teleport: 5    teleport_then_racing: 5
-triple_click: 7            racing_sandwich: 8
+racing_then_teleport: 5    teleport_then_racing: 5    // 2 step ciascuno
+triple_click: 7            racing_sandwich: 8          // 3 step ciascuno
 ```
 
 ### **🎯 Slot Pubblicitari**
@@ -365,14 +365,21 @@ templateLimits = {
 ### **Script di Test**
 ```bash
 cd tests
-node test-racing.js           # Racing click game
-node test-rigged.js           # Rigged racing game  
-node test-teleport.js         # Teleporting click game
-node test-all-games.js        # Sequenza multi-game
-node create-test-link.js      # Link generico
-node test-new-templates.js    # Nuovi template compositi
-node test-revenue-system.js   # Sistema revenue
-node debug-weights.js         # Debug pesi template
+# Test locali (logica)
+node quick-template-test.js        # Test sistema completo
+node revenue-comparison.js         # Confronto revenue
+node debug-weights.js              # Debug pesi template
+
+# Test su Render (UI reale)
+node generate-real-test-links.js   # Genera link per tutti i template
+node batch-template-test.js        # Batch test + HTML
+node test-revenue-on-render.js     # Test revenue su server
+
+# Test legacy
+node test-racing.js                # Racing click game
+node test-rigged.js                # Rigged racing game  
+node test-teleport.js              # Teleporting click game
+node create-test-link.js           # Link generico
 ```
 
 ### **Debug Template Selection**
@@ -418,8 +425,14 @@ DEBUG: Found 7 viable templates for targetTime 120
 - 3 piani utente (FREE/PREMIUM/VIP)
 - Sistema advertising scalabile
 
+### **✅ FASE 5**: Fix Template Compositi (Iterazione 25)
+- Template compositi ora espansi in step multipli atomici
+- Fix bug: compositi non più convertiti in timer singolo
+- Ogni step del composito gestito separatamente
+- Sistema multi-step funzionante per tutti i 13 template
+
 ---
 
-**🎯 Sistema Template + Revenue Completamente Automatizzato**
+**🎯 Sistema Template + Revenue + Multi-Step Completamente Funzionante**
 
-*Selezione ottimale + monetizzazione intelligente basata su complessità template*
+*13 template, sistema revenue, compositi multi-step, test completi su Render*

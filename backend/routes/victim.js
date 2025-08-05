@@ -166,6 +166,8 @@ function generateStepHTML(template, nextUrl, sessionJS = '') {
       return minimalTemplates.click('step', template.target, nextUrl) + sessionJS;
     }
   } else if (template.type === 'composite') {
+    // ERRORE: I compositi devono essere espansi in step multipli, non convertiti in timer singolo
+    // Per ora fallback a timer, ma questo è il bug
     const duration = Math.min(Math.max(Math.round(template.estimatedTime || 60), 15), 60);
     return minimalTemplates.timer('step', duration, nextUrl) + sessionJS;
   }

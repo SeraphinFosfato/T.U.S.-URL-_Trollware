@@ -326,14 +326,14 @@ class AdvancedTemplateSystem {
     const sequence = distribution.map(item => {
       const template = this.templates[item.templateId];
       
-      // Template compositi
-      if (item.templateId.includes('_then_') || item.templateId === 'double_timer') {
-        return {
-          type: 'composite',
-          subtype: item.templateId,
-          sequence: template.generateSequence(item.targetTime, {}),
-          estimatedTime: item.estimatedTime
-        };
+      // Template compositi: espandi in step multipli
+      if (item.templateId.includes('_then_') || item.templateId === 'double_timer' || 
+          item.templateId === 'triple_click' || item.templateId === 'racing_sandwich' ||
+          item.templateId === 'racing_then_teleport' || item.templateId === 'teleport_then_racing') {
+        
+        // Espandi compositi in step atomici
+        const subSteps = this.expandCompositeTemplate(item.templateId, item.targetTime, item.params);
+        return subSteps; // Ritorna array di step atomici
       }
       
       if (!template) {
@@ -378,10 +378,20 @@ class AdvancedTemplateSystem {
       };
     }).filter(Boolean);
     
-    const totalEstimatedTime = sequence.reduce((sum, s) => sum + s.estimatedTime, 0);
+    // Flatten compositi espansi
+    const flatSequence = [];
+    sequence.forEach(item => {
+      if (Array.isArray(item)) {
+        flatSequence.push(...item); // Espandi compositi
+      } else {
+        flatSequence.push(item);
+      }
+    });
+    
+    const totalEstimatedTime = flatSequence.reduce((sum, s) => sum + s.estimatedTime, 0);
     
     logger.info('TEMPLATE', 'Generated intelligent sequence', {
-      sequence: sequence.map(s => ({ type: s.type, subtype: s.subtype, estimatedTime: s.estimatedTime })),
+      sequence: flatSequence.map(s => ({ type: s.type, subtype: s.subtype, estimatedTime: s.estimatedTime })),
       totalEstimatedTime,
       targetTime,
       accuracy: Math.abs(totalEstimatedTime - targetTime) / targetTime,
@@ -389,11 +399,11 @@ class AdvancedTemplateSystem {
     });
     
     return {
-      sequence,
+      sequence: flatSequence,
       metadata: {
         targetTime,
         actualTime: totalEstimatedTime,
-        steps: requestedSteps,
+        steps: flatSequence.length,
         accuracy: Math.abs(totalEstimatedTime - targetTime) / targetTime,
         algorithm: 'intelligent',
         seed: seed.substring(0, 8)
@@ -533,6 +543,161 @@ class AdvancedTemplateSystem {
     
     // Fallback
     return Object.keys(weights)[0];
+  }
+  
+  // Espandi template compositi in step atomici
+  expandCompositeTemplate(templateId, targetTime, params) {
+    const estimator = require('./template-time-estimator');
+    
+    switch (templateId) {
+      case 'timer_then_click':
+        const timerTime1 = Math.floor(targetTime * 0.6);
+        const clickTime1 = targetTime - timerTime1;
+        return [
+          {
+            type: 'timer',
+            subtype: 'timer_simple',
+            duration: Math.max(timerTime1, 15),
+            estimatedTime: Math.max(timerTime1, 15)
+          },
+          {
+            type: 'click',
+            subtype: 'click_simple',
+            target: Math.max(Math.floor(clickTime1 * 2), 3),
+            estimatedTime: clickTime1
+          }
+        ];
+        
+      case 'click_then_timer':
+        const clickTime2 = Math.floor(targetTime * 0.4);
+        const timerTime2 = targetTime - clickTime2;
+        return [
+          {
+            type: 'click',
+            subtype: 'click_simple',
+            target: Math.max(Math.floor(clickTime2 * 2), 3),
+            estimatedTime: clickTime2
+          },
+          {
+            type: 'timer',
+            subtype: 'timer_simple',
+            duration: Math.max(timerTime2, 15),
+            estimatedTime: timerTime2
+          }
+        ];
+        
+      case 'double_timer':
+        const timer1Time = Math.floor(targetTime * 0.5);
+        const timer2Time = targetTime - timer1Time;
+        return [
+          {
+            type: 'timer',
+            subtype: 'timer_simple',
+            duration: Math.max(timer1Time, 15),
+            estimatedTime: timer1Time
+          },
+          {
+            type: 'timer',
+            subtype: 'timer_punish',
+            duration: Math.max(timer2Time, 20),
+            estimatedTime: timer2Time
+          }
+        ];
+        
+      case 'racing_then_teleport':
+        const racingTime1 = Math.floor(targetTime * 0.6);
+        const teleportTime1 = targetTime - racingTime1;
+        return [
+          {
+            type: 'click',
+            subtype: 'click_racing',
+            params: { duration: Math.max(racingTime1, 15), drain: 0.8 },
+            estimatedTime: racingTime1
+          },
+          {
+            type: 'click',
+            subtype: 'click_teleport',
+            target: Math.max(Math.floor(teleportTime1 * 1.5), 5),
+            estimatedTime: teleportTime1
+          }
+        ];
+        
+      case 'teleport_then_racing':
+        const teleportTime2 = Math.floor(targetTime * 0.4);
+        const racingTime2 = targetTime - teleportTime2;
+        return [
+          {
+            type: 'click',
+            subtype: 'click_teleport',
+            target: Math.max(Math.floor(teleportTime2 * 1.5), 5),
+            estimatedTime: teleportTime2
+          },
+          {
+            type: 'click',
+            subtype: 'click_racing',
+            params: { duration: Math.max(racingTime2, 15), drain: 0.8 },
+            estimatedTime: racingTime2
+          }
+        ];
+        
+      case 'triple_click':
+        const step1Time = Math.floor(targetTime * 0.33);
+        const step2Time = Math.floor(targetTime * 0.33);
+        const step3Time = targetTime - step1Time - step2Time;
+        return [
+          {
+            type: 'click',
+            subtype: 'click_simple',
+            target: Math.max(Math.floor(step1Time * 2), 3),
+            estimatedTime: step1Time
+          },
+          {
+            type: 'click',
+            subtype: 'click_drain',
+            target: Math.max(Math.floor(step2Time * 1.5), 5),
+            estimatedTime: step2Time
+          },
+          {
+            type: 'click',
+            subtype: 'click_teleport',
+            target: Math.max(Math.floor(step3Time * 1.5), 5),
+            estimatedTime: step3Time
+          }
+        ];
+        
+      case 'racing_sandwich':
+        const racing1Time = Math.floor(targetTime * 0.4);
+        const timerMiddleTime = Math.floor(targetTime * 0.2);
+        const racing2Time = targetTime - racing1Time - timerMiddleTime;
+        return [
+          {
+            type: 'click',
+            subtype: 'click_racing',
+            params: { duration: Math.max(racing1Time, 15), drain: 0.6 },
+            estimatedTime: racing1Time
+          },
+          {
+            type: 'timer',
+            subtype: 'timer_simple',
+            duration: Math.max(timerMiddleTime, 15),
+            estimatedTime: timerMiddleTime
+          },
+          {
+            type: 'click',
+            subtype: 'click_racing_rigged',
+            params: { realDuration: Math.max(racing2Time, 10), maxProgress: 80, resetPoint: 25 },
+            estimatedTime: racing2Time
+          }
+        ];
+        
+      default:
+        return [{
+          type: 'timer',
+          subtype: 'timer_simple',
+          duration: Math.max(targetTime, 15),
+          estimatedTime: targetTime
+        }];
+    }
   }
 }
 

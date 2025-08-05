@@ -1,5 +1,5 @@
-// Genera link reali per testare template su Render
-const axios = require('axios');
+// Genera link reali per testare template su Render usando API esistente
+const https = require('https');
 
 const BASE_URL = 'https://tus-tasklink.onrender.com';
 const TEST_TARGET = 'https://example.com';
@@ -21,35 +21,68 @@ const templates = {
   racing_sandwich: { totalTime: 150, timerRatio: 0.4 }
 };
 
+function createTestLink(templateId) {
+  return new Promise((resolve, reject) => {
+    const postData = JSON.stringify({
+      url: TEST_TARGET,
+      timePreset: '2min',
+      steps: 1,
+      expiryPreset: '1d',
+      testTemplate: templateId
+    });
+
+    const options = {
+      hostname: 'tus-tasklink.onrender.com',
+      port: 443,
+      path: '/api/shorten',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const response = JSON.parse(data);
+          if (res.statusCode === 200) {
+            resolve({
+              templateId,
+              shortUrl: response.shortUrl,
+              shortId: response.shortId
+            });
+          } else {
+            reject(new Error(response.error || 'API Error'));
+          }
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+
+    req.on('error', reject);
+    req.write(postData);
+    req.end();
+  });
+}
+
 async function generateTestLinks() {
   console.log('🧌 Generating Real Test Links on Render');
   console.log('======================================');
   
   const results = [];
   
-  for (const [templateId, params] of Object.entries(templates)) {
+  for (const templateId of Object.keys(templates)) {
     try {
       console.log(`\n📋 Creating link for ${templateId}...`);
       
-      const response = await axios.post(`${BASE_URL}/api/create`, {
-        url: TEST_TARGET,
-        forceTemplate: templateId,
-        forceParams: params
-      });
+      const result = await createTestLink(templateId);
+      results.push(result);
       
-      if (response.data.success) {
-        const shortUrl = `${BASE_URL}/${response.data.shortId}`;
-        results.push({
-          templateId,
-          params,
-          shortUrl,
-          shortId: response.data.shortId
-        });
-        
-        console.log(`✅ ${templateId}: ${shortUrl}`);
-      } else {
-        console.log(`❌ ${templateId}: Failed`);
-      }
+      console.log(`✅ ${templateId}: ${result.shortUrl}`);
       
       // Delay per non sovraccaricare
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -65,7 +98,7 @@ async function generateTestLinks() {
   results.forEach(result => {
     console.log(`\n${result.templateId}:`);
     console.log(`  URL: ${result.shortUrl}`);
-    console.log(`  Params: ${JSON.stringify(result.params)}`);
+    console.log(`  Revenue: ${getRevenue(result.templateId)}`);
   });
   
   console.log(`\n✅ Generated ${results.length}/${Object.keys(templates).length} test links`);
@@ -74,8 +107,25 @@ async function generateTestLinks() {
   return results;
 }
 
+function getRevenue(templateId) {
+  const revenues = {
+    timer_simple: 1, timer_punish: 2,
+    click_simple: 1, click_drain: 2, click_teleport: 3, click_racing: 2, click_racing_rigged: 4,
+    timer_then_click: 3, click_then_timer: 3, double_timer: 4,
+    racing_then_teleport: 5, teleport_then_racing: 5, triple_click: 7, racing_sandwich: 8
+  };
+  return revenues[templateId] || 0;
+}
+
+function getTemplateType(templateId) {
+  if (templateId.startsWith('timer')) return 'Timer';
+  if (templateId.startsWith('click') && !templateId.includes('_then_')) return 'Click';
+  if (templateId.includes('_then_') || templateId === 'double_timer') return 'Composite Base';
+  return 'Composite Advanced';
+}
+
 if (require.main === module) {
   generateTestLinks().catch(console.error);
 }
 
-module.exports = { generateTestLinks, templates, BASE_URL };
+module.exports = { generateTestLinks, templates, BASE_URL, getRevenue, getTemplateType };

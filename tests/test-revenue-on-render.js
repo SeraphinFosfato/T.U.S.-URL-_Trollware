@@ -22,7 +22,7 @@ async function testRevenueSystem() {
       console.log(`\n📋 ${template.desc} (${template.id}):`);
       
       // Crea link normale
-      const normalResponse = await axios.post(`${BASE_URL}/api/create`, {
+      const normalResponse = await axios.post(`${BASE_URL}/create`, {
         url: TEST_TARGET,
         forceTemplate: template.id
       });
