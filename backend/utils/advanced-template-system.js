@@ -121,9 +121,9 @@ class AdvancedTemplateSystem {
         generateDifficulty: (targetTime, constraints) => {
           // 3 difficoltà: easy, medium, hard
           const difficulties = [
-            { drain: 0.8, name: 'easy' },    // Perde 0.8% al secondo
-            { drain: 1.2, name: 'medium' },  // Perde 1.2% al secondo  
-            { drain: 1.8, name: 'hard' }     // Perde 1.8% al secondo
+            { drain: 0.3 + Math.random() * 0.3, name: 'easy' },    // 0.3-0.6%
+            { drain: 0.7 + Math.random() * 0.3, name: 'medium' },  // 0.7-1.0%  
+            { drain: 1.1 + Math.random() * 0.2, name: 'hard' }     // 1.1-1.3%
           ];
           const rng = Math.floor(Math.random() * 3);
           return { ...difficulties[rng], duration: Math.max(targetTime, 15) };
