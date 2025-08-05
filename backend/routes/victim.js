@@ -75,26 +75,48 @@ async function handleVictimStep(req, res, currentStep) {
   let pathData = null;
   const pathCookie = req.cookies.troll_path;
   
+  logger.info('VICTIM', 'Checking session', { 
+    hasCookie: !!pathCookie, 
+    fingerprint,
+    currentStep 
+  });
+  
   if (pathCookie && clientFingerprint.validatePath(pathCookie)) {
     const cookieData = clientFingerprint.decryptPath(pathCookie);
     if (cookieData && cookieData.shortId === shortId) {
       pathData = await db.getClientPath(cookieData.pathHash);
+      logger.info('VICTIM', 'Cookie session found', { pathHash: cookieData.pathHash });
     }
   }
   
-  // Fallback: cerca per shortId + fingerprint
+  // Fallback robusto: cerca per shortId + fingerprint
   if (!pathData) {
-    return res.status(400).send('<h1>Session expired - please restart</h1>');
+    logger.warn('VICTIM', 'Cookie session failed, trying DB fallback');
+    const pathHash = clientFingerprint.generatePathHash(shortId, fingerprint);
+    pathData = await db.getClientPath(pathHash);
+    
+    if (pathData) {
+      logger.info('VICTIM', 'DB fallback successful', { pathHash });
+    } else {
+      logger.error('VICTIM', 'Session completely lost', { shortId, fingerprint });
+      return res.status(400).send('<h1>Session expired - <a href="/v/' + shortId + '">restart here</a></h1>');
+    }
   }
   
-  // Verifica step progression
+  // Verifica step progression con tolleranza
   if (currentStep !== pathData.currentStep + 1) {
     logger.warn('VICTIM', 'Invalid step sequence', {
       expected: pathData.currentStep + 1,
       received: currentStep,
       pathHash: pathData.pathHash
     });
-    return res.status(400).send('<h1>Invalid step sequence</h1>');
+    
+    // Se è solo 1 step indietro, permetti (refresh page)
+    if (currentStep === pathData.currentStep) {
+      logger.info('VICTIM', 'Allowing same step (page refresh)');
+    } else {
+      return res.status(400).send('<h1>Invalid step sequence - <a href="/v/' + shortId + '">restart</a></h1>');
+    }
   }
   
   // Se completato tutti i step
