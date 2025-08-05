@@ -2,15 +2,15 @@
 
 > Un URL shortener che forza gli utenti attraverso step fastidiosi prima del redirect finale
 
-## 🚀 Stato Progetto (Iterazione 21 - Stabile)
+## 🚀 Stato Progetto (Iterazione 22 - Nuovi Games)
 
 ### ✅ Funzionalità Core Implementate
 - **MVP Funzionante** con RNG deterministico stabile
 - **Timer Standard** (pause/resume con penalty 1.5s + 2-5s random)
 - **Timer Punitivo** (Windows 95 style, reload su focus loss)
-- **Click Game** con progress bar visiva e feedback migliorato
+- **Click Games Avanzati** con 6 varianti diverse
 - **Sistema Sessioni** robusto con fallback DB
-- **Template System** avanzato con vincoli temporali ottimizzato
+- **Template System** avanzato con 9 template totali
 
 ### 🏗️ Architettura
 - **Backend**: Node.js/Express + MongoDB Atlas
@@ -18,18 +18,27 @@
 - **Deploy**: Render.com con auto-deploy da GitHub
 - **Database**: MongoDB Atlas con TTL automatico
 
-### 🎯 Ultimi Fix Critici (Iterazione 21)
-1. **RNG Deterministico**: Risolto problema reload cambia percorso
-2. **Continue Button**: Verificato funzionamento ultimo step
-3. **Percorsi Personalizzati**: Fingerprint diversi = sequenze uniche
-4. **UI Ottimizzata**: Progress bar, transizioni fluide, feedback visivo
+### 🎯 Nuove Features (Iterazione 22)
+1. **Teleporting Click**: Button che si teletrasporta (35% hover, 10% barriera, 5s idle)
+2. **Racing Click**: Riempi barra vs drain automatico (3 difficoltà)
+3. **Rigged Racing**: Racing truccato con timer nascosto
+4. **Template Avanzati**: 6 atomici + 3 compositi = 9 template totali
 
 ## 🧪 Test e Verifica
 
 ### Link di Test Attivo
 - **URL**: https://tus-tasklink.onrender.com
-- **Test Reload**: `node test-reload-consistency.js`
-- **Test Final Step**: `node create-test-link.js`
+- **Test Organizzati**: Cartella `tests/`
+
+### Script di Test Disponibili
+```bash
+cd tests
+node test-teleport.js      # Teleporting click game
+node test-racing.js        # Racing click game  
+node test-rigged.js        # Rigged racing game
+node test-all-games.js     # Sequenza multi-game
+node create-test-link.js   # Link generico
+```
 
 ### Comportamenti Verificati
 - ✅ Stesso fingerprint = stessa sequenza sempre
@@ -79,17 +88,20 @@ if (currentStep >= pathData.templates.length) {
 // Cookie + localStorage + DB fallback = robustezza
 ```
 
-## 🎮 Template Disponibili
+## 🎮 Template Disponibili (9 Totali)
 
-### Timer
+### Timer (2)
 - `timer_simple`: 15-60s, pause/resume con penalty
 - `timer_punish`: 20-45s, Windows 95 style, reload su focus loss
 
-### Click Games
+### Click Games (6)
 - `click_simple`: 3-60 click, delay 0.5s
 - `click_drain`: 10-60 click, più lento (0.67s per click)
+- `click_teleport`: 5-40 click, button che si teletrasporta
+- `click_racing`: 15-45s, riempi barra vs drain
+- `click_racing_rigged`: 10-40s, racing truccato con timer nascosto
 
-### Compositi
+### Compositi (3)
 - `timer_then_click`: Timer seguito da click game
 - `click_then_timer`: Click game seguito da timer
 - `double_timer`: Due timer in sequenza
@@ -106,10 +118,14 @@ git push origin main
 
 ## 📊 Prossimi Sviluppi
 
-### In Sviluppo (Iterazione 22)
-- **Teleporting Click Game**: Click button che si sposta
-- **Racing Click Game**: Riempi barra vs svuotamento
-- **Rigged Racing**: Racing truccato con timer invisibile
+### Completato (Iterazione 22)
+- **Teleporting Click Game**: ✅ Implementato con barriera predittiva
+- **Racing Click Game**: ✅ Implementato con 3 difficoltà
+- **Rigged Racing**: ✅ Implementato con timer nascosto
+
+### In Sviluppo (Iterazione 23)
+- **Sistema Layered**: Minigiochi sovrapposti nella stessa posizione
+- **Template Ricombinati**: Nuove combinazioni con 9 template
 
 ### Roadmap Futura
 - Analytics Dashboard
