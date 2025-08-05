@@ -299,9 +299,96 @@ class AdvancedTemplateSystem {
       const maxSteps = this.calculateMaxSteps(targetTime);
       const requestedSteps = Math.min(userParams.steps || maxSteps, maxSteps);
       
-      // Test override
+      // Test override: usa sistema intelligente anche per test
       if (userParams.testTemplate) {
-        return this.generateConstrainedSequence(userParams, fingerprint, shortId);
+        // Forza il template nel sistema intelligente
+        const distribution = [{
+          templateId: userParams.testTemplate,
+          params: timeEstimator.generateOptimalParams(userParams.testTemplate, targetTime),
+          estimatedTime: timeEstimator.estimateTime(userParams.testTemplate, timeEstimator.generateOptimalParams(userParams.testTemplate, targetTime)),
+          targetTime: targetTime
+        }];
+        
+        // Espandi compositi
+        const sequence = distribution.map(item => {
+          if (item.templateId.includes('_then_') || item.templateId === 'double_timer' || 
+              item.templateId === 'triple_click' || item.templateId === 'racing_sandwich' ||
+              item.templateId === 'racing_then_teleport' || item.templateId === 'teleport_then_racing') {
+            return this.expandCompositeTemplate(item.templateId, item.targetTime, item.params);
+          }
+          
+          const template = this.templates[item.templateId];
+          if (!template) {
+            return {
+              type: 'timer',
+              subtype: 'timer_simple',
+              duration: 30,
+              estimatedTime: 30
+            };
+          }
+          
+          if (template.category === 'timer') {
+            return {
+              type: template.category,
+              subtype: item.templateId,
+              duration: item.params.duration || 30,
+              estimatedTime: item.estimatedTime
+            };
+          } else if (template.category === 'click') {
+            if (item.templateId.includes('racing')) {
+              return {
+                type: template.category,
+                subtype: item.templateId,
+                params: item.params || { duration: 30, drain: 1.0 },
+                estimatedTime: item.estimatedTime
+              };
+            } else {
+              return {
+                type: template.category,
+                subtype: item.templateId,
+                target: item.params.clicks || 10,
+                estimatedTime: item.estimatedTime
+              };
+            }
+          }
+          
+          return {
+            type: 'timer',
+            subtype: 'timer_simple',
+            duration: 30,
+            estimatedTime: 30
+          };
+        }).filter(Boolean);
+        
+        // Flatten compositi espansi
+        const flatSequence = [];
+        sequence.forEach(item => {
+          if (Array.isArray(item)) {
+            flatSequence.push(...item);
+          } else {
+            flatSequence.push(item);
+          }
+        });
+        
+        const totalEstimatedTime = flatSequence.reduce((sum, s) => sum + s.estimatedTime, 0);
+        
+        logger.info('TEMPLATE', 'Generated test template sequence', {
+          testTemplate: userParams.testTemplate,
+          sequence: flatSequence.map(s => ({ type: s.type, subtype: s.subtype, estimatedTime: s.estimatedTime })),
+          totalEstimatedTime,
+          targetTime
+        });
+        
+        return {
+          sequence: flatSequence,
+          metadata: {
+            targetTime,
+            actualTime: totalEstimatedTime,
+            steps: flatSequence.length,
+            algorithm: 'test_forced',
+            testTemplate: userParams.testTemplate
+          }
+        };
       }
     
     logger.info('TEMPLATE', 'Generating intelligent sequence', {
