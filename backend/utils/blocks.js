@@ -11,12 +11,26 @@ function generateRandomSequence(count = 2, testOverride = null) {
     return testOverride;
   }
   
-  // RNG FORZATO per debug
-  return [
-    { type: 'timer', subtype: 'timer_simple', duration: 15, estimatedTime: 15 },
-    { type: 'click', subtype: 'click_simple', target: 5, estimatedTime: 2.5 },
-    { type: 'timer', subtype: 'timer_punish', duration: 20, estimatedTime: 30 }
-  ];
+  // RNG DETERMINISTICO - usa advanced-template-system per percorsi consistenti
+  const advancedTemplates = require('./advanced-template-system');
+  
+  // Parametri default per RNG
+  const defaultParams = {
+    timePreset: '1min',
+    steps: 3 // fisso per consistenza
+  };
+  
+  // Genera fingerprint fittizio deterministico per RNG
+  const fakeFingerprint = 'rng_deterministic_' + (testOverride ? 'test' : 'prod');
+  const fakeShortId = 'fixed_shortid';
+  
+  const result = advancedTemplates.generateConstrainedSequence(
+    defaultParams,
+    fakeFingerprint, 
+    fakeShortId
+  );
+  
+  return result.sequence;
 }
 
 // Genera HTML per sequenza di blocchi (USA SISTEMA AVANZATO)
