@@ -294,14 +294,15 @@ class AdvancedTemplateSystem {
   generateIntelligentSequence(userParams, fingerprint, shortId) {
     const logger = require('./debug-logger');
     
-    const targetTime = this.timePresets[userParams.timePreset] || 60;
-    const maxSteps = this.calculateMaxSteps(targetTime);
-    const requestedSteps = Math.min(userParams.steps || maxSteps, maxSteps);
-    
-    // Test override
-    if (userParams.testTemplate) {
-      return this.generateConstrainedSequence(userParams, fingerprint, shortId);
-    }
+    try {
+      const targetTime = this.timePresets[userParams.timePreset] || 60;
+      const maxSteps = this.calculateMaxSteps(targetTime);
+      const requestedSteps = Math.min(userParams.steps || maxSteps, maxSteps);
+      
+      // Test override
+      if (userParams.testTemplate) {
+        return this.generateConstrainedSequence(userParams, fingerprint, shortId);
+      }
     
     logger.info('TEMPLATE', 'Generating intelligent sequence', {
       targetTime,
@@ -321,15 +322,24 @@ class AdvancedTemplateSystem {
       rng
     );
     
-    // Converte in formato compatibile
+    // Converte in formato compatibile con fallback robusto
     const sequence = distribution.map(item => {
       const template = this.templates[item.templateId];
+      if (!template) {
+        // Fallback per template mancante
+        return {
+          type: 'timer',
+          subtype: 'timer_simple',
+          duration: 30,
+          estimatedTime: 30
+        };
+      }
       
       if (template.category === 'timer') {
         return {
           type: template.category,
           subtype: item.templateId,
-          duration: item.params.duration,
+          duration: item.params.duration || 30,
           estimatedTime: item.estimatedTime
         };
       } else if (template.category === 'click') {
@@ -337,19 +347,27 @@ class AdvancedTemplateSystem {
           return {
             type: template.category,
             subtype: item.templateId,
-            params: item.params,
+            params: item.params || { duration: 30, drain: 1.0 },
             estimatedTime: item.estimatedTime
           };
         } else {
           return {
             type: template.category,
             subtype: item.templateId,
-            target: item.params.clicks,
+            target: item.params.clicks || 10,
             estimatedTime: item.estimatedTime
           };
         }
       }
-    });
+      
+      // Fallback finale
+      return {
+        type: 'timer',
+        subtype: 'timer_simple',
+        duration: 30,
+        estimatedTime: 30
+      };
+    }).filter(Boolean);
     
     const totalEstimatedTime = sequence.reduce((sum, s) => sum + s.estimatedTime, 0);
     
@@ -372,6 +390,11 @@ class AdvancedTemplateSystem {
         seed: seed.substring(0, 8)
       }
     };
+    
+    } catch (error) {
+      logger.error('TEMPLATE', 'Intelligent system failed, falling back to legacy', { error: error.message });
+      return this.generateConstrainedSequence(userParams, fingerprint, shortId);
+    }
   }
 
   // Genera sequenza completa con vincoli (legacy)
