@@ -3,6 +3,40 @@ const timeEstimator = require('./template-time-estimator');
 
 class SmartTemplateDistributor {
   constructor() {
+    // Sistema Revenue per advertising dinamico
+    this.revenueSystem = {
+      enabled: false, // Flag globale per abilitare revenue
+      templateRevenue: {
+        // Template singoli - revenue bassa
+        timer_simple: 1,
+        timer_punish: 2,
+        click_simple: 1,
+        click_drain: 2,
+        click_teleport: 3,
+        click_racing: 2,
+        click_racing_rigged: 4,
+        
+        // Template compositi base - revenue media
+        timer_then_click: 3,
+        click_then_timer: 3,
+        double_timer: 4,
+        
+        // Template compositi avanzati - revenue alta
+        racing_then_teleport: 5,
+        teleport_then_racing: 5,
+        triple_click: 7,
+        racing_sandwich: 8
+      },
+      
+      // Slot pubblicitari che si sbloccano per revenue
+      adSlots: {
+        header: { threshold: 2, enabled: false },
+        sidebar: { threshold: 4, enabled: false },
+        footer: { threshold: 3, enabled: false },
+        interstitial: { threshold: 6, enabled: false },
+        overlay: { threshold: 8, enabled: false }
+      }
+    };
     this.baseWeights = {
       timer_simple: 1.0,
       timer_punish: 0.8,
@@ -12,10 +46,16 @@ class SmartTemplateDistributor {
       click_racing: 1.1,
       click_racing_rigged: 0.6,
       
-      // Template ricombinati
+      // Template ricombinati base
       timer_then_click: 0.7,
       click_then_timer: 0.7,
-      double_timer: 0.5
+      double_timer: 0.5,
+      
+      // Template compositi avanzati
+      racing_then_teleport: 0.6,
+      teleport_then_racing: 0.6,
+      triple_click: 0.4,
+      racing_sandwich: 0.3
     };
     
     // Limiti massimi realistici per template singoli
@@ -30,7 +70,7 @@ class SmartTemplateDistributor {
     };
   }
   
-  calculateOptimalDistribution(targetTime, steps, rng) {
+  calculateOptimalDistribution(targetTime, steps, rng, revenueMultiplier = 1.0) {
     const timePerStep = targetTime / steps;
     const distribution = [];
     
@@ -46,11 +86,14 @@ class SmartTemplateDistributor {
       const params = timeEstimator.generateOptimalParams(selectedTemplate, stepTime);
       const estimatedTime = timeEstimator.estimateTime(selectedTemplate, params);
       
+      const revenue = this.calculateRevenue(selectedTemplate, revenueMultiplier);
+      
       distribution.push({
         templateId: selectedTemplate,
         params,
         estimatedTime,
-        targetTime: stepTime
+        targetTime: stepTime,
+        revenue
       });
       
       remainingTime -= estimatedTime;
@@ -107,9 +150,9 @@ class SmartTemplateDistributor {
       
       // Bonus per compositi quando singoli sono al limite
       const isComposite = template.templateId.includes('_then_') || template.templateId === 'double_timer';
-      if (isComposite && targetTime > 90) {
-        // Bonus crescente per tempi lunghi
-        const compositeBonus = Math.min((targetTime - 90) / 60, 2); // Max 2x bonus
+      if (isComposite && targetTime > 45) {
+        // Bonus crescente per tempi medi-lunghi
+        const compositeBonus = Math.min((targetTime - 45) / 30, 3); // Max 3x bonus, inizia da 45s
         weight *= (1 + compositeBonus);
       }
       
@@ -139,6 +182,35 @@ class SmartTemplateDistributor {
     }
     
     return dynamicWeights[0].templateId;
+  }
+  
+  // Calcola revenue per template
+  calculateRevenue(templateId, multiplier = 1.0) {
+    if (!this.revenueSystem.enabled) return 0;
+    
+    const baseRevenue = this.revenueSystem.templateRevenue[templateId] || 1;
+    return Math.ceil(baseRevenue * multiplier);
+  }
+  
+  // Calcola slot pubblicitari abilitati per revenue totale
+  calculateEnabledAdSlots(totalRevenue) {
+    const enabledSlots = {};
+    
+    Object.entries(this.revenueSystem.adSlots).forEach(([slot, config]) => {
+      enabledSlots[slot] = totalRevenue >= config.threshold;
+    });
+    
+    return enabledSlots;
+  }
+  
+  // Abilita/disabilita sistema revenue
+  setRevenueEnabled(enabled) {
+    this.revenueSystem.enabled = enabled;
+  }
+  
+  // Ottieni revenue totale da distribuzione
+  getTotalRevenue(distribution) {
+    return distribution.reduce((total, step) => total + (step.revenue || 0), 0);
   }
 }
 

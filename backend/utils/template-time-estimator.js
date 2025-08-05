@@ -103,6 +103,53 @@ class TemplateTimeEstimator {
         },
         variance: 0.3,
         frustrationFactor: 1.0
+      },
+      
+      // Nuovi Template Compositi Avanzati
+      racing_then_teleport: {
+        type: 'composite',
+        baseTime: (params) => {
+          const totalTime = params.totalTime || 90;
+          const racingTime = totalTime * 0.6; // 60% racing
+          const teleportTime = totalTime * 0.4; // 40% teleport
+          return racingTime * 1.2 + (teleportTime / 0.8) * 0.8 * 1.4;
+        },
+        variance: 0.35,
+        frustrationFactor: 1.0
+      },
+      
+      teleport_then_racing: {
+        type: 'composite', 
+        baseTime: (params) => {
+          const totalTime = params.totalTime || 90;
+          const teleportTime = totalTime * 0.4;
+          const racingTime = totalTime * 0.6;
+          return (teleportTime / 0.8) * 0.8 * 1.4 + racingTime * 1.2;
+        },
+        variance: 0.35,
+        frustrationFactor: 1.0
+      },
+      
+      triple_click: {
+        type: 'composite',
+        baseTime: (params) => {
+          const totalTime = params.totalTime || 120;
+          // Simple -> Drain -> Teleport (escalation)
+          return totalTime * 0.33 * 0.5 + totalTime * 0.33 * 0.67 + totalTime * 0.34 * 0.8 * 1.4;
+        },
+        variance: 0.4,
+        frustrationFactor: 1.0
+      },
+      
+      racing_sandwich: {
+        type: 'composite',
+        baseTime: (params) => {
+          const totalTime = params.totalTime || 150;
+          // Racing -> Timer -> Racing Rigged
+          return totalTime * 0.4 * 1.2 + totalTime * 0.2 + totalTime * 0.4 * 1.2;
+        },
+        variance: 0.45,
+        frustrationFactor: 1.0
       }
     };
   }
@@ -204,7 +251,11 @@ class TemplateTimeEstimator {
         return {
           totalTime: targetTime,
           timerRatio: templateId === 'double_timer' ? 0.5 : 
-                     templateId === 'timer_then_click' ? 0.6 : 0.4
+                     templateId === 'timer_then_click' ? 0.6 : 
+                     templateId === 'racing_then_teleport' ? 0.6 :
+                     templateId === 'teleport_then_racing' ? 0.4 :
+                     templateId === 'triple_click' ? 0.33 :
+                     templateId === 'racing_sandwich' ? 0.4 : 0.4
         };
     }
     

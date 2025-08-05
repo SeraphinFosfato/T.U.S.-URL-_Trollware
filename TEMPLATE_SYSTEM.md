@@ -25,7 +25,7 @@ Algoritmo intelligente per selezione ottimale basata su:
 4. **Limiti**: Penalty per singoli oltre 80% del limite massimo
 5. **Compositi**: Bonus crescente per tempi lunghi
 
-## TEMPLATE DISPONIBILI (9 Totali)
+## TEMPLATE DISPONIBILI (13 Totali)
 
 ### **⏱️ Timer Templates (2)**
 
@@ -120,7 +120,7 @@ Algoritmo intelligente per selezione ottimale basata su:
 }
 ```
 
-### **🔄 Template Compositi (3)**
+### **🔄 Template Compositi Base (3)**
 
 #### timer_then_click
 ```javascript
@@ -170,6 +170,105 @@ Algoritmo intelligente per selezione ottimale basata su:
 }
 ```
 
+### **🚀 Template Compositi Avanzati (4)**
+
+#### racing_then_teleport
+```javascript
+{
+  type: 'composite',
+  baseTime: (params) => {
+    const totalTime = params.totalTime || 90;
+    const racingTime = totalTime * 0.6;     // 60% racing
+    const teleportTime = totalTime * 0.4;   // 40% teleport
+    return racingTime * 1.2 + (teleportTime / 0.8) * 0.8 * 1.4;
+  },
+  variance: 0.35,
+  frustrationFactor: 1.0,
+  components: ['click_racing', 'click_teleport']
+}
+```
+
+#### teleport_then_racing
+```javascript
+{
+  type: 'composite',
+  baseTime: (params) => {
+    const totalTime = params.totalTime || 90;
+    const teleportTime = totalTime * 0.4;
+    const racingTime = totalTime * 0.6;
+    return (teleportTime / 0.8) * 0.8 * 1.4 + racingTime * 1.2;
+  },
+  variance: 0.35,
+  frustrationFactor: 1.0,
+  components: ['click_teleport', 'click_racing']
+}
+```
+
+#### triple_click
+```javascript
+{
+  type: 'composite',
+  baseTime: (params) => {
+    const totalTime = params.totalTime || 120;
+    // Simple -> Drain -> Teleport (escalation)
+    return totalTime * 0.33 * 0.5 + totalTime * 0.33 * 0.67 + totalTime * 0.34 * 0.8 * 1.4;
+  },
+  variance: 0.4,
+  frustrationFactor: 1.0,
+  components: ['click_simple', 'click_drain', 'click_teleport']
+}
+```
+
+#### racing_sandwich
+```javascript
+{
+  type: 'composite',
+  baseTime: (params) => {
+    const totalTime = params.totalTime || 150;
+    // Racing -> Timer -> Racing Rigged
+    return totalTime * 0.4 * 1.2 + totalTime * 0.2 + totalTime * 0.4 * 1.2;
+  },
+  variance: 0.45,
+  frustrationFactor: 1.0,
+  components: ['click_racing', 'timer_simple', 'click_racing_rigged']
+}
+```
+
+## 💰 SISTEMA REVENUE
+
+### **📊 Revenue per Template**
+```javascript
+// Template singoli - revenue bassa (1-4)
+timer_simple: 1        click_simple: 1
+timer_punish: 2        click_drain: 2
+click_teleport: 3      click_racing: 2
+click_racing_rigged: 4
+
+// Template compositi base - revenue media (3-4)
+timer_then_click: 3    click_then_timer: 3
+double_timer: 4
+
+// Template compositi avanzati - revenue alta (5-8)
+racing_then_teleport: 5    teleport_then_racing: 5
+triple_click: 7            racing_sandwich: 8
+```
+
+### **🎯 Slot Pubblicitari**
+```javascript
+adSlots: {
+  header: { threshold: 2 },        // Banner header
+  sidebar: { threshold: 4 },       // Sidebar ads
+  footer: { threshold: 3 },        // Footer banner
+  interstitial: { threshold: 6 },  // Popup interstitial
+  overlay: { threshold: 8 }        // Overlay ads
+}
+```
+
+### **💳 Piani Utente**
+- **FREE**: Revenue 1.0x - Tutti gli slot attivi per template avanzati
+- **PREMIUM**: Revenue 0.5x - Slot ridotti, meno pubblicità
+- **VIP**: Revenue 0x - Solo minigioco, nessuna pubblicità
+
 ## ALGORITMO SELEZIONE INTELLIGENTE
 
 ### **Fase 1: Viabilità**
@@ -200,8 +299,8 @@ const varietyPenalty = Math.pow(0.7, recentUse);
 weight *= varietyPenalty;
 
 // 3. Bonus compositi per tempi lunghi
-if (isComposite && targetTime > 90) {
-  const compositeBonus = Math.min((targetTime - 90) / 60, 2); // Max 2x
+if (isComposite && targetTime > 45) {
+  const compositeBonus = Math.min((targetTime - 45) / 30, 3); // Max 3x, inizia da 45s
   weight *= (1 + compositeBonus);
 }
 
@@ -266,11 +365,14 @@ templateLimits = {
 ### **Script di Test**
 ```bash
 cd tests
-node test-racing.js        # Racing click game
-node test-rigged.js        # Rigged racing game  
-node test-teleport.js      # Teleporting click game
-node test-all-games.js     # Sequenza multi-game
-node create-test-link.js   # Link generico
+node test-racing.js           # Racing click game
+node test-rigged.js           # Rigged racing game  
+node test-teleport.js         # Teleporting click game
+node test-all-games.js        # Sequenza multi-game
+node create-test-link.js      # Link generico
+node test-new-templates.js    # Nuovi template compositi
+node test-revenue-system.js   # Sistema revenue
+node debug-weights.js         # Debug pesi template
 ```
 
 ### **Debug Template Selection**
@@ -310,8 +412,14 @@ DEBUG: Found 7 viable templates for targetTime 120
 - Deploy automatico e monitoring
 - Suite test completa
 
+### **✅ FASE 4**: Sistema Revenue (Iterazione 24)
+- 13 template totali con revenue 1-8
+- 5 slot pubblicitari dinamici
+- 3 piani utente (FREE/PREMIUM/VIP)
+- Sistema advertising scalabile
+
 ---
 
-**🎯 Sistema Template Completamente Automatizzato e Intelligente**
+**🎯 Sistema Template + Revenue Completamente Automatizzato**
 
-*Selezione ottimale basata su calcoli reali, non su pesi artificiali*
+*Selezione ottimale + monetizzazione intelligente basata su complessità template*
