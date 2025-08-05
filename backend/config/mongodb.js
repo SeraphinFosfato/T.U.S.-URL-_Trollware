@@ -144,6 +144,15 @@ class MongoDB {
       console.error(`DEBUG: Failed to complete client path:`, error.message);
     }
   }
+
+  async getClientPathByShortId(shortId) {
+    try {
+      return await this.sessions.findOne({ shortId }, { sort: { created_at: -1 } });
+    } catch (error) {
+      console.error(`DEBUG: Failed to get client path by shortId:`, error.message);
+      return null;
+    }
+  }
 }
 
 module.exports = new MongoDB();

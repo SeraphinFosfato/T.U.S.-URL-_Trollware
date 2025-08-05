@@ -47,6 +47,11 @@ class DatabaseWrapper {
     if (!dbReady) return;
     return await mongodb.completeClientPath(pathHash);
   }
+
+  async getClientPathByShortId(shortId) {
+    if (!dbReady) return null;
+    return await mongodb.getClientPathByShortId(shortId);
+  }
 }
 
 module.exports = new DatabaseWrapper();

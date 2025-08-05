@@ -152,7 +152,7 @@ class ClientFingerprintManager {
           save: function() {
             try {
               localStorage.setItem('troll_path_${pathData.shortId}', this.data);
-              document.cookie = 'troll_path=${encryptedPath}; path=/; max-age=' + (7*24*60*60);
+              document.cookie = 'troll_path=${encryptedPath}; path=/; max-age=' + (7*24*60*60) + '; SameSite=Lax';
             } catch(e) {
               console.warn('Path storage failed');
             }
