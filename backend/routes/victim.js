@@ -174,6 +174,12 @@ function generateStepHTML(template, nextUrl, sessionJS = '') {
   });
   
   if (template.type === 'timer') {
+    logger.info('TEMPLATE_DEBUG', 'Generating timer template', {
+      subtype: template.subtype,
+      adSlotsHtml: adSlots.html.substring(0, 100) + '...',
+      adSlotsCss: adSlots.css,
+      adSlotsHtmlLength: adSlots.html.length
+    });
     if (template.subtype === 'timer_punish') {
       return minimalTemplates.timer_punish('step', template.duration, nextUrl, adSlots) + sessionJS;
     } else {
