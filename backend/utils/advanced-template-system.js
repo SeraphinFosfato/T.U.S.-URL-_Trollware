@@ -314,7 +314,21 @@ class AdvancedTemplateSystem {
           if (item.templateId.includes('_then_') || item.templateId === 'double_timer' || 
               item.templateId === 'triple_click' || item.templateId === 'racing_sandwich' ||
               item.templateId === 'racing_then_teleport' || item.templateId === 'teleport_then_racing') {
-            return this.expandCompositeTemplate(item.templateId, item.targetTime, item.params);
+            
+            logger.info('TEMPLATE', 'TEST: Expanding composite template', {
+              templateId: item.templateId,
+              targetTime: item.targetTime,
+              params: item.params
+            });
+            
+            const expanded = this.expandCompositeTemplate(item.templateId, item.targetTime, item.params);
+            
+            logger.info('TEMPLATE', 'TEST: Composite expanded', {
+              templateId: item.templateId,
+              expanded: expanded.map(s => ({ type: s.type, subtype: s.subtype, estimatedTime: s.estimatedTime }))
+            });
+            
+            return expanded;
           }
           
           const template = this.templates[item.templateId];
@@ -418,8 +432,20 @@ class AdvancedTemplateSystem {
           item.templateId === 'triple_click' || item.templateId === 'racing_sandwich' ||
           item.templateId === 'racing_then_teleport' || item.templateId === 'teleport_then_racing') {
         
+        logger.info('TEMPLATE', 'Expanding composite template', {
+          templateId: item.templateId,
+          targetTime: item.targetTime,
+          params: item.params
+        });
+        
         // Espandi compositi in step atomici
         const subSteps = this.expandCompositeTemplate(item.templateId, item.targetTime, item.params);
+        
+        logger.info('TEMPLATE', 'Composite expanded to steps', {
+          templateId: item.templateId,
+          subSteps: subSteps.map(s => ({ type: s.type, subtype: s.subtype, estimatedTime: s.estimatedTime }))
+        });
+        
         return subSteps; // Ritorna array di step atomici
       }
       
