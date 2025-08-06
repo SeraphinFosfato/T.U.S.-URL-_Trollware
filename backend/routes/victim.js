@@ -167,7 +167,10 @@ function generateStepHTML(template, nextUrl, sessionJS = '') {
     enabledSlots,
     adSlotsHtmlLength: adSlots.html.length,
     adSlotsCssLength: adSlots.css.length,
-    revenueSystemEnabled: smartDistributor.revenueSystem.enabled
+    revenueSystemEnabled: smartDistributor.revenueSystem.enabled,
+    containsVignetteZone: adSlots.html.includes('9677091'),
+    containsInPageZone: adSlots.html.includes('9677112'),
+    htmlPreview: adSlots.html.substring(0, 200) + '...'  
   });
   
   if (template.type === 'timer') {
