@@ -164,13 +164,13 @@ function generateStepHTML(template, nextUrl, sessionJS = '') {
     }
   } else if (template.type === 'click') {
     if (template.subtype === 'click_teleport') {
-      return minimalTemplates.click_teleport('step', template.target, nextUrl) + sessionJS;
+      return minimalTemplates.click_teleport('step', template.target, nextUrl, adSlots) + sessionJS;
     } else if (template.subtype === 'click_racing') {
-      return minimalTemplates.click_racing('step', template.params || {drain: 1.2}, nextUrl) + sessionJS;
+      return minimalTemplates.click_racing('step', template.params || {drain: 1.2}, nextUrl, adSlots) + sessionJS;
     } else if (template.subtype === 'click_racing_rigged') {
-      return minimalTemplates.click_racing_rigged('step', template.params || {realDuration: 20, maxProgress: 80, resetPoint: 25}, nextUrl) + sessionJS;
+      return minimalTemplates.click_racing_rigged('step', template.params || {realDuration: 20, maxProgress: 80, resetPoint: 25}, nextUrl, adSlots) + sessionJS;
     } else {
-      return minimalTemplates.click('step', template.target, nextUrl) + sessionJS;
+      return minimalTemplates.click('step', template.target, nextUrl, adSlots) + sessionJS;
     }
   } else if (template.type === 'composite') {
     // ERRORE CRITICO: I template compositi non dovrebbero mai arrivare qui!
@@ -183,7 +183,7 @@ function generateStepHTML(template, nextUrl, sessionJS = '') {
     
     // Fallback di emergenza
     const duration = Math.min(Math.max(Math.round(template.estimatedTime || 60), 15), 60);
-    return minimalTemplates.timer('step', duration, nextUrl) + sessionJS;
+    return minimalTemplates.timer('step', duration, nextUrl, adSlots) + sessionJS;
   }
   return `<html><body><script>location.href='${nextUrl}'</script></body></html>`;
 }
