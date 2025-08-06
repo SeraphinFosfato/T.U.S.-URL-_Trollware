@@ -5,7 +5,7 @@ class SmartTemplateDistributor {
   constructor() {
     // Sistema Revenue per advertising dinamico
     this.revenueSystem = {
-      enabled: false, // Flag globale per abilitare revenue
+      enabled: true, // Flag globale per abilitare revenue
       templateRevenue: {
         // Template singoli - revenue bassa
         timer_simple: 1,

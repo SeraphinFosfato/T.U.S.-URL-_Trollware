@@ -5,6 +5,8 @@ const clientFingerprint = require('../utils/client-fingerprint');
 const advancedTemplates = require('../utils/advanced-template-system');
 const { minimalTemplates } = require('../templates/minimal-templates');
 const freeTier = require('../config/free-tier-manager');
+const adSlotGenerator = require('../utils/ad-slot-generator');
+const smartDistributor = require('../utils/smart-template-distributor');
 
 // GET /:shortId/:step - Step successivi
 router.get('/:shortId/:step', async (req, res) => {
