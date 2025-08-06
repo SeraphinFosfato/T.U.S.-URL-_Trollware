@@ -7,8 +7,6 @@ const { minimalTemplates } = require('../templates/minimal-templates');
 const freeTier = require('../config/free-tier-manager');
 const adSlotGenerator = require('../utils/ad-slot-generator');
 const smartDistributor = require('../utils/smart-template-distributor');
-const adSlotGenerator = require('../utils/ad-slot-generator');
-const smartDistributor = require('../utils/smart-template-distributor');
 
 // GET /:shortId/:step - Step successivi
 router.get('/:shortId/:step', async (req, res) => {
