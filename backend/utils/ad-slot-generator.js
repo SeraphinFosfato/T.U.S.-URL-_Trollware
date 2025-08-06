@@ -9,7 +9,7 @@ class AdSlotGenerator {
         css: '.ad-header{margin-bottom:20px;min-height:50px;position:relative}'
       },
       sidebar: {
-        html: '<div class="ad-sidebar" id="ad-sidebar">' + this.getPropellerAd('inPagePush') + '</div>',
+        html: '<div class="ad-sidebar" id="ad-sidebar"><div class="ad-fallback" style="background:#e3f2fd;padding:8px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 InPage Loading...</div></div><script>document.addEventListener("DOMContentLoaded", function() { const script = document.createElement("script"); script.innerHTML = atob("' + Buffer.from(this.getPropellerAd('inPagePush')).toString('base64') + '"); document.head.appendChild(script); setTimeout(() => { if (!document.querySelector("#ad-sidebar iframe, #ad-sidebar [data-propeller]")) document.querySelector("#ad-sidebar .ad-fallback").style.display = "block"; }, 3000); });</script>',
         css: '.ad-sidebar{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:160px;height:600px;z-index:1000}'
       },
       footer: {
