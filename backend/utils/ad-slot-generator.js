@@ -6,15 +6,15 @@ class AdSlotGenerator {
     this.slotStyles = {
       header: {
         html: '<div class="ad-header" id="ad-header">' + this.getPropellerAd('vignette') + '</div>',
-        css: '.ad-header{margin-bottom:20px}'
+        css: '.ad-header{background:#f8f9fa;border:1px solid #dee2e6;padding:15px;text-align:center;margin-bottom:20px;border-radius:5px;min-height:50px}'
       },
       sidebar: {
         html: '<div class="ad-sidebar" id="ad-sidebar">' + this.getPropellerAd('inPagePush') + '</div>',
-        css: '.ad-sidebar{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:160px;height:600px;z-index:1000}'
+        css: '.ad-sidebar{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:160px;height:600px;background:#f8f9fa;border:1px solid #dee2e6;border-radius:5px;z-index:1000}'
       },
       footer: {
         html: '<div class="ad-footer" id="ad-footer"><a href="' + propellerConfig.getDirectLink() + '" target="_blank" style="display:block;padding:15px;background:#007bff;color:white;text-decoration:none;text-align:center;border-radius:5px;">🚀 Sponsored Link - Click Here</a></div>',
-        css: '.ad-footer{margin-top:20px}'
+        css: '.ad-footer{background:#f8f9fa;border:1px solid #dee2e6;padding:15px;text-align:center;margin-top:20px;border-radius:5px}'
       },
       interstitial: {
         html: '<div class="ad-interstitial" id="ad-interstitial"><div class="ad-content"><div class="ad-placeholder">Sponsored Content</div><button onclick="this.parentElement.parentElement.style.display=\'none\'" class="ad-close">×</button></div></div>',
