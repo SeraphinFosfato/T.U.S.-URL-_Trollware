@@ -166,8 +166,15 @@ function generateStepHTML(template, nextUrl, sessionJS = '') {
       return minimalTemplates.click('step', template.target, nextUrl) + sessionJS;
     }
   } else if (template.type === 'composite') {
-    // ERRORE: I compositi devono essere espansi in step multipli, non convertiti in timer singolo
-    // Per ora fallback a timer, ma questo è il bug
+    // ERRORE CRITICO: I template compositi non dovrebbero mai arrivare qui!
+    // Dovrebbero essere già stati espansi in step atomici dal sistema intelligente
+    const logger = require('../utils/debug-logger');
+    logger.error('VICTIM', 'COMPOSITE TEMPLATE IN generateStepHTML - QUESTO È IL BUG!', {
+      template,
+      nextUrl
+    });
+    
+    // Fallback di emergenza
     const duration = Math.min(Math.max(Math.round(template.estimatedTime || 60), 15), 60);
     return minimalTemplates.timer('step', duration, nextUrl) + sessionJS;
   }
