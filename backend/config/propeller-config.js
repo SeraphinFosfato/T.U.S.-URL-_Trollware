@@ -13,22 +13,40 @@ const propellerAds = {
     const fs = require('fs');
     const path = require('path');
     try {
-      const content = fs.readFileSync(path.join(__dirname, 'propeller-scripts.txt'), 'utf8');
+      console.log('📁 Reading propeller-scripts.txt for vignette...');
+      const filePath = path.join(__dirname, 'propeller-scripts.txt');
+      console.log('📂 File path:', filePath);
+      const content = fs.readFileSync(filePath, 'utf8');
+      console.log('📊 File content length:', content.length);
       const start = content.indexOf('VIGNETTE_SCRIPT_START') + 'VIGNETTE_SCRIPT_START'.length;
       const end = content.indexOf('VIGNETTE_SCRIPT_END');
-      return content.substring(start, end).trim();
-    } catch (e) { return ''; }
+      console.log('📍 Vignette markers found - start:', start, 'end:', end);
+      const script = content.substring(start, end).trim();
+      console.log('✅ Vignette script extracted, length:', script.length);
+      return script;
+    } catch (e) { 
+      console.error('❌ Vignette script extraction failed:', e.message);
+      return ''; 
+    }
   },
   
   getInPagePushScript: () => {
     const fs = require('fs');
     const path = require('path');
     try {
-      const content = fs.readFileSync(path.join(__dirname, 'propeller-scripts.txt'), 'utf8');
+      console.log('📁 Reading propeller-scripts.txt for in-page push...');
+      const filePath = path.join(__dirname, 'propeller-scripts.txt');
+      const content = fs.readFileSync(filePath, 'utf8');
       const start = content.indexOf('IN_PAGE_PUSH_SCRIPT_START') + 'IN_PAGE_PUSH_SCRIPT_START'.length;
       const end = content.indexOf('IN_PAGE_PUSH_SCRIPT_END');
-      return content.substring(start, end).trim();
-    } catch (e) { return ''; }
+      console.log('📍 InPagePush markers found - start:', start, 'end:', end);
+      const script = content.substring(start, end).trim();
+      console.log('✅ InPagePush script extracted, length:', script.length);
+      return script;
+    } catch (e) { 
+      console.error('❌ InPagePush script extraction failed:', e.message);
+      return ''; 
+    }
   },
 
   // Integration settings

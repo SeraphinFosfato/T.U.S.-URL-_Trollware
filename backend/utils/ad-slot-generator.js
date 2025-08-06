@@ -29,11 +29,20 @@ class AdSlotGenerator {
 
   getPropellerAd(type) {
     try {
-      if (type === 'vignette') return propellerConfig.getVignetteScript();
-      if (type === 'inPagePush') return propellerConfig.getInPagePushScript();
-      return '';
+      console.log(`🎯 Loading PropellerAds script: ${type}`);
+      let script = '';
+      if (type === 'vignette') {
+        script = propellerConfig.getVignetteScript();
+        console.log(`📜 Vignette script length: ${script.length}`);
+      }
+      if (type === 'inPagePush') {
+        script = propellerConfig.getInPagePushScript();
+        console.log(`📜 InPagePush script length: ${script.length}`);
+      }
+      console.log(`✅ PropellerAds ${type} loaded successfully`);
+      return script;
     } catch (e) {
-      console.log('PropellerAds script load failed:', type);
+      console.error(`❌ PropellerAds script load failed for ${type}:`, e.message);
       return '';
     }
   }
