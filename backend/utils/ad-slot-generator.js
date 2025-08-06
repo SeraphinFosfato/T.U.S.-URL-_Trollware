@@ -5,7 +5,7 @@ class AdSlotGenerator {
   constructor() {
     this.slotStyles = {
       header: {
-        html: '<div class="ad-header" id="ad-header"><div class="ad-fallback" style="background:#e3f2fd;padding:8px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 PropellerAds Loading...</div></div><script>setTimeout(() => { const script = document.createElement("script"); script.innerHTML = atob("' + Buffer.from(this.getPropellerAd('vignette')).toString('base64') + '"); document.head.appendChild(script); setTimeout(() => { if (!document.querySelector("#ad-header iframe, #ad-header [data-propeller]")) document.querySelector(".ad-fallback").style.display = "block"; }, 3000); }, 100);</script>',
+        html: '<div class="ad-header" id="ad-header"><div class="ad-fallback" style="background:#e3f2fd;padding:8px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 PropellerAds Loading...</div></div><script>console.log("🔍 AD DEBUG: Script started"); setTimeout(() => { console.log("🔍 AD DEBUG: Timeout executed"); try { const fallback = document.querySelector(".ad-fallback"); console.log("🔍 AD DEBUG: Fallback element:", fallback); if (fallback) { fallback.style.display = "block"; fallback.innerHTML = "✅ Test Successful!"; console.log("🔍 AD DEBUG: Fallback shown"); } else { console.error("❌ AD DEBUG: Fallback not found"); } } catch(e) { console.error("❌ AD DEBUG: Error:", e); } }, 1000);</script>',
         css: '.ad-header{margin-bottom:20px;min-height:50px;position:relative}'
       },
       sidebar: {
