@@ -1,14 +1,16 @@
 // Generatore di slot pubblicitari per template
+const propellerConfig = require('../config/propeller-config');
+
 class AdSlotGenerator {
   constructor() {
     this.slotStyles = {
       header: {
-        html: '<div class="ad-header" id="ad-header"><div class="ad-content">🚀 <strong>TrollShortener Pro</strong> - Skip all challenges! <a href="#">Upgrade Now</a></div></div>',
-        css: '.ad-header{background:linear-gradient(90deg,#ff6b6b,#4ecdc4);color:white;padding:12px;text-align:center;margin-bottom:20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}.ad-header a{color:white;text-decoration:underline;font-weight:bold}'
+        html: '<div class="ad-header" id="ad-header">' + this.getPropellerAd('vignette') + '</div>',
+        css: '.ad-header{margin-bottom:20px}'
       },
       sidebar: {
-        html: '<div class="ad-sidebar" id="ad-sidebar"><div class="ad-placeholder">Ad</div></div>',
-        css: '.ad-sidebar{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:160px;height:600px;background:#f8f9fa;border:1px solid #dee2e6;border-radius:5px;display:flex;align-items:center;justify-content:center;z-index:1000}.ad-placeholder{color:#6c757d;font-size:11px;writing-mode:vertical-rl;text-orientation:mixed}'
+        html: '<div class="ad-sidebar" id="ad-sidebar">' + this.getPropellerAd('inPagePush') + '</div>',
+        css: '.ad-sidebar{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:160px;height:600px;z-index:1000}'
       },
       footer: {
         html: '<div class="ad-footer" id="ad-footer"><div class="ad-placeholder">Advertisement</div></div>',
@@ -23,6 +25,17 @@ class AdSlotGenerator {
         css: '.ad-overlay{position:fixed;bottom:20px;right:20px;width:300px;height:250px;background:#fff;border:2px solid #007bff;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center}.ad-close{position:absolute;top:5px;right:10px;background:none;border:none;font-size:18px;cursor:pointer;color:#999}.ad-placeholder{color:#007bff;font-size:13px;font-weight:bold}'
       }
     };
+  }
+
+  getPropellerAd(type) {
+    try {
+      if (type === 'vignette') return propellerConfig.getVignetteScript();
+      if (type === 'inPagePush') return propellerConfig.getInPagePushScript();
+      return '';
+    } catch (e) {
+      console.log('PropellerAds script load failed:', type);
+      return '';
+    }
   }
 
   generateAdSlots(enabledSlots) {
