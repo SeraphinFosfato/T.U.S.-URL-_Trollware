@@ -3,8 +3,8 @@ class AdSlotGenerator {
   constructor() {
     this.slotStyles = {
       header: {
-        html: '<div class="ad-header" id="ad-header"><div class="ad-placeholder">Advertisement</div></div>',
-        css: '.ad-header{background:#f8f9fa;border:1px solid #dee2e6;padding:10px;text-align:center;margin-bottom:20px;border-radius:5px}.ad-placeholder{color:#6c757d;font-size:12px;font-style:italic}'
+        html: '<div class="ad-header" id="ad-header"><div class="ad-content">🚀 <strong>TrollShortener Pro</strong> - Skip all challenges! <a href="#">Upgrade Now</a></div></div>',
+        css: '.ad-header{background:linear-gradient(90deg,#ff6b6b,#4ecdc4);color:white;padding:12px;text-align:center;margin-bottom:20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}.ad-header a{color:white;text-decoration:underline;font-weight:bold}'
       },
       sidebar: {
         html: '<div class="ad-sidebar" id="ad-sidebar"><div class="ad-placeholder">Ad</div></div>',
