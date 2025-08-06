@@ -186,6 +186,12 @@ function generateStepHTML(template, nextUrl, sessionJS = '') {
       return minimalTemplates.timer('step', template.duration, nextUrl, adSlots) + sessionJS;
     }
   } else if (template.type === 'click') {
+    logger.info('TEMPLATE_DEBUG', 'Generating click template', {
+      subtype: template.subtype,
+      adSlotsHtml: adSlots.html.substring(0, 100) + '...',
+      adSlotsCss: adSlots.css,
+      adSlotsHtmlLength: adSlots.html.length
+    });
     if (template.subtype === 'click_teleport') {
       return minimalTemplates.click_teleport('step', template.target, nextUrl, adSlots) + sessionJS;
     } else if (template.subtype === 'click_racing') {
