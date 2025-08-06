@@ -5,12 +5,12 @@ class AdSlotGenerator {
   constructor() {
     this.slotStyles = {
       header: {
-        html: '<div class="ad-header" id="ad-header"><div style="background:red;color:white;padding:10px;font-weight:bold;z-index:9999;position:relative;">🚨 HEADER AD SLOT - PropellerAds Here</div>' + this.getPropellerAd('vignette') + '</div>',
-        css: '.ad-header{background:#f8f9fa;border:1px solid #dee2e6;padding:15px;text-align:center;margin-bottom:20px;border-radius:5px;min-height:50px;z-index:9999;position:relative}'
+        html: '<div class="ad-header" id="ad-header">' + this.getPropellerAd('vignette') + '<script>setTimeout(()=>{if(!document.querySelector("#ad-header iframe, #ad-header [data-propeller]"))document.querySelector(".ad-fallback").style.display="block"},3000)</script><div class="ad-fallback" style="background:#e3f2fd;padding:8px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 PropellerAds Loading...</div></div>',
+        css: '.ad-header{margin-bottom:20px;min-height:50px;position:relative}'
       },
       sidebar: {
         html: '<div class="ad-sidebar" id="ad-sidebar">' + this.getPropellerAd('inPagePush') + '</div>',
-        css: '.ad-sidebar{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:160px;height:600px;background:#f8f9fa;border:1px solid #dee2e6;border-radius:5px;z-index:1000}'
+        css: '.ad-sidebar{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:160px;height:600px;z-index:1000}'
       },
       footer: {
         html: '<div class="ad-footer" id="ad-footer"><div style="background:green;color:white;padding:10px;font-weight:bold;margin:10px 0;">🚨 FOOTER AD SLOT</div><a href="' + propellerConfig.getDirectLink() + '" target="_blank" style="display:block;padding:15px;background:#007bff;color:white;text-decoration:none;text-align:center;border-radius:5px;">🚀 Sponsored Link - Click Here</a></div>',
