@@ -58,15 +58,15 @@ class SmartTemplateDistributor {
       racing_sandwich: 0.3
     };
     
-    // Limiti massimi realistici per template singoli
+    // Limiti per testing - valori bassi, multipli di 5, max 60s
     this.templateLimits = {
-      timer_simple: 60,
-      timer_punish: 45,
-      click_simple: 20, // 40 click * 0.5s
-      click_drain: 30,  // 40 click * 0.67s
-      click_teleport: 45, // 40 click * 0.8s * 1.4 frustration
-      click_racing: 120, // Può durare di più
-      click_racing_rigged: 150 // Può durare ancora di più
+      timer_simple: 60,     // Max 60s, step 5s
+      timer_punish: 45,     // Max 45s, step 5s
+      click_simple: 15,     // Max 30 click (15s), multipli di 5
+      click_drain: 20,      // Max 30 click (20s), multipli di 5
+      click_teleport: 25,   // Max 30 click (25s), multipli di 5
+      click_racing: 60,     // Max 60s per testing
+      click_racing_rigged: 60 // Max 60s per testing
     };
   }
   

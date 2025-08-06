@@ -664,142 +664,146 @@ class AdvancedTemplateSystem {
     
     switch (templateId) {
       case 'timer_then_click':
-        const timerTime1 = Math.floor(targetTime * 0.6);
+        const timerTime1 = Math.round(targetTime * 0.6 / 5) * 5;
         const clickTime1 = targetTime - timerTime1;
+        const clicks1 = Math.round(clickTime1 * 2 / 5) * 5;
         return [
           {
             type: 'timer',
             subtype: 'timer_simple',
-            duration: Math.max(timerTime1, 15),
-            estimatedTime: Math.max(timerTime1, 15)
+            duration: Math.min(Math.max(timerTime1, 5), 60),
+            estimatedTime: Math.min(Math.max(timerTime1, 5), 60)
           },
           {
             type: 'click',
             subtype: 'click_simple',
-            target: Math.max(Math.floor(clickTime1 * 2), 3),
-            estimatedTime: clickTime1
+            target: Math.min(Math.max(clicks1, 5), 30),
+            estimatedTime: Math.min(Math.max(clicks1, 5), 30) * 0.5
           }
         ];
         
       case 'click_then_timer':
-        const clickTime2 = Math.floor(targetTime * 0.4);
+        const clickTime2 = Math.round(targetTime * 0.4 / 5) * 5;
         const timerTime2 = targetTime - clickTime2;
+        const clicks2 = Math.round(clickTime2 * 2 / 5) * 5;
         return [
           {
             type: 'click',
             subtype: 'click_simple',
-            target: Math.max(Math.floor(clickTime2 * 2), 3),
-            estimatedTime: clickTime2
+            target: Math.min(Math.max(clicks2, 5), 30),
+            estimatedTime: Math.min(Math.max(clicks2, 5), 30) * 0.5
           },
           {
             type: 'timer',
             subtype: 'timer_simple',
-            duration: Math.max(timerTime2, 15),
-            estimatedTime: timerTime2
+            duration: Math.min(Math.max(timerTime2, 5), 60),
+            estimatedTime: Math.min(Math.max(timerTime2, 5), 60)
           }
         ];
         
       case 'double_timer':
-        const timer1Time = Math.floor(targetTime * 0.5);
-        const timer2Time = targetTime - timer1Time;
+        const timer1Time = Math.round(targetTime * 0.5 / 5) * 5;
+        const timer2Time = Math.round((targetTime - timer1Time) / 5) * 5;
         return [
           {
             type: 'timer',
             subtype: 'timer_simple',
-            duration: Math.max(timer1Time, 15),
-            estimatedTime: timer1Time
+            duration: Math.min(Math.max(timer1Time, 5), 60),
+            estimatedTime: Math.min(Math.max(timer1Time, 5), 60)
           },
           {
             type: 'timer',
             subtype: 'timer_punish',
-            duration: Math.max(timer2Time, 20),
-            estimatedTime: timer2Time
+            duration: Math.min(Math.max(timer2Time, 5), 45),
+            estimatedTime: Math.min(Math.max(timer2Time, 5), 45)
           }
         ];
         
       case 'racing_then_teleport':
-        const racingTime1 = Math.floor(targetTime * 0.6);
+        const racingTime1 = Math.round(targetTime * 0.6 / 5) * 5;
         const teleportTime1 = targetTime - racingTime1;
+        const teleportClicks1 = Math.round(teleportTime1 * 1.25 / 5) * 5;
         return [
           {
             type: 'click',
             subtype: 'click_racing',
-            params: { duration: Math.max(racingTime1, 15), drain: 0.8 },
-            estimatedTime: racingTime1
+            params: { duration: Math.min(Math.max(racingTime1, 5), 60), drain: 0.8 },
+            estimatedTime: Math.min(Math.max(racingTime1, 5), 60)
           },
           {
             type: 'click',
             subtype: 'click_teleport',
-            target: Math.max(Math.floor(teleportTime1 * 1.5), 5),
-            estimatedTime: teleportTime1
+            target: Math.min(Math.max(teleportClicks1, 5), 30),
+            estimatedTime: Math.min(Math.max(teleportClicks1, 5), 30) * 0.8
           }
         ];
         
       case 'teleport_then_racing':
-        const teleportTime2 = Math.floor(targetTime * 0.4);
+        const teleportTime2 = Math.round(targetTime * 0.4 / 5) * 5;
         const racingTime2 = targetTime - teleportTime2;
+        const teleportClicks2 = Math.round(teleportTime2 * 1.25 / 5) * 5;
         return [
           {
             type: 'click',
             subtype: 'click_teleport',
-            target: Math.max(Math.floor(teleportTime2 * 1.5), 5),
-            estimatedTime: teleportTime2
+            target: Math.min(Math.max(teleportClicks2, 5), 30),
+            estimatedTime: Math.min(Math.max(teleportClicks2, 5), 30) * 0.8
           },
           {
             type: 'click',
             subtype: 'click_racing',
-            params: { duration: Math.max(racingTime2, 15), drain: 0.8 },
-            estimatedTime: racingTime2
+            params: { duration: Math.min(Math.max(racingTime2, 5), 60), drain: 0.8 },
+            estimatedTime: Math.min(Math.max(racingTime2, 5), 60)
           }
         ];
         
       case 'triple_click':
-        const step1Time = Math.floor(targetTime * 0.33);
-        const step2Time = Math.floor(targetTime * 0.33);
-        const step3Time = targetTime - step1Time - step2Time;
+        const step1Time = Math.round(targetTime * 0.33 / 5) * 5;
+        const step2Time = Math.round(targetTime * 0.33 / 5) * 5;
+        const step3Time = Math.round((targetTime - step1Time - step2Time) / 5) * 5;
         return [
           {
             type: 'click',
             subtype: 'click_simple',
-            target: Math.max(Math.floor(step1Time * 2), 3),
-            estimatedTime: step1Time
+            target: Math.min(Math.max(Math.round(step1Time * 2 / 5) * 5, 5), 30),
+            estimatedTime: Math.min(Math.max(step1Time, 5), 60)
           },
           {
             type: 'click',
             subtype: 'click_drain',
-            target: Math.max(Math.floor(step2Time * 1.5), 5),
-            estimatedTime: step2Time
+            target: Math.min(Math.max(Math.round(step2Time * 1.5 / 5) * 5, 5), 30),
+            estimatedTime: Math.min(Math.max(step2Time, 5), 60)
           },
           {
             type: 'click',
             subtype: 'click_teleport',
-            target: Math.max(Math.floor(step3Time * 1.5), 5),
-            estimatedTime: step3Time
+            target: Math.min(Math.max(Math.round(step3Time * 1.25 / 5) * 5, 5), 30),
+            estimatedTime: Math.min(Math.max(step3Time, 5), 60)
           }
         ];
         
       case 'racing_sandwich':
-        const racing1Time = Math.floor(targetTime * 0.4);
-        const timerMiddleTime = Math.floor(targetTime * 0.2);
-        const racing2Time = targetTime - racing1Time - timerMiddleTime;
+        const racing1Time = Math.round(targetTime * 0.4 / 5) * 5;
+        const timerMiddleTime = Math.round(targetTime * 0.2 / 5) * 5;
+        const racing2Time = Math.round((targetTime - racing1Time - timerMiddleTime) / 5) * 5;
         return [
           {
             type: 'click',
             subtype: 'click_racing',
-            params: { duration: Math.max(racing1Time, 15), drain: 0.6 },
-            estimatedTime: racing1Time
+            params: { duration: Math.min(Math.max(racing1Time, 5), 60), drain: 0.6 },
+            estimatedTime: Math.min(Math.max(racing1Time, 5), 60)
           },
           {
             type: 'timer',
             subtype: 'timer_simple',
-            duration: Math.max(timerMiddleTime, 15),
-            estimatedTime: timerMiddleTime
+            duration: Math.min(Math.max(timerMiddleTime, 5), 60),
+            estimatedTime: Math.min(Math.max(timerMiddleTime, 5), 60)
           },
           {
             type: 'click',
             subtype: 'click_racing_rigged',
-            params: { realDuration: Math.max(racing2Time, 10), maxProgress: 80, resetPoint: 25 },
-            estimatedTime: racing2Time
+            params: { realDuration: Math.min(Math.max(racing2Time, 5), 60), maxProgress: 80, resetPoint: 25 },
+            estimatedTime: Math.min(Math.max(racing2Time, 5), 60)
           }
         ];
         

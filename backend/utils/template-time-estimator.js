@@ -218,29 +218,34 @@ class TemplateTimeEstimator {
     
     switch (estimate.type) {
       case 'direct':
-        return { duration: Math.max(targetTime / estimate.frustrationFactor, 15) };
+        let duration = Math.round(targetTime / estimate.frustrationFactor / 5) * 5;
+        return { duration: Math.max(duration, 5) };
         
       case 'multiplied':
-        return { duration: Math.max(targetTime / estimate.frustrationFactor, 20) };
+        let punishDuration = Math.round(targetTime / estimate.frustrationFactor / 5) * 5;
+        return { duration: Math.max(punishDuration, 5) };
         
       case 'calculated':
         if (templateId.includes('click')) {
           const clickTime = templateId === 'click_teleport' ? 0.8 : 
                            templateId === 'click_drain' ? 0.67 : 0.5;
-          const clicks = Math.max(Math.floor(targetTime / (clickTime * estimate.frustrationFactor)), 3);
-          return { clicks: Math.min(clicks, 40) }; // Ridotto max click
+          let clicks = Math.floor(targetTime / (clickTime * estimate.frustrationFactor));
+          clicks = Math.round(clicks / 5) * 5; // Multipli di 5
+          return { clicks: Math.min(Math.max(clicks, 5), 30) }; // Min 5, max 30
         }
         break;
         
       case 'dynamic':
         if (templateId === 'click_racing') {
+          let racingDuration = Math.round(targetTime / estimate.frustrationFactor / 5) * 5;
           return {
-            duration: Math.max(targetTime / estimate.frustrationFactor, 15),
-            drain: 0.3 + Math.random() * 1.0 // 0.3-1.3 range
+            duration: Math.min(Math.max(racingDuration, 5), 60),
+            drain: 0.3 + Math.random() * 1.0
           };
         } else if (templateId === 'click_racing_rigged') {
+          let riggedDuration = Math.round(targetTime / estimate.frustrationFactor / 5) * 5;
           return {
-            realDuration: Math.max(targetTime / estimate.frustrationFactor, 10),
+            realDuration: Math.min(Math.max(riggedDuration, 5), 60),
             maxProgress: 80,
             resetPoint: 25
           };
