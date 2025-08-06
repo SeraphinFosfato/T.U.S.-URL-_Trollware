@@ -1,6 +1,13 @@
 # TrollShortener - Sistema Template Intelligente
 
-## ARCHITETTURA SISTEMA INTELLIGENTE (Iterazione 23)
+## ARCHITETTURA SISTEMA INTELLIGENTE (Iterazione 24 - Testing Optimized)
+
+### **🚀 STANDARDIZZAZIONE TESTING**
+Sistema ottimizzato per testing rapido con vincoli rigorosi:
+- **Valori Bassi**: Tempi minimi per ridurre spreco durante test
+- **Multipli di 5**: Tutti i valori numerici (click, secondi) sono multipli di 5
+- **Max 60s per Blocco**: Limite massimo 60 secondi per singolo template
+- **Espansione Compositi**: Template compositi espansi correttamente in step atomici multipli
 
 ### **🧠 Template Time Estimator**
 Sistema standardizzato per stime temporali accurate di ogni template.
@@ -36,7 +43,7 @@ Algoritmo intelligente per selezione ottimale basata su:
   baseTime: (duration) => duration,
   variance: 0.1,
   frustrationFactor: 1.0,
-  limits: { min: 15, max: 60, step: 5 }
+  limits: { min: 5, max: 60, step: 5 }  // TESTING: min ridotto a 5s
 }
 ```
 
@@ -47,7 +54,7 @@ Algoritmo intelligente per selezione ottimale basata su:
   baseTime: (duration) => duration,
   variance: 0.2,
   frustrationFactor: 1.5,  // 50% più lento per punizioni
-  limits: { min: 20, max: 45, step: 5 }
+  limits: { min: 5, max: 45, step: 5 }  // TESTING: min ridotto a 5s
 }
 ```
 
@@ -60,7 +67,7 @@ Algoritmo intelligente per selezione ottimale basata su:
   baseTime: (clicks) => clicks * 0.5,  // 0.5s per click + delay random 0.4-0.6s
   variance: 0.15,
   frustrationFactor: 1.0,
-  limits: { min: 3, max: 40 }
+  limits: { min: 5, max: 30, step: 5 }  // TESTING: max ridotto a 30, multipli di 5
 }
 ```
 
@@ -71,7 +78,7 @@ Algoritmo intelligente per selezione ottimale basata su:
   baseTime: (clicks) => clicks * 0.67,  // Più lento per drain
   variance: 0.2,
   frustrationFactor: 1.1,
-  limits: { min: 10, max: 40 }
+  limits: { min: 5, max: 30, step: 5 }  // TESTING: max ridotto a 30, multipli di 5
 }
 ```
 
@@ -82,7 +89,7 @@ Algoritmo intelligente per selezione ottimale basata su:
   baseTime: (clicks) => clicks * 0.8,   // Più lento per teleport
   variance: 0.3,                        // Alta varianza per frustrazione
   frustrationFactor: 1.4,
-  limits: { min: 5, max: 40 }
+  limits: { min: 5, max: 30, step: 5 }  // TESTING: max ridotto a 30, multipli di 5
 }
 ```
 
@@ -99,7 +106,7 @@ Algoritmo intelligente per selezione ottimale basata su:
   },
   variance: 0.4,
   frustrationFactor: 1.2,
-  limits: { min: 15, max: 120 }
+  limits: { min: 5, max: 60, step: 5 }  // TESTING: max ridotto a 60s, multipli di 5
 }
 ```
 
@@ -116,7 +123,7 @@ Algoritmo intelligente per selezione ottimale basata su:
   },
   variance: 0.4,
   frustrationFactor: 1.2,
-  limits: { min: 10, max: 150 }
+  limits: { min: 5, max: 60, step: 5 }  // TESTING: max ridotto a 60s, multipli di 5
 }
 ```
 
@@ -323,18 +330,132 @@ for (const template of templates) {
 }
 ```
 
-## LIMITI TEMPLATE SINGOLI
+## LIMITI TEMPLATE TESTING
 
 ```javascript
-// Limiti massimi realistici per evitare forzature
+// Limiti ottimizzati per testing rapido
 templateLimits = {
-  timer_simple: 60,        // Max 60s
-  timer_punish: 45,        // Max 45s  
-  click_simple: 20,        // 40 click * 0.5s
-  click_drain: 30,         // 40 click * 0.67s
-  click_teleport: 45,      // 40 click * 0.8s * 1.4 frustration
-  click_racing: 120,       // Può durare di più
-  click_racing_rigged: 150 // Può durare ancora di più
+  timer_simple: 60,     // Max 60s, step 5s
+  timer_punish: 45,     // Max 45s, step 5s
+  click_simple: 15,     // Max 30 click (15s), multipli di 5
+  click_drain: 20,      // Max 30 click (20s), multipli di 5
+  click_teleport: 25,   // Max 30 click (25s), multipli di 5
+  click_racing: 60,     // Max 60s per testing
+  click_racing_rigged: 60 // Max 60s per testing
+}
+```
+
+## 🔧 SISTEMA ESPANSIONE COMPOSITI
+
+### **Espansione Automatica**
+I template compositi vengono automaticamente espansi in step atomici:
+
+```javascript
+// Esempio: racing_then_teleport (120s target)
+expandCompositeTemplate('racing_then_teleport', 120) => [
+  {
+    type: 'click',
+    subtype: 'click_racing',
+    params: { duration: 70, drain: 0.8 },  // 60% del tempo, max 60s
+    estimatedTime: 70
+  },
+  {
+    type: 'click', 
+    subtype: 'click_teleport',
+    target: 25,  // 40% del tempo, multipli di 5
+    estimatedTime: 50
+  }
+]
+```
+
+### **Vincoli Espansione**
+- **Distribuzione Temporale**: Rispetta percentuali definite per ogni composito
+- **Multipli di 5**: Tutti i parametri (duration, target) sono multipli di 5
+- **Limite 60s**: Ogni step espanso rispetta il limite massimo di 60s
+- **Arrotondamento Intelligente**: Valori arrotondati mantenendo tempo totale
+
+## 🧪 TESTING INFRASTRUCTURE
+
+### **Test Locali**
+```bash
+# Test espansione compositi
+node tests/test-composite-expansion.js
+
+# Test logica distributor
+node tests/test-smart-distributor.js
+```
+
+### **Test Reali su Render**
+```bash
+# Genera tutti i link di test
+node tests/generate-real-test-links.js
+
+# Verifica deploy status
+node tests/check-deploy-status.js
+```
+
+### **Link di Test Rapidi**
+- **Timer 5s**: Testa timer minimo
+- **Click 5**: Testa click minimo
+- **Racing 15s**: Testa racing breve
+- **Composito 30s**: Testa espansione multi-step
+
+## 📊 METRICHE PERFORMANCE
+
+### **Accuratezza Temporale**
+- **Target**: ±10% dal tempo richiesto
+- **Compositi**: ±15% per complessità espansione
+- **Varianza Utente**: Considerata nel calcolo finale
+
+### **Distribuzione Template**
+```javascript
+// Pesi base ottimizzati per testing
+baseWeights = {
+  // Singoli: peso normale per test rapidi
+  timer_simple: 1.0,
+  click_simple: 1.2,
+  
+  // Compositi: peso ridotto per evitare complessità eccessiva
+  racing_then_teleport: 0.6,
+  triple_click: 0.4,
+  racing_sandwich: 0.3
+}
+```
+
+## 🚀 DEPLOYMENT STATUS
+
+### **Render Auto-Deploy**
+- **Branch**: main
+- **Trigger**: Push automatico
+- **Build Time**: ~2-3 minuti
+- **Health Check**: Template compositi funzionanti
+
+### **Verifica Funzionamento**
+1. **Template Singoli**: Rispettano multipli di 5 e limiti
+2. **Template Compositi**: Espansi correttamente in step multipli
+3. **Sistema Revenue**: Calcolo corretto per slot pubblicitari
+4. **Sessioni Utente**: Progressione multi-step stabile
+
+## 📈 ROADMAP FUTURE
+
+### **Ottimizzazioni Pianificate**
+- **Template Dinamici**: Generazione runtime basata su metriche utente
+- **A/B Testing**: Confronto efficacia template diversi
+- **Machine Learning**: Predizione template ottimale per utente
+- **Analytics Avanzate**: Tracking dettagliato comportamento utente
+
+### **Nuovi Template Types**
+- **Hybrid Templates**: Combinazioni dinamiche timer+click
+- **Adaptive Difficulty**: Difficoltà che si adatta alle performance utente
+- **Social Templates**: Sfide collaborative multi-utente
+- **Seasonal Templates**: Template tematici per eventi speciali
+
+---
+
+**Ultima Modifica**: Iterazione 24 - Testing Optimization  
+**Status**: ✅ Deploy Attivo su Render  
+**Template Compositi**: ✅ Funzionanti  
+**Testing**: ✅ Ottimizzato per sviluppo rapidoiù
   // Compositi: nessun limite rigido
 }
 ```

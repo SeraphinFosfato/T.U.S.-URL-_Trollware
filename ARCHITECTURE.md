@@ -1,211 +1,171 @@
-# TrollShortener - Architettura Sistema Intelligente
+# TrollShortener - Architettura Sistema
 
-## Struttura Progetto (Iterazione 23)
+## 🏗️ OVERVIEW ARCHITETTURALE
 
+### **Stack Tecnologico**
+- **Backend**: Node.js + Express
+- **Database**: SQLite con WAL mode
+- **Frontend**: HTML5 + CSS3 + Vanilla JS
+- **Deploy**: Render (auto-deploy da GitHub)
+- **Testing**: Custom test suite + Render integration
+
+### **Struttura Progetto**
 ```
 troll-url-shortener/
 ├── backend/
-│   ├── server.js                    # Server Express principale
-│   ├── config/
-│   │   ├── database.js              # Wrapper MongoDB Atlas
-│   │   ├── mongodb.js               # Driver MongoDB
-│   │   └── free-tier-manager.js     # Gestione limiti risorse
-│   ├── routes/
-│   │   ├── shortener.js             # API creazione link
-│   │   ├── victim.js                # 🔥 CORE - Gestione step utente
-│   │   ├── admin.js                 # Dashboard amministrativa
-│   │   └── debug.js                 # Endpoint debug
-│   ├── utils/
-│   │   ├── advanced-template-system.js      # 🔥 CORE - Sistema template
-│   │   ├── template-time-estimator.js       # 🧠 NEW - Stime temporali
-│   │   ├── smart-template-distributor.js    # 🧠 NEW - Algoritmo intelligente
-│   │   ├── client-fingerprint.js           # 🔥 CORE - Sessioni stabili
-│   │   ├── debug-logger.js                 # Sistema logging
-│   │   └── shortener.js                    # Utilità base
-│   ├── templates/
-│   │   └── minimal-templates.js     # 🎨 UI - Template ottimizzati
-│   └── package.json
-├── tests/                           # 🧪 Suite test completa
-│   ├── test-racing.js              # Test racing games
-│   ├── test-rigged.js              # Test rigged racing
-│   ├── test-teleport.js            # Test teleporting click
-│   ├── test-all-games.js           # Test multi-game
-│   └── create-test-link.js         # Test generico
-├── frontend/
-│   └── index.html                  # Landing page
-└── README.md                       # Documentazione completa
+│   ├── routes/           # API endpoints
+│   ├── utils/            # Sistema template intelligente
+│   ├── templates/        # Template HTML minigiochi
+│   ├── config/           # Configurazioni DB e tier
+│   └── server.js         # Entry point
+├── frontend/             # Assets statici
+├── tests/                # Test suite completa
+└── docs/                 # Documentazione
 ```
 
-## Architettura Sistema Intelligente
+## 🧠 SISTEMA TEMPLATE INTELLIGENTE
 
-### **🧠 Template Time Estimator**
+### **Componenti Core**
+
+#### **1. Template Time Estimator**
+- **File**: `backend/utils/template-time-estimator.js`
+- **Funzione**: Calcolo preciso tempi stimati per ogni template
+- **Algoritmi**: 5 tipi di calcolo (direct, multiplied, calculated, dynamic, composite)
+
+#### **2. Smart Template Distributor**
+- **File**: `backend/utils/smart-template-distributor.js`
+- **Funzione**: Selezione intelligente template basata su vincoli
+- **Metriche**: Viabilità, precisione, varietà, limiti, compositi
+
+#### **3. Advanced Template System**
+- **File**: `backend/utils/advanced-template-system.js`
+- **Funzione**: Orchestrazione completa e espansione compositi
+- **Features**: RNG deterministico, espansione multi-step, fallback robusti
+
+### **Flusso Generazione Template**
+```
+1. Richiesta utente (timePreset, steps)
+2. Smart Distributor → selezione template ottimali
+3. Time Estimator → calcolo parametri precisi
+4. Advanced System → espansione compositi in step atomici
+5. Victim Route → rendering HTML per ogni step
+6. Client → esecuzione minigioco sequenziale
+```
+
+## 🎮 SISTEMA MINIGIOCHI
+
+### **Template Atomici (8)**
+- **Timer**: `timer_simple`, `timer_punish`
+- **Click**: `click_simple`, `click_drain`, `click_teleport`
+- **Racing**: `click_racing`, `click_racing_rigged`
+
+### **Template Compositi (5)**
+- **Base**: `timer_then_click`, `click_then_timer`, `double_timer`
+- **Avanzati**: `racing_then_teleport`, `teleport_then_racing`, `triple_click`, `racing_sandwich`
+
+### **Espansione Multi-Step**
+I template compositi vengono espansi automaticamente:
 ```javascript
-// Stime temporali standardizzate per ogni template
-{
-  timer_simple: {
-    type: 'direct',
-    baseTime: (duration) => duration,
-    variance: 0.1,
-    frustrationFactor: 1.0
-  },
-  click_racing_rigged: {
-    type: 'dynamic', 
-    baseTime: (params) => {
-      // Formula: medium_racing_time + fake_time/10
-      const baseDuration = params.realDuration || 20;
-      const mediumRacingTime = baseDuration * 1.0;
-      const fakeTimeBonus = baseDuration / 10;
-      return mediumRacingTime + fakeTimeBonus;
-    }
-  }
+racing_then_teleport → [click_racing, click_teleport]
+triple_click → [click_simple, click_drain, click_teleport]
+racing_sandwich → [click_racing, timer_simple, click_racing_rigged]
+```
+
+## 💰 SISTEMA REVENUE
+
+### **Revenue Scoring**
+- **Template Singoli**: 1-4 punti
+- **Template Compositi Base**: 3-4 punti
+- **Template Compositi Avanzati**: 5-8 punti
+
+### **Slot Pubblicitari Dinamici**
+```javascript
+adSlots = {
+  header: { threshold: 2 },
+  sidebar: { threshold: 4 },
+  footer: { threshold: 3 },
+  interstitial: { threshold: 6 },
+  overlay: { threshold: 8 }
 }
 ```
 
-### **🎯 Smart Template Distributor**
-```javascript
-// Algoritmo intelligente per selezione template
-class SmartTemplateDistributor {
-  // Limiti massimi realistici per template singoli
-  templateLimits = {
-    timer_simple: 60,      // Max 60s
-    click_simple: 20,      // 40 click * 0.5s
-    click_racing: 120,     // Può durare di più
-    // Compositi: nessun limite rigido
-  }
-  
-  // Logica intelligente:
-  // 1. Bonus compositi per tempi >90s
-  // 2. Penalty singoli oltre 80% del limite
-  // 3. Precisione temporale
-  // 4. Varietà garantita
-}
-```
+## 🗄️ SISTEMA DATABASE
 
-### **🔄 Flusso Utente Ottimizzato**
-```
-1. /:shortId → redirect a /v/:shortId (step 0)
-2. Sistema intelligente genera sequenza ottimale
-3. Template compositi per tempi lunghi automaticamente
-4. Sessioni stabili con fingerprint deterministico
-5. Redirect finale all'URL originale
+### **Tabelle Principali**
+- **urls**: Link accorciati e configurazioni
+- **client_paths**: Sessioni utente e progressi
+- **stats**: Metriche e analytics
 
-🔥 OTTIMIZZAZIONI ITERAZIONE 23:
-- Selezione template completamente automatizzata
-- Calcoli temporali accurati al 90%+
-- Template compositi per step >90s
-- Varietà garantita senza ripetizioni eccessive
-- Sessioni stabili per tutta la durata URL
-```
+### **Gestione Sessioni**
+- **Fingerprinting**: Identificazione utente cross-device
+- **Path Tracking**: Progressione multi-step persistente
+- **Fallback Robusti**: Recovery automatico sessioni perse
 
-## Database Schema (MongoDB Atlas)
+## 🔧 TESTING INFRASTRUCTURE
 
-```javascript
-// Collection: urls
-{
-  "shortId": "abc123",
-  "original_url": "https://example.com", 
-  "user_params": {
-    "timePreset": "2min",
-    "steps": null,           // null = auto
-    "expiryPreset": "1d",
-    "testTemplate": null     // Per test deterministici
-  },
-  "expiry_days": 1,
-  "created_at": Date,
-  "expires_at": Date,        // TTL automatico
-  "stats": { "visits": 0, "completed": 0 }
-}
-
-// Collection: sessions (client paths)
-{
-  "pathHash": "a1b2c3d4e5f6",
-  "shortId": "abc123", 
-  "fingerprint": "fp_1a2b3c4d",
-  "currentStep": 1,
-  "templates": [             // Generati da sistema intelligente
-    {
-      "type": "composite",
-      "subtype": "timer_then_click",
-      "sequence": [...],
-      "estimatedTime": 120
-    }
-  ],
-  "metadata": {
-    "algorithm": "intelligent",
-    "accuracy": 0.05,        // Precisione temporale
-    "seed": "abc12345"
-  },
-  "completed": false,
-  "created_at": Date,
-  "expires_at": Date         // TTL = TTL URL
-}
-```
-
-## Template Disponibili (9 Totali)
-
-### **⏱️ Timer (2)**
-- `timer_simple`: 15-60s, pause/resume con penalty
-- `timer_punish`: 20-45s, Windows 95 style, reload su focus loss
-
-### **🖱️ Click Games (4)**  
-- `click_simple`: 3-40 click, delay random 0.4-0.6s
-- `click_drain`: 10-40 click, più lento (0.67s per click)
-- `click_teleport`: 5-40 click, button che si teletrasporta
-- `click_racing`: 15-120s, riempi barra vs drain passivo
-- `click_racing_rigged`: 10-150s, racing truccato con accelerazione dinamica
-
-### **🔄 Compositi (3)**
-- `timer_then_click`: Timer seguito da click game
-- `click_then_timer`: Click game seguito da timer
-- `double_timer`: Due timer in sequenza (normale + punitivo)
-
-## Sistema Intelligente - Logica Selezione
-
-### **Viabilità Template**
-```javascript
-// Template è viable se può raggiungere il tempo target ±50%
-isTemplateViable(templateId, targetTime, params) {
-  const range = getTimeRange(templateId, params);
-  const tolerance = 0.5;
-  return range.expected >= targetTime * (1-tolerance) && 
-         range.expected <= targetTime * (1+tolerance);
-}
-```
-
-### **Peso Dinamico**
-```javascript
-// Calcolo peso finale per selezione
-finalWeight = baseWeight * 
-              (1 + precisionBonus) *     // Vicinanza tempo target
-              varietyPenalty *           // Penalty ripetizioni
-              compositeBonusOrPenalty;   // Bonus compositi/penalty singoli
-```
-
-### **Preferenza Automatica Compositi**
-- **Tempi >90s**: Bonus crescente fino a 2x
-- **Singoli al limite**: Penalty fino a 70%
-- **Risultato**: Selezione naturale ottimale
-
-## Deploy e Monitoring
-
-### **Deploy Automatico**
+### **Test Locali**
 ```bash
-git push origin main → Render.com auto-deploy
+node tests/test-composite-expansion.js    # Test espansione compositi
+node tests/test-smart-distributor.js      # Test logica selezione
+node tests/test-template-estimator.js     # Test calcoli temporali
 ```
 
-### **Monitoring**
-- **Live URL**: https://tus-tasklink.onrender.com
-- **Admin**: /admin/usage (limiti risorse)
-- **Debug**: /debug/status (stato sistema)
+### **Test Reali**
+```bash
+node tests/generate-real-test-links.js    # Genera link su Render
+node tests/check-deploy-status.js         # Verifica deploy
+```
 
-### **Metriche Sistema Intelligente**
-- **Accuratezza temporale**: ~90%+ 
-- **Varietà template**: Penalty ripetizioni automatica
-- **Preferenza compositi**: Automatica per tempi lunghi
-- **Stabilità sessioni**: TTL ottimizzato
+### **Standardizzazione Testing**
+- **Valori Bassi**: Min 5s/5click per test rapidi
+- **Multipli di 5**: Tutti i parametri numerici
+- **Max 60s**: Limite per singolo blocco
+- **Auto-Deploy**: Render sync con GitHub main branch
+
+## 🚀 DEPLOYMENT PIPELINE
+
+### **Render Configuration**
+- **Build Command**: `npm install`
+- **Start Command**: `node backend/server.js`
+- **Environment**: Node.js 18+
+- **Auto-Deploy**: Trigger su push main branch
+
+### **Health Checks**
+1. **Server Startup**: Express listening su porta
+2. **Database**: SQLite connection e tabelle
+3. **Template System**: Espansione compositi funzionante
+4. **API Endpoints**: /api/shorten e /v/:shortId attivi
+
+## 📊 MONITORING & ANALYTICS
+
+### **Metriche Tracked**
+- **Template Usage**: Distribuzione per tipo
+- **Completion Rates**: % utenti che completano
+- **Time Accuracy**: Differenza stimato vs reale
+- **Revenue Generation**: Slot pubblicitari attivati
+
+### **Debug Logging**
+- **Template Selection**: Decisioni algoritmo intelligente
+- **Composite Expansion**: Step generati per compositi
+- **Session Management**: Tracking progressi utente
+- **Error Handling**: Fallback e recovery automatici
+
+## 🔮 ARCHITETTURA FUTURE
+
+### **Scalabilità Pianificata**
+- **Database Migration**: SQLite → PostgreSQL per produzione
+- **Caching Layer**: Redis per sessioni e template
+- **Load Balancing**: Multiple Render instances
+- **CDN Integration**: Assets statici ottimizzati
+
+### **Features Avanzate**
+- **Machine Learning**: Predizione template ottimali
+- **Real-time Analytics**: Dashboard live metriche
+- **A/B Testing**: Confronto efficacia template
+- **Social Features**: Sfide collaborative multi-utente
 
 ---
 
-**🎯 Architettura Stabile e Intelligente - Pronta per Produzione**
-
-*Sistema completamente automatizzato per selezione template ottimale*
+**Architettura Version**: 2.4  
+**Last Updated**: Testing Optimization Phase  
+**Status**: ✅ Production Ready su Render
