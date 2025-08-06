@@ -151,10 +151,24 @@ async function handleVictimStep(req, res, currentStep) {
 
 // Usa SEMPRE template originali
 function generateStepHTML(template, nextUrl, sessionJS = '') {
+  const logger = require('../utils/debug-logger');
+  
   // Calcola ad slots basati sul revenue del template
-  const revenue = smartDistributor.calculateRevenue(template.subtype || template.type, 1.0);
+  const templateId = template.subtype || template.type;
+  const revenue = smartDistributor.calculateRevenue(templateId, 1.0);
   const enabledSlots = smartDistributor.calculateEnabledAdSlots(revenue);
   const adSlots = adSlotGenerator.generateAdSlots(enabledSlots);
+  
+  logger.info('AD_SLOTS', 'Debug ad slots generation', {
+    templateId,
+    templateType: template.type,
+    templateSubtype: template.subtype,
+    revenue,
+    enabledSlots,
+    adSlotsHtmlLength: adSlots.html.length,
+    adSlotsCssLength: adSlots.css.length,
+    revenueSystemEnabled: smartDistributor.revenueSystem.enabled
+  });
   
   if (template.type === 'timer') {
     if (template.subtype === 'timer_punish') {

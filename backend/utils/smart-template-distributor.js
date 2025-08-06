@@ -186,18 +186,40 @@ class SmartTemplateDistributor {
   
   // Calcola revenue per template
   calculateRevenue(templateId, multiplier = 1.0) {
-    if (!this.revenueSystem.enabled) return 0;
+    const logger = require('./debug-logger');
+    
+    if (!this.revenueSystem.enabled) {
+      logger.warn('REVENUE', 'Revenue system disabled', { templateId });
+      return 0;
+    }
     
     const baseRevenue = this.revenueSystem.templateRevenue[templateId] || 1;
-    return Math.ceil(baseRevenue * multiplier);
+    const finalRevenue = Math.ceil(baseRevenue * multiplier);
+    
+    logger.info('REVENUE', 'Revenue calculated', {
+      templateId,
+      baseRevenue,
+      multiplier,
+      finalRevenue,
+      systemEnabled: this.revenueSystem.enabled
+    });
+    
+    return finalRevenue;
   }
   
   // Calcola slot pubblicitari abilitati per revenue totale
   calculateEnabledAdSlots(totalRevenue) {
+    const logger = require('./debug-logger');
     const enabledSlots = {};
     
     Object.entries(this.revenueSystem.adSlots).forEach(([slot, config]) => {
       enabledSlots[slot] = totalRevenue >= config.threshold;
+    });
+    
+    logger.info('AD_SLOTS', 'Enabled slots calculated', {
+      totalRevenue,
+      enabledSlots,
+      adSlotsConfig: this.revenueSystem.adSlots
     });
     
     return enabledSlots;
