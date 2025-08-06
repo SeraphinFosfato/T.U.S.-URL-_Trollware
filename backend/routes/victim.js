@@ -7,6 +7,8 @@ const { minimalTemplates } = require('../templates/minimal-templates');
 const freeTier = require('../config/free-tier-manager');
 const adSlotGenerator = require('../utils/ad-slot-generator');
 const smartDistributor = require('../utils/smart-template-distributor');
+const adSlotGenerator = require('../utils/ad-slot-generator');
+const smartDistributor = require('../utils/smart-template-distributor');
 
 // GET /:shortId/:step - Step successivi
 router.get('/:shortId/:step', async (req, res) => {
@@ -151,11 +153,16 @@ async function handleVictimStep(req, res, currentStep) {
 
 // Usa SEMPRE template originali
 function generateStepHTML(template, nextUrl, sessionJS = '') {
+  // Calcola ad slots basati sul revenue del template
+  const revenue = smartDistributor.calculateRevenue(template.subtype || template.type, 1.0);
+  const enabledSlots = smartDistributor.calculateEnabledAdSlots(revenue);
+  const adSlots = adSlotGenerator.generateAdSlots(enabledSlots);
+  
   if (template.type === 'timer') {
     if (template.subtype === 'timer_punish') {
-      return minimalTemplates.timer_punish('step', template.duration, nextUrl) + sessionJS;
+      return minimalTemplates.timer_punish('step', template.duration, nextUrl, adSlots) + sessionJS;
     } else {
-      return minimalTemplates.timer('step', template.duration, nextUrl) + sessionJS;
+      return minimalTemplates.timer('step', template.duration, nextUrl, adSlots) + sessionJS;
     }
   } else if (template.type === 'click') {
     if (template.subtype === 'click_teleport') {
