@@ -1,6 +1,6 @@
 // Test PropellerAds integration
-const propellerConfig = require('./backend/config/propeller-config');
-const adSlotGenerator = require('./backend/utils/ad-slot-generator');
+const propellerConfig = require('../backend/config/propeller-config');
+const adSlotGenerator = require('../backend/utils/ad-slot-generator');
 
 console.log('🧪 Testing PropellerAds Integration...\n');
 
