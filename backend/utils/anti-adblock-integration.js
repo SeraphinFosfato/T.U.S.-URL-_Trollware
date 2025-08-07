@@ -42,7 +42,7 @@ class AntiAdBlockIntegration {
     text-align: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   ">
-    <div style="font-size: 60px; margin-bottom: 20px;">🧌</div>
+    <div style="margin-bottom: 20px;"><img src="/assets/images/Troll_icon.webp" alt="Troll" style="width: 80px; height: 80px; object-fit: contain;"></div>
     <h2 style="color: #e74c3c; margin: 0 0 20px 0;">NICE TRY, SMARTASS!</h2>
     <p style="color: #333; line-height: 1.6; margin-bottom: 25px;">
       <strong>Oh look!</strong> Another genius trying to outsmart <strong>TrollShortener</strong> with AdBlock.
@@ -87,7 +87,7 @@ class AntiAdBlockIntegration {
     ">🏃 I'm outta here</button>
     
     <p style="font-size: 12px; color: #999; margin-top: 20px;">
-      🧌 TrollShortener: Where smartasses learn patience • No shortcuts for cheaters • Git gud
+      <img src="/assets/images/Troll_icon.webp" alt="Troll" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;"> TrollShortener: Where smartasses learn patience • No shortcuts for cheaters • Git gud
     </p>
   </div>
 </div>`;

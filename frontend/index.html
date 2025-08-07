@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>TrollShortener</title>
+  <link rel="icon" type="image/webp" href="/assets/images/Logo_Admin.webp">
+  <link rel="shortcut icon" type="image/webp" href="/assets/images/Logo_Admin.webp">
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
     .form-group { margin: 20px 0; }
@@ -16,7 +18,7 @@
   </style>
 </head>
 <body>
-  <h1>🧌 TrollShortener</h1>
+  <h1><img src="/assets/images/Troll_icon.webp" alt="Troll" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;"> TrollShortener</h1>
   <p>Create shortened links... with surprises 😈</p>
   
   <div class="form-group">
@@ -57,7 +59,7 @@
     </select>
   </div>
   
-  <button onclick="shortenUrl()">🧌 Create Troll Link</button>
+  <button onclick="shortenUrl()"><img src="/assets/images/Troll_icon.webp" alt="Troll" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> Create Troll Link</button>
   
   <div id="result" class="result" style="display: none;"></div>
 
@@ -130,7 +132,7 @@
         
         if (response.ok) {
           resultDiv.innerHTML = `
-            <h3>🧌 Troll Link Created!</h3>
+            <h3><img src="/assets/images/Troll_icon.webp" alt="Troll" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 5px;"> Troll Link Created!</h3>
             <p><strong>Original URL:</strong> ${data.original_url}</p>
             <p><strong>Troll URL:</strong> <a href="${data.shortUrl}" target="_blank">${data.shortUrl}</a></p>
             <p><strong>Configuration:</strong> ${data.config.time} • ${data.config.steps} steps • expires ${data.config.expiry}</p>
