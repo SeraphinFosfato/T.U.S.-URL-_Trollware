@@ -122,12 +122,28 @@ ${this.warningOverlay}
   } else {
     console.log('✅ BlockAdBlock loaded, setting up detection');
     
-    // Configura opzioni per debug
+    // Configura opzioni con bait PropellerAds specifico
     blockAdBlock.setOption({
       debug: true,
       checkOnLoad: true,
-      resetOnEnd: false
+      resetOnEnd: false,
+      baitClass: 'propellerads_ad propeller-ad ads-by-propeller banner-ad',
+      baitStyle: 'width: 300px !important; height: 250px !important; position: absolute !important; left: -10000px !important; top: -1000px !important;'
     });
+    
+    // Test aggiuntivo PropellerAds
+    setTimeout(function() {
+      var testScript = document.createElement('script');
+      testScript.src = 'https://cdn.propellerads.com/tags.js';
+      testScript.onerror = function() {
+        console.log('🚫 PropellerAds script blocked - showing warning');
+        showAdBlockWarning();
+      };
+      testScript.onload = function() {
+        console.log('✅ PropellerAds script loaded');
+      };
+      document.head.appendChild(testScript);
+    }, 1000);
     
     // Eventi come da documentazione
     blockAdBlock.onDetected(function() {
