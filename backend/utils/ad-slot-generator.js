@@ -1,5 +1,6 @@
 // Generatore di slot pubblicitari per template
 const propellerConfig = require('../config/propeller-config');
+const antiAdBlock = require('./anti-adblock-integration');
 
 class AdSlotGenerator {
   constructor() {
@@ -55,7 +56,11 @@ class AdSlotGenerator {
     let html = '';
     let css = '';
     
-    // Anti-AdBlock rimosso - da sostituire con libreria esterna
+    // Aggiungi BlockAdBlock se ci sono ad slots attivi
+    const hasActiveSlots = Object.values(enabledSlots).some(enabled => enabled);
+    if (hasActiveSlots) {
+      html += antiAdBlock.getAntiAdBlockScript();
+    }
     
     Object.entries(enabledSlots).forEach(([slotName, enabled]) => {
       if (enabled && this.slotStyles[slotName]) {
