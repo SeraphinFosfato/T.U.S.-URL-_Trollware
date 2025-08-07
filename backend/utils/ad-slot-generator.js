@@ -6,15 +6,15 @@ class AdSlotGenerator {
   constructor() {
     this.slotStyles = {
       header: {
-        html: '<script>setTimeout(() => { const headerArea = document.querySelector(".header-area"); if (headerArea) { headerArea.innerHTML = `<div style="background:red;color:white;padding:10px;text-align:center;font-weight:bold;">🚀 HEADER AD - WORKING!</div>`; console.log("✅ Header ad injected"); } else { console.error("❌ Header area not found"); } }, 100);</script>',
+        html: '<script>setTimeout(() => { const headerArea = document.querySelector(".header-area"); if (headerArea) { headerArea.innerHTML = `' + this.getPropellerAd('vignette').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`; console.log("✅ Header ad injected"); } else { console.error("❌ Header area not found"); } }, 100);</script>',
         css: '.header-area{min-height:60px;background:rgba(255,255,255,0.1);border-radius:5px;padding:10px}.header-slot{width:100%;text-align:center}'
       },
       sidebar: {
-        html: '<script>setTimeout(() => { const sideArea = document.querySelector(".sidebar-area"); if (sideArea) { sideArea.innerHTML = `<div style="background:blue;color:white;padding:10px;text-align:center;font-weight:bold;height:200px;writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;">📱 LEFT SIDEBAR AD</div>`; console.log("✅ Left sidebar ad injected"); } }, 100);</script>',
+        html: '<script>setTimeout(() => { const sideArea = document.querySelector(".sidebar-area"); if (sideArea) { sideArea.innerHTML = `' + this.getPropellerAd('inpage').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`; console.log("✅ Left sidebar ad injected"); } }, 100);</script>',
         css: '.sidebar-area{background:rgba(255,255,255,0.1);border-radius:5px;padding:5px}'
       },
       footer: {
-        html: '<script>setTimeout(() => { const footerArea = document.querySelector(".footer-area"); if (footerArea) { footerArea.innerHTML = `<div style="background:green;color:white;padding:10px;text-align:center;font-weight:bold;">📎 FOOTER AD - WORKING!</div>`; console.log("✅ Footer ad injected"); } else { console.error("❌ Footer area not found"); } }, 100);</script>',
+        html: '<script>setTimeout(() => { const footerArea = document.querySelector(".footer-area"); if (footerArea) { footerArea.innerHTML = `<a href="' + propellerConfig.getDirectLink() + '" target="_blank" style="display:block;padding:12px;background:linear-gradient(45deg,#007bff,#0056b3);color:white;text-decoration:none;text-align:center;border-radius:8px;font-weight:bold;transition:transform 0.2s;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">🚀 Sponsored Content - Click Here</a>`; console.log("✅ Footer ad injected"); } else { console.error("❌ Footer area not found"); } }, 100);</script>',
         css: '.ad-footer{background:#f8f9fa;border:1px solid #dee2e6;padding:15px;text-align:center;margin-top:20px;border-radius:5px;z-index:9999;position:relative}'
       },
       interstitial: {
@@ -22,7 +22,7 @@ class AdSlotGenerator {
         css: '.ad-interstitial{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center}.ad-content{background:#fff;padding:40px;border-radius:10px;position:relative;max-width:400px;text-align:center}.ad-close{position:absolute;top:10px;right:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#999}.ad-placeholder{color:#6c757d;font-size:14px;margin-bottom:20px}'
       },
       sidebar2: {
-        html: '<script>setTimeout(() => { const side2Area = document.querySelector(".sidebar2-area"); if (side2Area) { side2Area.innerHTML = `<div style="background:purple;color:white;padding:10px;text-align:center;font-weight:bold;height:200px;writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;">📱 RIGHT SIDEBAR AD</div>`; console.log("✅ Right sidebar ad injected"); } }, 100);</script>',
+        html: '<script>setTimeout(() => { const side2Area = document.querySelector(".sidebar2-area"); if (side2Area) { side2Area.innerHTML = `' + this.getPropellerAd('inpage').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`; console.log("✅ Right sidebar ad injected"); } }, 100);</script>',
         css: '.sidebar2-area{background:rgba(255,255,255,0.1);border-radius:5px;padding:5px}'
       },
       overlay: {
