@@ -5,11 +5,11 @@ class AdSlotGenerator {
   constructor() {
     this.slotStyles = {
       header: {
-        html: '<div class="header-slot" id="header-slot"><div class="loading-msg" style="background:#e3f2fd;padding:8px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 PropellerAds Loading...</div></div><script>setTimeout(() => { const slot = document.getElementById("header-slot"); const adHtml = atob("' + Buffer.from(this.getPropellerAd('vignette')).toString('base64') + '"); slot.innerHTML += adHtml; const scripts = slot.querySelectorAll("script"); scripts.forEach(s => { if (s.innerHTML) eval(s.innerHTML); }); setTimeout(() => { if (!document.querySelector("#header-slot iframe, #header-slot [data-propeller]")) { const msg = document.querySelector(".loading-msg"); if (msg) msg.style.display = "block"; } }, 3000); }, 100);</script>',
+        html: '<div class="header-slot" id="header-slot">' + this.getPropellerAd('vignette') + '<div class="loading-msg" style="background:#e3f2fd;padding:8px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 PropellerAds Loading...</div></div><script>setTimeout(() => { if (!document.querySelector("#header-slot iframe, #header-slot [data-propeller]")) { const msg = document.querySelector(".loading-msg"); if (msg) msg.style.display = "block"; } }, 3000);</script>',
         css: '.header-slot{margin-bottom:20px;min-height:50px;position:relative}'
       },
       sidebar: {
-        html: '<div class="side-slot" id="side-slot"><div class="loading-msg" style="background:#e3f2fd;padding:8px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 InPage Loading...</div></div><script>setTimeout(() => { const slot = document.getElementById("side-slot"); const adHtml = atob("' + Buffer.from(this.getPropellerAd('inPagePush')).toString('base64') + '"); slot.innerHTML += adHtml; setTimeout(() => { if (!document.querySelector("#side-slot iframe, #side-slot [data-propeller]")) { const msg = document.querySelector("#side-slot .loading-msg"); if (msg) msg.style.display = "block"; } }, 3000); }, 100);</script>',
+        html: '<div class="side-slot" id="side-slot">' + this.getPropellerAd('inPagePush') + '<div class="loading-msg" style="background:#e3f2fd;padding:8px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 InPage Loading...</div></div><script>setTimeout(() => { if (!document.querySelector("#side-slot iframe, #side-slot [data-propeller]")) { const msg = document.querySelector(".loading-msg"); if (msg) msg.style.display = "block"; } }, 3000);</script>',
         css: '.side-slot{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:160px;height:600px;z-index:1000}'
       },
       footer: {
