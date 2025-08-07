@@ -5,15 +5,15 @@ class AdSlotGenerator {
   constructor() {
     this.slotStyles = {
       header: {
-        html: '<script>setTimeout(() => { const headerArea = document.querySelector(".header-area"); if (headerArea) { headerArea.innerHTML = `<div class="header-slot"><div style="background:red;color:white;padding:5px;text-align:center;font-size:12px;">🚀 TEST HEADER AD</div></div>`; } }, 500);</script>',
+        html: '<script>setTimeout(() => { const headerArea = document.querySelector(".header-area"); if (headerArea) { headerArea.innerHTML = `<div style="background:red;color:white;padding:10px;text-align:center;font-weight:bold;">🚀 HEADER AREA - AD SLOT</div>`; } }, 100);</script>',
         css: '.header-area{min-height:60px;background:rgba(255,255,255,0.1);border-radius:5px;padding:10px}.header-slot{width:100%;text-align:center}'
       },
       sidebar: {
-        html: '<div class="side-slot" id="side-slot">' + this.getPropellerAd('inPagePush') + '<div class="loading-msg" style="background:#e3f2fd;padding:8px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 InPage Loading...</div></div><script>setTimeout(() => { if (!document.querySelector("#side-slot iframe, #side-slot [data-propeller]")) { const msg = document.querySelector(".loading-msg"); if (msg) msg.style.display = "block"; } }, 3000);</script>',
+        html: '<script>setTimeout(() => { const sideArea = document.querySelector(".sidebar-area"); if (sideArea) { sideArea.innerHTML = `<div style="background:blue;color:white;padding:10px;text-align:center;font-weight:bold;height:100px;">📱 SIDEBAR AREA</div>`; } }, 100);</script>',
         css: '.side-slot{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:160px;height:600px;z-index:1000}'
       },
       footer: {
-        html: '<div class="ad-footer" id="ad-footer"><div style="background:green;color:white;padding:10px;font-weight:bold;margin:10px 0;">🚨 FOOTER AD SLOT</div><a href="' + propellerConfig.getDirectLink() + '" target="_blank" style="display:block;padding:15px;background:#007bff;color:white;text-decoration:none;text-align:center;border-radius:5px;">🚀 Sponsored Link - Click Here</a></div>',
+        html: '<script>setTimeout(() => { const footerArea = document.querySelector(".footer-area"); if (footerArea) { footerArea.innerHTML = `<div style="background:green;color:white;padding:10px;text-align:center;font-weight:bold;">📎 FOOTER AREA - AD SLOT</div>`; } }, 100);</script>',
         css: '.ad-footer{background:#f8f9fa;border:1px solid #dee2e6;padding:15px;text-align:center;margin-top:20px;border-radius:5px;z-index:9999;position:relative}'
       },
       interstitial: {
