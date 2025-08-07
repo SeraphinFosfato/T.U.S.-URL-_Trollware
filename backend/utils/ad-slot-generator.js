@@ -9,8 +9,8 @@ class AdSlotGenerator {
         css: '.header-area{min-height:60px;background:rgba(255,255,255,0.1);border-radius:5px;padding:10px}.header-slot{width:100%;text-align:center}'
       },
       sidebar: {
-        html: '<script>setTimeout(() => { const sideArea = document.querySelector(".sidebar-area"); if (sideArea) { sideArea.innerHTML = `<div style="background:blue;color:white;padding:10px;text-align:center;font-weight:bold;height:100px;">📱 SIDEBAR AREA</div>`; } }, 100);</script>',
-        css: '.side-slot{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:160px;height:600px;z-index:1000}'
+        html: '',
+        css: ''
       },
       footer: {
         html: '<script>setTimeout(() => { const footerArea = document.querySelector(".footer-area"); if (footerArea) { footerArea.innerHTML = `<div style="background:green;color:white;padding:10px;text-align:center;font-weight:bold;">📎 FOOTER AREA - AD SLOT</div>`; } }, 100);</script>',
