@@ -1,43 +1,9 @@
 <!-- VIGNETTE_SCRIPT_START -->
-<script>
-console.log("🎯 Test Script Vignette Started");
-setTimeout(() => {
-  const banner = document.createElement('div');
-  banner.innerHTML = '🚀 TEST VIGNETTE AD - SUCCESS!';
-  banner.style.cssText = 'background:red;color:white;padding:5px;text-align:center;margin:5px 0;font-size:12px;';
-  const slot = document.querySelector('.header-slot');
-  if (slot) {
-    const fallback = slot.querySelector('.loading-msg');
-    if (fallback) {
-      slot.insertBefore(banner, fallback);
-    } else {
-      slot.appendChild(banner);
-    }
-  }
-  console.log("✅ Test vignette banner added");
-}, 1000);
-</script>
+  <script>(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('gizokraijaw.net',9677090,document.createElement('script'))</script>
 <!-- VIGNETTE_SCRIPT_END -->
 
 <!-- IN_PAGE_PUSH_SCRIPT_START -->
-<script>
-console.log("🎯 Test Script InPage Started");
-setTimeout(() => {
-  const push = document.createElement('div');
-  push.innerHTML = '📱 TEST INPAGE AD - SUCCESS!';
-  push.style.cssText = 'background:blue;color:white;padding:5px;text-align:center;margin:5px 0;font-size:12px;';
-  const slot = document.querySelector('.side-slot');
-  if (slot) {
-    const fallback = slot.querySelector('.loading-msg');
-    if (fallback) {
-      slot.insertBefore(push, fallback);
-    } else {
-      slot.appendChild(push);
-    }
-  }
-  console.log("✅ Test inpage banner added");
-}, 1000);
-</script>
+  <script>(function(d,z,s){s.src='https://'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('vemtoutcheeg.com',9677112,document.createElement('script'))</script>
 <!-- IN_PAGE_PUSH_SCRIPT_END -->
 
 <!-- DIRECT_LINK_SCRIPT_START -->
