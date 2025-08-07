@@ -114,11 +114,16 @@ ${this.warningOverlay}
     }
   }
   
+  // Debug console
+  console.log('🔍 BlockAdBlock status:', typeof blockAdBlock);
+  console.log('🔍 Window blockAdBlock:', window.blockAdBlock);
+  
   // Controllo principale
   if(typeof blockAdBlock === 'undefined') {
-    // BlockAdBlock stesso è stato bloccato
+    console.log('❌ BlockAdBlock undefined - showing warning');
     showAdBlockWarning();
   } else {
+    console.log('✅ BlockAdBlock loaded, setting up detection');
     // Usa BlockAdBlock per detection
     blockAdBlock.onDetected(function() {
       console.log('🚫 AdBlock detected by BlockAdBlock');
@@ -128,6 +133,14 @@ ${this.warningOverlay}
     blockAdBlock.onNotDetected(function() {
       console.log('✅ No AdBlock detected');
     });
+    
+    // Force check dopo 2 secondi
+    setTimeout(function() {
+      console.log('🔍 Force checking...');
+      if (blockAdBlock.check) {
+        blockAdBlock.check();
+      }
+    }, 2000);
   }
 })();
 </script>`;
