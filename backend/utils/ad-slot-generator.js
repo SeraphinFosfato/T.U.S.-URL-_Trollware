@@ -10,8 +10,8 @@ class AdSlotGenerator {
         css: '.header-area{min-height:60px;background:rgba(255,255,255,0.1);border-radius:5px;padding:10px}.header-slot{width:100%;text-align:center}'
       },
       sidebar: {
-        html: '',
-        css: ''
+        html: '<script>setTimeout(() => { const sideArea = document.querySelector(".sidebar-area"); if (sideArea) { sideArea.innerHTML = `<div style="background:blue;color:white;padding:10px;text-align:center;font-weight:bold;height:200px;writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;">📱 LEFT SIDEBAR AD</div>`; console.log("✅ Left sidebar ad injected"); } }, 100);</script>',
+        css: '.sidebar-area{background:rgba(255,255,255,0.1);border-radius:5px;padding:5px}'
       },
       footer: {
         html: '<script>setTimeout(() => { const footerArea = document.querySelector(".footer-area"); if (footerArea) { footerArea.innerHTML = `<div style="background:green;color:white;padding:10px;text-align:center;font-weight:bold;">📎 FOOTER AD - WORKING!</div>`; console.log("✅ Footer ad injected"); } else { console.error("❌ Footer area not found"); } }, 100);</script>',
@@ -20,6 +20,10 @@ class AdSlotGenerator {
       interstitial: {
         html: '<div class="ad-interstitial" id="ad-interstitial"><div class="ad-content"><div class="ad-placeholder">Sponsored Content</div><button onclick="this.parentElement.parentElement.style.display=\'none\'" class="ad-close">×</button></div></div>',
         css: '.ad-interstitial{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center}.ad-content{background:#fff;padding:40px;border-radius:10px;position:relative;max-width:400px;text-align:center}.ad-close{position:absolute;top:10px;right:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#999}.ad-placeholder{color:#6c757d;font-size:14px;margin-bottom:20px}'
+      },
+      sidebar2: {
+        html: '<script>setTimeout(() => { const side2Area = document.querySelector(".sidebar2-area"); if (side2Area) { side2Area.innerHTML = `<div style="background:purple;color:white;padding:10px;text-align:center;font-weight:bold;height:200px;writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;">📱 RIGHT SIDEBAR AD</div>`; console.log("✅ Right sidebar ad injected"); } }, 100);</script>',
+        css: '.sidebar2-area{background:rgba(255,255,255,0.1);border-radius:5px;padding:5px}'
       },
       overlay: {
         html: '<div class="ad-overlay" id="ad-overlay"><div class="ad-placeholder">Premium Ad</div><button onclick="this.parentElement.style.display=\'none\'" class="ad-close">×</button></div>',
