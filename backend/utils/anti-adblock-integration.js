@@ -42,25 +42,27 @@ class AntiAdBlockIntegration {
     text-align: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   ">
-    <div style="font-size: 60px; margin-bottom: 20px;">🚫</div>
-    <h2 style="color: #e74c3c; margin: 0 0 20px 0;">AdBlock Rilevato!</h2>
+    <div style="font-size: 60px; margin-bottom: 20px;">🧌</div>
+    <h2 style="color: #e74c3c; margin: 0 0 20px 0;">TROLL DETECTED!</h2>
     <p style="color: #333; line-height: 1.6; margin-bottom: 25px;">
-      Per continuare e accedere al link, devi <strong>disattivare AdBlock</strong> per questo sito.
+      <strong>Complimenti!</strong> Hai un AdBlock attivo. Peccato che questo sia <strong>TrollShortener</strong>.
       <br><br>
-      Gli annunci ci permettono di mantenere il servizio gratuito! 🙏
+      Per accedere al tuo prezioso link, devi <strong>disattivare AdBlock</strong> e sopportare i nostri annunci. 😈
     </p>
     
-    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left;">
-      <h4 style="margin: 0 0 10px 0; color: #495057;">📋 Come disattivare AdBlock:</h4>
-      <ol style="margin: 0; padding-left: 20px; color: #6c757d;">
-        <li>Clicca sull'icona AdBlock nel browser</li>
-        <li>Seleziona "Disattiva per questo sito"</li>
+    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; border-left: 4px solid #ffc107;">
+      <h4 style="margin: 0 0 10px 0; color: #856404;">🎭 Regole del Gioco:</h4>
+      <ol style="margin: 0; padding-left: 20px; color: #856404;">
+        <li>Disattiva AdBlock per questo sito</li>
         <li>Ricarica la pagina</li>
+        <li>Sopporta gli annunci come tutti</li>
+        <li>Completa il mini-gioco frustrante</li>
+        <li>FORSE otterrai il tuo link</li>
       </ol>
     </div>
     
     <button onclick="location.reload()" style="
-      background: #28a745;
+      background: #dc3545;
       color: white;
       border: none;
       padding: 12px 30px;
@@ -68,7 +70,7 @@ class AntiAdBlockIntegration {
       font-size: 16px;
       cursor: pointer;
       margin-right: 10px;
-    ">🔄 Ho disattivato AdBlock</button>
+    ">😤 Va bene, ho disattivato AdBlock</button>
     
     <button onclick="window.close()" style="
       background: #6c757d;
@@ -78,10 +80,10 @@ class AntiAdBlockIntegration {
       border-radius: 5px;
       font-size: 16px;
       cursor: pointer;
-    ">❌ Chiudi</button>
+    ">🚪 Scappo via</button>
     
     <p style="font-size: 12px; color: #999; margin-top: 20px;">
-      🔒 Nessun malware • Solo annunci sicuri • Supporta il progetto
+      🧌 Welcome to TrollShortener • Your patience will be tested • Every click is earned
     </p>
   </div>
 </div>`;
