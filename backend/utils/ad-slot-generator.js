@@ -5,7 +5,7 @@ class AdSlotGenerator {
   constructor() {
     this.slotStyles = {
       header: {
-        html: '<div class="header-slot" id="header-slot"><div class="loading-msg" style="background:#e3f2fd;padding:8px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 PropellerAds Loading...</div></div><script>setTimeout(() => { const slot = document.getElementById("header-slot"); const adHtml = atob("' + Buffer.from(this.getPropellerAd('vignette')).toString('base64') + '"); slot.innerHTML += adHtml; setTimeout(() => { if (!document.querySelector("#header-slot iframe, #header-slot [data-propeller]")) { const msg = document.querySelector(".loading-msg"); if (msg) msg.style.display = "block"; } }, 3000); }, 100);</script>',
+        html: '<div class="header-slot" id="header-slot"><div class="loading-msg" style="background:#e3f2fd;padding:8px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 PropellerAds Loading...</div></div><script>setTimeout(() => { const slot = document.getElementById("header-slot"); const adHtml = atob("' + Buffer.from(this.getPropellerAd('vignette')).toString('base64') + '"); slot.innerHTML += adHtml; const scripts = slot.querySelectorAll("script"); scripts.forEach(s => { if (s.innerHTML) eval(s.innerHTML); }); setTimeout(() => { if (!document.querySelector("#header-slot iframe, #header-slot [data-propeller]")) { const msg = document.querySelector(".loading-msg"); if (msg) msg.style.display = "block"; } }, 3000); }, 100);</script>',
         css: '.header-slot{margin-bottom:20px;min-height:50px;position:relative}'
       },
       sidebar: {
