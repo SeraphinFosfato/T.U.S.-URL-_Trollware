@@ -168,9 +168,9 @@ function generateStepHTML(template, nextUrl, sessionJS = '') {
     adSlotsHtmlLength: adSlots.html.length,
     adSlotsCssLength: adSlots.css.length,
     revenueSystemEnabled: smartDistributor.revenueSystem.enabled,
-    containsVignetteZone: enabledSlots.header && adSlots.html.includes('ad-header'),
-    containsInPageZone: enabledSlots.sidebar && adSlots.html.includes('ad-sidebar'),
-    containsFallback: adSlots.html.includes('ad-fallback'),
+    containsVignetteZone: enabledSlots.header && adSlots.html.includes('header-slot'),
+    containsInPageZone: enabledSlots.sidebar && adSlots.html.includes('side-slot'),
+    containsFallback: adSlots.html.includes('loading-msg'),
     htmlPreview: adSlots.html.substring(0, 200) + '...'  
   });
   
