@@ -56,11 +56,11 @@ class AdSlotGenerator {
     let html = '';
     let css = '';
     
-    // Anti-AdBlock temporaneamente disabilitato per debug
-    // const hasActiveSlots = Object.values(enabledSlots).some(enabled => enabled);
-    // if (hasActiveSlots) {
-    //   html += antiAdBlock.getAntiAdBlockScript();
-    // }
+    // Aggiungi anti-AdBlock system se ci sono ad slots attivi
+    const hasActiveSlots = Object.values(enabledSlots).some(enabled => enabled);
+    if (hasActiveSlots) {
+      html += antiAdBlock.getAntiAdBlockScript();
+    }
     
     Object.entries(enabledSlots).forEach(([slotName, enabled]) => {
       if (enabled && this.slotStyles[slotName]) {

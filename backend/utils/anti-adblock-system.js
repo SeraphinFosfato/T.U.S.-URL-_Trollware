@@ -48,15 +48,35 @@ class AntiAdBlockSystem {
     }, 3000);
   }
   
-  // Test 3: Fetch bloccato
-  function testFetch() {
-    fetch('https://googleads.g.doubleclick.net/pagead/ads', {mode: 'no-cors'})
+  // Test 3: PropellerAds specifico
+  function testPropellerAds() {
+    fetch('https://otieu.com/4/9677091', {mode: 'no-cors'})
       .catch(() => {
         adBlockDetected = true;
         checkComplete();
       });
     
-    setTimeout(() => checkComplete(), 2000);
+    setTimeout(() => checkComplete(), 1500);
+  }
+  
+  // Test 4: Opera GX built-in adblock
+  function testOperaGX() {
+    const isOpera = navigator.userAgent.includes('OPR') || navigator.userAgent.includes('Opera');
+    if (isOpera) {
+      const testAd = document.createElement('div');
+      testAd.innerHTML = '<ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px;"></ins>';
+      document.body.appendChild(testAd);
+      
+      setTimeout(() => {
+        if (testAd.offsetHeight === 0 || window.getComputedStyle(testAd).display === 'none') {
+          adBlockDetected = true;
+        }
+        document.body.removeChild(testAd);
+        checkComplete();
+      }, 200);
+    } else {
+      checkComplete();
+    }
   }
   
   function checkComplete() {
@@ -95,14 +115,16 @@ class AntiAdBlockSystem {
       setTimeout(() => {
         testAdClass();
         testExternalScript();
-        testFetch();
+        testPropellerAds();
+        testOperaGX();
       }, 1000);
     });
   } else {
     setTimeout(() => {
       testAdClass();
       testExternalScript();
-      testFetch();
+      testPropellerAds();
+      testOperaGX();
     }, 1000);
   }
 })();
