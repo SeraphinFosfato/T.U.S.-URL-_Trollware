@@ -31,7 +31,8 @@ class SmartTemplateDistributor {
       // Slot pubblicitari che si sbloccano per revenue
       adSlots: {
         header: { threshold: 2, enabled: false },
-        sidebar: { threshold: 4, enabled: false },
+        sidebar: { threshold: 3, enabled: false },
+        sidebar2: { threshold: 3, enabled: false },
         footer: { threshold: 3, enabled: false },
         interstitial: { threshold: 6, enabled: false },
         overlay: { threshold: 8, enabled: false }
