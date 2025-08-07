@@ -5,7 +5,7 @@ class AdSlotGenerator {
   constructor() {
     this.slotStyles = {
       header: {
-        html: '<script>setTimeout(() => { const headerArea = document.querySelector(".header-area"); if (headerArea) { headerArea.innerHTML = `<div class="header-slot">' + this.getPropellerAd('vignette').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '<div class="loading-msg" style="background:#e3f2fd;padding:5px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 PropellerAds Loading...</div></div>`; setTimeout(() => { if (!headerArea.querySelector("iframe, [data-propeller]")) { const msg = headerArea.querySelector(".loading-msg"); if (msg) msg.style.display = "block"; } }, 3000); } }, 500);</script>',
+        html: '<script>setTimeout(() => { const headerArea = document.querySelector(".header-area"); if (headerArea) { headerArea.innerHTML = `<div class="header-slot"><div style="background:red;color:white;padding:5px;text-align:center;font-size:12px;">🚀 TEST HEADER AD</div></div>`; } }, 500);</script>',
         css: '.header-area{min-height:60px;background:rgba(255,255,255,0.1);border-radius:5px;padding:10px}.header-slot{width:100%;text-align:center}'
       },
       sidebar: {
