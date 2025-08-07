@@ -137,17 +137,31 @@ ${this.warningOverlay}
       baitStyle: 'width: 300px !important; height: 250px !important; position: absolute !important; left: -10000px !important; top: -1000px !important;'
     });
     
-    // Test aggiuntivo PropellerAds
+    // Test aggiuntivo PropellerAds con timeout
     setTimeout(function() {
       var testScript = document.createElement('script');
+      var scriptLoaded = false;
+      
       testScript.src = 'https://cdn.propellerads.com/tags.js';
       testScript.onerror = function() {
-        console.log('🚫 PropellerAds script blocked - showing warning');
-        showAdBlockWarning();
+        if (!scriptLoaded) {
+          console.log('🚫 PropellerAds script blocked - showing warning');
+          showAdBlockWarning();
+        }
       };
       testScript.onload = function() {
+        scriptLoaded = true;
         console.log('✅ PropellerAds script loaded');
       };
+      
+      // Timeout fallback per DNS blocking
+      setTimeout(function() {
+        if (!scriptLoaded) {
+          console.log('🚫 PropellerAds DNS blocked or timeout - showing warning');
+          showAdBlockWarning();
+        }
+      }, 5000);
+      
       document.head.appendChild(testScript);
     }, 1000);
     
