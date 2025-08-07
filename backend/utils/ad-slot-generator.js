@@ -6,7 +6,7 @@ class AdSlotGenerator {
   constructor() {
     this.slotStyles = {
       header: {
-        html: '<script>setTimeout(() => { const headerArea = document.querySelector(".header-area"); if (headerArea) { headerArea.innerHTML = `<div class="header-slot">' + this.getPropellerAd('vignette').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '<div class="loading-msg" style="background:#e3f2fd;padding:5px;font-size:11px;color:#1976d2;display:none;border-left:3px solid #2196f3;">🔄 PropellerAds Loading...</div></div>`; setTimeout(() => { if (!headerArea.querySelector("iframe, [data-propeller]")) { const msg = headerArea.querySelector(".loading-msg"); if (msg) msg.style.display = "block"; } }, 3000); } }, 100);</script>',
+        html: '<script>setTimeout(() => { const headerArea = document.querySelector(".header-area"); if (headerArea) { headerArea.innerHTML = `<div style="background:red;color:white;padding:10px;text-align:center;font-weight:bold;">🚀 HEADER AD - WORKING!</div>`; console.log("✅ Header ad injected"); } else { console.error("❌ Header area not found"); } }, 100);</script>',
         css: '.header-area{min-height:60px;background:rgba(255,255,255,0.1);border-radius:5px;padding:10px}.header-slot{width:100%;text-align:center}'
       },
       sidebar: {
@@ -14,7 +14,7 @@ class AdSlotGenerator {
         css: ''
       },
       footer: {
-        html: '<script>setTimeout(() => { const footerArea = document.querySelector(".footer-area"); if (footerArea) { footerArea.innerHTML = `<div class="footer-slot"><a href="' + propellerConfig.getDirectLink() + '" target="_blank" style="display:block;padding:12px;background:linear-gradient(45deg,#007bff,#0056b3);color:white;text-decoration:none;text-align:center;border-radius:8px;font-weight:bold;transition:transform 0.2s;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">🚀 Sponsored Content - Click Here</a></div>`; } }, 100);</script>',
+        html: '<script>setTimeout(() => { const footerArea = document.querySelector(".footer-area"); if (footerArea) { footerArea.innerHTML = `<div style="background:green;color:white;padding:10px;text-align:center;font-weight:bold;">📎 FOOTER AD - WORKING!</div>`; console.log("✅ Footer ad injected"); } else { console.error("❌ Footer area not found"); } }, 100);</script>',
         css: '.ad-footer{background:#f8f9fa;border:1px solid #dee2e6;padding:15px;text-align:center;margin-top:20px;border-radius:5px;z-index:9999;position:relative}'
       },
       interstitial: {
