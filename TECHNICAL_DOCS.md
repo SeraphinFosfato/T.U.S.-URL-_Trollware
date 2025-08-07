@@ -144,11 +144,35 @@ const components = [
 }
 ```
 
+### Layout Grid Standard (Iterazione 24)
+```html
+<!-- Struttura Grid Uniforme -->
+<div class="layout">
+  <div class="header-area"></div>     <!-- Ad slots header -->
+  <div class="main-area">             <!-- Gioco centrato -->
+    <div class="w"><!-- Contenuto gioco --></div>
+  </div>
+  <div class="footer-area"></div>     <!-- Ad slots footer -->
+</div>
+```
+
+```css
+.layout {
+  display: grid;
+  grid-template-areas: "header header" "main main" "footer footer";
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+  gap: 10px;
+  padding: 10px;
+}
+```
+
 ### Aggiunta Nuovi Template
 1. **Definire in template-time-estimator.js** con stime accurate
 2. **Aggiungere peso in smart-template-distributor.js**
 3. **Implementare logica in advanced-template-system.js**
-4. **Creare template HTML in minimal-templates.js**
+4. **Creare template HTML in minimal-templates.js** con layout grid
 5. **Aggiornare victim.js per rendering**
 6. **Testare con script dedicato**
 
@@ -244,6 +268,26 @@ Generated intelligent sequence: [
   { type: "composite", subtype: "timer_then_click", estimatedTime: 120 }
 ]
 ```
+
+## 🎯 Obiettivi Iterazione 24 - COMPLETATI
+
+### ✅ Layout Grid Standardizzato
+- **CSS Grid Layout**: Tutti i template usano struttura grid uniforme
+- **Aree Dedicate**: Header, Main, Footer separati fisicamente
+- **Centramento Perfetto**: Giochi centrati senza shift laterali
+- **Responsive Design**: Layout adattivo per mobile
+
+### ✅ Sistema Ad Slots Avanzato
+- **Revenue-Based**: Ad slots attivati in base al revenue del template
+- **Anti-AdBlock**: Nomi classi neutri per evitare blocchi
+- **Injection Dinamica**: Script inseriti nelle aree grid dedicate
+- **Fallback System**: Messaggi di debug per troubleshooting
+
+### ✅ Template Unificati
+- **Grid Structure**: `header-area`, `main-area`, `footer-area`
+- **Consistent Styling**: CSS uniforme tra tutti i template
+- **Ad Integration**: Slot pubblicitari integrati senza interferenze
+- **Perfect Centering**: Giochi centrati matematicamente
 
 ## 🎯 Obiettivi Iterazione 23 - COMPLETATI
 
