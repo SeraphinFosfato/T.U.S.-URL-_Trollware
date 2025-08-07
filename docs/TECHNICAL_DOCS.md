@@ -269,7 +269,19 @@ Generated intelligent sequence: [
 ]
 ```
 
-## 🎯 Obiettivi Iterazione 25 - COMPLETATI
+## 🎯 Obiettivi Iterazione 26 - COMPLETATI
+
+### ✅ PropellerAds Revenue System LIVE
+- **Script Reali**: propeller-scripts.txt con vignette/inpage veri
+- **Estrazione Automatica**: propeller-config.js legge script dal file
+- **Integration Completa**: Header, sidebar, footer con PropellerAds reali
+- **Revenue Attivo**: Sistema pronto per monetizzazione
+
+### ✅ Anti-AdBlock Detection Perfezionato
+- **DNS Blocking**: Rileva anche blocchi a livello DNS/ISP
+- **Timeout Fallback**: 5 secondi per rilevare script bloccati
+- **PropellerAds Specific**: Test su cdn.propellerads.com reale
+- **Dual Detection**: BlockAdBlock + PropellerAds script test
 
 ### ✅ Sistema Immagini WEBP
 - **Troll_icon.webp**: Icona principale (277KB) - sostituisce emoji 🧌

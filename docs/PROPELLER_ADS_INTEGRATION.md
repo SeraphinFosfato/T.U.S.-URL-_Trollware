@@ -15,6 +15,14 @@
 2. **Use helper functions** to read them as raw strings
 3. **Never parse as JavaScript** - treat as HTML strings only
 
+## 🚀 SISTEMA LIVE E OPERATIVO
+
+### Status: REVENUE ATTIVO
+- **PropellerAds Reali**: Script veri integrati e funzionanti
+- **Anti-AdBlock**: BlockAdBlock + DNS detection completa
+- **Troll Integration**: Overlay "NICE TRY, SMARTASS!" operativo
+- **Multi-Template**: Header, sidebar, footer con ads reali
+
 ## Current Integration
 
 ### Files Structure
