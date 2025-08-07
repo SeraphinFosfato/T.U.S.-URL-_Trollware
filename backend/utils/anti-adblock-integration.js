@@ -43,22 +43,26 @@ class AntiAdBlockIntegration {
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   ">
     <div style="font-size: 60px; margin-bottom: 20px;">🧌</div>
-    <h2 style="color: #e74c3c; margin: 0 0 20px 0;">TROLL DETECTED!</h2>
+    <h2 style="color: #e74c3c; margin: 0 0 20px 0;">NICE TRY, SMARTASS!</h2>
     <p style="color: #333; line-height: 1.6; margin-bottom: 25px;">
-      <strong>Complimenti!</strong> Hai un AdBlock attivo. Peccato che questo sia <strong>TrollShortener</strong>.
+      <strong>Oh look!</strong> Another genius trying to outsmart <strong>TrollShortener</strong> with AdBlock.
       <br><br>
-      Per accedere al tuo prezioso link, devi <strong>disattivare AdBlock</strong> e sopportare i nostri annunci. 😈
+      Did you really think we wouldn't notice? <strong>Disable your AdBlock</strong> and face the ads like everyone else, you sneaky little troll. 😏
     </p>
     
     <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; border-left: 4px solid #ffc107;">
-      <h4 style="margin: 0 0 10px 0; color: #856404;">🎭 Regole del Gioco:</h4>
+      <h4 style="margin: 0 0 10px 0; color: #856404;">🎭 GAME RULES FOR SMARTASSES:</h4>
       <ol style="margin: 0; padding-left: 20px; color: #856404;">
-        <li>Disattiva AdBlock per questo sito</li>
-        <li>Ricarica la pagina</li>
-        <li>Sopporta gli annunci come tutti</li>
-        <li>Completa il mini-gioco frustrante</li>
-        <li>FORSE otterrai il tuo link</li>
+        <li>Disable AdBlock for this site (yes, YOU have to do it)</li>
+        <li>Refresh the page and watch our beautiful ads</li>
+        <li>Complete the frustrating mini-game we prepared</li>
+        <li>Earn your precious link through PAIN</li>
+        <li>Learn that there's no free lunch on the internet</li>
       </ol>
+      <p style="margin: 10px 0 0 0; font-size: 13px; color: #dc3545; font-weight: bold;">
+        ⚠️ Using browsers with built-in adblock (Opera GX, Brave) is PROHIBITED. 
+        Switch to a normal browser or suffer the consequences.
+      </p>
     </div>
     
     <button onclick="location.reload()" style="
@@ -70,7 +74,7 @@ class AntiAdBlockIntegration {
       font-size: 16px;
       cursor: pointer;
       margin-right: 10px;
-    ">😤 Va bene, ho disattivato AdBlock</button>
+    ">😠 Fine, I disabled AdBlock</button>
     
     <button onclick="window.close()" style="
       background: #6c757d;
@@ -80,10 +84,10 @@ class AntiAdBlockIntegration {
       border-radius: 5px;
       font-size: 16px;
       cursor: pointer;
-    ">🚪 Scappo via</button>
+    ">🏃 I'm outta here</button>
     
     <p style="font-size: 12px; color: #999; margin-top: 20px;">
-      🧌 Welcome to TrollShortener • Your patience will be tested • Every click is earned
+      🧌 TrollShortener: Where smartasses learn patience • No shortcuts for cheaters • Git gud
     </p>
   </div>
 </div>`;
