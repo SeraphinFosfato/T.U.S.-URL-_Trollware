@@ -31,7 +31,7 @@ TrollShortener transforms boring URL shortening into an **interactive gaming exp
 - **Fingerprint Sessions**: Your progress is remembered (you can't escape)
 - **Real-time Analytics**: We know exactly how frustrated you are
 - **Scalable Architecture**: Built to handle millions of annoyed users
-- **Revenue System**: Optional advertising for different experience tiers
+- **AdStyle Revenue**: Integrated advertising system with anti-adblock protection
 
 ## 🚀 Live Demo
 

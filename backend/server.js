@@ -19,7 +19,7 @@ const debugTemplatesRoutes = require('./routes/debug-templates');
 // Middleware per cookie parsing
 app.use(require('cookie-parser')());
 
-// PropellerAds verification file
+// AdStyle verification file
 app.get('/sw.js', (req, res) => {
   res.sendFile(path.join(__dirname, '../sw.js'));
 });

@@ -128,7 +128,7 @@ ${this.warningOverlay}
   } else {
     console.log('✅ BlockAdBlock loaded, setting up detection');
     
-    // Configura opzioni con bait PropellerAds specifico
+    // Configura opzioni con bait AdStyle specifico
     blockAdBlock.setOption({
       debug: true,
       checkOnLoad: true,

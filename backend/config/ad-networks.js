@@ -10,7 +10,7 @@ const adNetworks = {
     }
   },
   
-  propellerads: {
+  adstyle: {
     enabled: false, // Attiva quando hai i codici
     publisherId: 'YOUR_PUBLISHER_ID',
     zones: {
