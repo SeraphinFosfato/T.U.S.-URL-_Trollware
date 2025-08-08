@@ -6,11 +6,11 @@ class AdSlotGenerator {
   constructor() {
     this.slotStyles = {
       header: {
-        html: '<script>setTimeout(() => { const headerArea = document.querySelector(".header-area"); if (headerArea) { headerArea.innerHTML = `' + this.getPropellerAd('vignette').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`; console.log("✅ Header ad injected"); } else { console.error("❌ Header area not found"); } }, 100);</script>',
+        html: '<script>setTimeout(() => { const headerArea = document.querySelector(".header-area"); if (headerArea) { headerArea.innerHTML = `' + this.getPropellerAd('inPagePush1').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`; console.log("✅ Header ad injected"); } else { console.error("❌ Header area not found"); } }, 100);</script>',
         css: '.header-area{min-height:60px;background:rgba(255,255,255,0.1);border-radius:5px;padding:10px}.header-slot{width:100%;text-align:center}'
       },
       sidebar: {
-        html: '<script>setTimeout(() => { const sideArea = document.querySelector(".sidebar-area"); if (sideArea) { sideArea.innerHTML = `' + this.getPropellerAd('inpage').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`; console.log("✅ Left sidebar ad injected"); } }, 100);</script>',
+        html: '<script>setTimeout(() => { const sideArea = document.querySelector(".sidebar-area"); if (sideArea) { sideArea.innerHTML = `' + this.getPropellerAd('inPagePush2').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`; console.log("✅ Left sidebar ad injected"); } }, 100);</script>',
         css: '.sidebar-area{background:rgba(255,255,255,0.1);border-radius:5px;padding:5px}'
       },
       footer: {
@@ -22,7 +22,7 @@ class AdSlotGenerator {
         css: '.ad-interstitial{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center}.ad-content{background:#fff;padding:40px;border-radius:10px;position:relative;max-width:400px;text-align:center}.ad-close{position:absolute;top:10px;right:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#999}.ad-placeholder{color:#6c757d;font-size:14px;margin-bottom:20px}'
       },
       sidebar2: {
-        html: '<script>setTimeout(() => { const side2Area = document.querySelector(".sidebar2-area"); if (side2Area) { side2Area.innerHTML = `' + this.getPropellerAd('inpage').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`; console.log("✅ Right sidebar ad injected"); } }, 100);</script>',
+        html: '<script>setTimeout(() => { const side2Area = document.querySelector(".sidebar2-area"); if (side2Area) { side2Area.innerHTML = `' + this.getPropellerAd('inPagePush1').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`; console.log("✅ Right sidebar ad injected"); } }, 100);</script>',
         css: '.sidebar2-area{background:rgba(255,255,255,0.1);border-radius:5px;padding:5px}'
       },
       overlay: {
@@ -36,13 +36,13 @@ class AdSlotGenerator {
     try {
       console.log(`🎯 Loading PropellerAds script: ${type}`);
       let script = '';
-      if (type === 'vignette') {
-        script = propellerConfig.getVignetteScript();
-        console.log(`📜 Vignette script length: ${script.length}`);
+      if (type === 'inPagePush1') {
+        script = propellerConfig.getInPagePush1Script();
+        console.log(`📜 InPagePush1 script length: ${script.length}`);
       }
-      if (type === 'inPagePush') {
-        script = propellerConfig.getInPagePushScript();
-        console.log(`📜 InPagePush script length: ${script.length}`);
+      if (type === 'inPagePush2') {
+        script = propellerConfig.getInPagePush2Script();
+        console.log(`📜 InPagePush2 script length: ${script.length}`);
       }
       console.log(`✅ PropellerAds ${type} loaded successfully`);
       return script;
