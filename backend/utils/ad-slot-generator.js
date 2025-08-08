@@ -1,20 +1,20 @@
 // Generatore di slot pubblicitari per template
-const propellerConfig = require('../config/propeller-config');
+const adStyleConfig = require('../config/adstyle-config');
 const antiAdBlock = require('./anti-adblock-integration');
 
 class AdSlotGenerator {
   constructor() {
     this.slotStyles = {
       header: {
-        html: '<script>setTimeout(() => { const headerArea = document.querySelector(".header-area"); if (headerArea) { headerArea.innerHTML = `' + this.getPropellerAd('inPagePush1').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`; console.log("✅ Header ad injected"); } else { console.error("❌ Header area not found"); } }, 100);</script>',
+        html: '<script>setTimeout(() => { const headerArea = document.querySelector(".header-area"); if (headerArea) { headerArea.innerHTML = `<div style="text-align:center;padding:10px;background:#f8f9fa;border-radius:5px;margin:5px 0;">📢 Sponsored Content</div>`; console.log("✅ Header ad area ready"); } }, 100);</script>',
         css: '.header-area{min-height:60px;background:rgba(255,255,255,0.1);border-radius:5px;padding:10px}.header-slot{width:100%;text-align:center}'
       },
       sidebar: {
-        html: '<script>setTimeout(() => { const sideArea = document.querySelector(".sidebar-area"); if (sideArea) { sideArea.innerHTML = `' + this.getPropellerAd('inPagePush2').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`; console.log("✅ Left sidebar ad injected"); } }, 100);</script>',
+        html: '<script>setTimeout(() => { const sideArea = document.querySelector(".sidebar-area"); if (sideArea) { sideArea.innerHTML = `<div style="text-align:center;padding:5px;background:#f8f9fa;border-radius:5px;font-size:12px;">Ad Space</div>`; console.log("✅ Sidebar ad area ready"); } }, 100);</script>',
         css: '.sidebar-area{background:rgba(255,255,255,0.1);border-radius:5px;padding:5px}'
       },
       footer: {
-        html: '<script>setTimeout(() => { const footerArea = document.querySelector(".footer-area"); if (footerArea) { footerArea.innerHTML = `<a href="' + propellerConfig.getDirectLink() + '" target="_blank" style="display:block;padding:12px;background:linear-gradient(45deg,#007bff,#0056b3);color:white;text-decoration:none;text-align:center;border-radius:8px;font-weight:bold;transition:transform 0.2s;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">🚀 Sponsored Content - Click Here</a>`; console.log("✅ Footer ad injected"); } else { console.error("❌ Footer area not found"); } }, 100);</script>',
+        html: '<script>setTimeout(() => { const footerArea = document.querySelector(".footer-area"); if (footerArea) { footerArea.innerHTML = `<div style="text-align:center;padding:10px;background:#f8f9fa;border-radius:5px;margin:5px 0;">🚀 Advertisement Space</div>`; console.log("✅ Footer ad area ready"); } }, 100);</script>',
         css: '.ad-footer{background:#f8f9fa;border:1px solid #dee2e6;padding:15px;text-align:center;margin-top:20px;border-radius:5px;z-index:9999;position:relative}'
       },
       interstitial: {
@@ -22,7 +22,7 @@ class AdSlotGenerator {
         css: '.ad-interstitial{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center}.ad-content{background:#fff;padding:40px;border-radius:10px;position:relative;max-width:400px;text-align:center}.ad-close{position:absolute;top:10px;right:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#999}.ad-placeholder{color:#6c757d;font-size:14px;margin-bottom:20px}'
       },
       sidebar2: {
-        html: '<script>setTimeout(() => { const side2Area = document.querySelector(".sidebar2-area"); if (side2Area) { side2Area.innerHTML = `' + this.getPropellerAd('inPagePush1').replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`; console.log("✅ Right sidebar ad injected"); } }, 100);</script>',
+        html: '<script>setTimeout(() => { const side2Area = document.querySelector(".sidebar2-area"); if (side2Area) { side2Area.innerHTML = `<div style="text-align:center;padding:5px;background:#f8f9fa;border-radius:5px;font-size:12px;">Ad Space</div>`; console.log("✅ Right sidebar ad area ready"); } }, 100);</script>',
         css: '.sidebar2-area{background:rgba(255,255,255,0.1);border-radius:5px;padding:5px}'
       },
       overlay: {
@@ -32,22 +32,14 @@ class AdSlotGenerator {
     };
   }
 
-  getPropellerAd(type) {
+  getAdStyleScript() {
     try {
-      console.log(`🎯 Loading PropellerAds script: ${type}`);
-      let script = '';
-      if (type === 'inPagePush1') {
-        script = propellerConfig.getInPagePush1Script();
-        console.log(`📜 InPagePush1 script length: ${script.length}`);
-      }
-      if (type === 'inPagePush2') {
-        script = propellerConfig.getInPagePush2Script();
-        console.log(`📜 InPagePush2 script length: ${script.length}`);
-      }
-      console.log(`✅ PropellerAds ${type} loaded successfully`);
+      console.log('🎯 Loading AdStyle script...');
+      const script = adStyleConfig.getAdStyleScript();
+      console.log(`✅ AdStyle script loaded, length: ${script.length}`);
       return script;
     } catch (e) {
-      console.error(`❌ PropellerAds script load failed for ${type}:`, e.message);
+      console.error('❌ AdStyle script load failed:', e.message);
       return '';
     }
   }
@@ -56,9 +48,10 @@ class AdSlotGenerator {
     let html = '';
     let css = '';
     
-    // Aggiungi BlockAdBlock se ci sono ad slots attivi
+    // Aggiungi AdStyle script se ci sono ad slots attivi
     const hasActiveSlots = Object.values(enabledSlots).some(enabled => enabled);
-    if (hasActiveSlots) {
+    if (hasActiveSlots && adStyleConfig.settings.enabled) {
+      html += this.getAdStyleScript();
       html += antiAdBlock.getAntiAdBlockScript();
     }
     

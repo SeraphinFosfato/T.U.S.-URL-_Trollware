@@ -133,31 +133,31 @@ ${this.warningOverlay}
       debug: true,
       checkOnLoad: true,
       resetOnEnd: false,
-      baitClass: 'propellerads_ad propeller-ad ads-by-propeller banner-ad',
+      baitClass: 'adstyle_ad ptm-ad ads-by-adstyle banner-ad',
       baitStyle: 'width: 300px !important; height: 250px !important; position: absolute !important; left: -10000px !important; top: -1000px !important;'
     });
     
-    // Test aggiuntivo PropellerAds con timeout
+    // Test aggiuntivo AdStyle con timeout
     setTimeout(function() {
       var testScript = document.createElement('script');
       var scriptLoaded = false;
       
-      testScript.src = 'https://gizokraijaw.net/401/9677090';
+      testScript.src = '//pubtagmanager.com/ptm.js?id=3819';
       testScript.onerror = function() {
         if (!scriptLoaded) {
-          console.log('🚫 PropellerAds script blocked - showing warning');
+          console.log('🚫 AdStyle script blocked - showing warning');
           showAdBlockWarning();
         }
       };
       testScript.onload = function() {
         scriptLoaded = true;
-        console.log('✅ PropellerAds script loaded');
+        console.log('✅ AdStyle script loaded');
       };
       
       // Timeout fallback per DNS blocking
       setTimeout(function() {
         if (!scriptLoaded) {
-          console.log('🚫 PropellerAds DNS blocked or timeout - showing warning');
+          console.log('🚫 AdStyle DNS blocked or timeout - showing warning');
           showAdBlockWarning();
         }
       }, 5000);
