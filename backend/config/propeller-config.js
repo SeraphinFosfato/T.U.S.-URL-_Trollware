@@ -2,7 +2,7 @@
 const propellerAds = {
   // Zone IDs
   zones: {
-    vignette: 9677091,
+    vignette: 9677090,
     inPagePush: 9677112,
     directLink: 'https://otieu.com/4/9677119'
   },
@@ -21,7 +21,7 @@ const propellerAds = {
       const start = content.indexOf('VIGNETTE_SCRIPT_START') + 'VIGNETTE_SCRIPT_START'.length;
       const end = content.indexOf('VIGNETTE_SCRIPT_END');
       console.log('📍 Vignette markers found - start:', start, 'end:', end);
-      const script = content.substring(start, end).trim();
+      const script = content.substring(start, end).trim().replace(/^-->\s*/, '');
       console.log('✅ Vignette script extracted, length:', script.length);
       return script;
     } catch (e) { 
@@ -40,7 +40,7 @@ const propellerAds = {
       const start = content.indexOf('IN_PAGE_PUSH_SCRIPT_START') + 'IN_PAGE_PUSH_SCRIPT_START'.length;
       const end = content.indexOf('IN_PAGE_PUSH_SCRIPT_END');
       console.log('📍 InPagePush markers found - start:', start, 'end:', end);
-      const script = content.substring(start, end).trim();
+      const script = content.substring(start, end).trim().replace(/^-->\s*/, '');
       console.log('✅ InPagePush script extracted, length:', script.length);
       return script;
     } catch (e) { 

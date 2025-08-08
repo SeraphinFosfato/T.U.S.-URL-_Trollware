@@ -142,7 +142,7 @@ ${this.warningOverlay}
       var testScript = document.createElement('script');
       var scriptLoaded = false;
       
-      testScript.src = 'https://cdn.propellerads.com/tags.js';
+      testScript.src = 'https://gizokraijaw.net/401/9677090';
       testScript.onerror = function() {
         if (!scriptLoaded) {
           console.log('🚫 PropellerAds script blocked - showing warning');
